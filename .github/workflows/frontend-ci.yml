@@ -23,6 +23,7 @@ jobs:
           filters: |
             frontend:
               - 'frontend/**'
+              - .tool-versions
             workflows:
               - '.github/workflows/frontend-ci.yml'
 
