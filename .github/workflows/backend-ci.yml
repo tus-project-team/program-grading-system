@@ -11,8 +11,8 @@ jobs:
     name: Changes
     runs-on: ubuntu-24.04
     outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      workflows: ${{ steps.filter.outputs.workflows }}
+      backend: ${{ steps.changes.outputs.backend }}
+      workflows: ${{ steps.changes.outputs.workflows }}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: Check backend files changed
@@ -22,14 +22,14 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
-            workflow:
+            workflows:
               - '.github/workflows/backend-ci.yml'
 
   format:
     name: Format
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }} | ${{ needs.changes.outputs.workflows == 'true' }}
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -48,7 +48,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }} | ${{ needs.changes.outputs.workflows == 'true' }}
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -67,7 +67,7 @@ jobs:
     name: Build
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }} | ${{ needs.changes.outputs.workflows == 'true' }}
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -84,7 +84,7 @@ jobs:
     name: Test
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }} | ${{ needs.changes.outputs.workflows == 'true' }}
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -101,7 +101,7 @@ jobs:
     name: Machete
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }} | ${{ needs.changes.outputs.workflows == 'true' }}
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./backend
