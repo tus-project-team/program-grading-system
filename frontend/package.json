@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others --names=frontend,backend,mock --prefix-colors=blue,green,magenta \"bun run dev:frontend\" \"bun run dev:backend\" \"bun run dev:mock\"",
+    "dev": "concurrently --kill-others-on-fail --prefix-colors=blue,green,magenta bun:dev:*",
     "dev:frontend": "next dev",
     "dev:backend": "cd ../backend && cargo run",
     "dev:mock": "wait-on http://localhost:5000/api/openapi.json && prism mock http://localhost:5000/api/openapi.json",
+    "dev:generate": "bun run wait-on http://localhost:5000/api/openapi.json && bun run generate",
+    "generate": "openapi-typescript http://localhost:5000/api/openapi.json --output ./src/lib/api/schema.ts",
+    "sync": "concurrently --kill-others --ks=SIGINT -s command-generate -n backend,generate -c green,magenta \"bun run dev:backend\" \"bun run generate\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,9 +17,10 @@
     "format:write": "prettier --ignore-path .gitignore --write ."
   },
   "dependencies": {
+    "next": "14.2.14",
+    "openapi-fetch": "^0.12.2",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.14"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@stoplight/prism-cli": "^5.10.0",
@@ -26,6 +30,7 @@
     "concurrently": "^9.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.14",
+    "openapi-typescript": "^7.4.1",
     "postcss": "8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "0.6.8",
