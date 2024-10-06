@@ -3,7 +3,7 @@ mod components;
 
 use std::io;
 
-use axum::{http::HeaderValue, routing::get};
+use axum::{http::HeaderValue, routing::get, Json};
 use hyper::header::CONTENT_TYPE;
 use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
@@ -13,7 +13,8 @@ use utoipa_scalar::{Scalar, Servable};
 #[openapi(
     nest(
         (path = "/api", api = api::Api)
-    )
+    ),
+    paths(get_openapi_json)
 )]
 struct Api;
 
@@ -26,12 +27,20 @@ async fn main() -> Result<(), io::Error> {
                 .allow_headers([CONTENT_TYPE]),
         )
         .merge(Scalar::with_url("/api/docs", Api::openapi()))
-        .route(
-            "/api/openapi.json",
-            get(|| async { Api::openapi().to_json().unwrap() }),
-        )
+        .route("/api/openapi.json", get(get_openapi_json))
         .nest("/api", api::router());
 
     let listner = tokio::net::TcpListener::bind("0.0.0.0:5000").await?;
     axum::serve(listner, app).await
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/openapi.json",
+    responses(
+        (status = 200, description = "OpenAPIのスキーマ", content_type = "application/json")
+    )
+)]
+async fn get_openapi_json() -> Json<utoipa::openapi::OpenApi> {
+    Json(Api::openapi())
 }
