@@ -1,0 +1,24 @@
+{
+    "name": "program-grading-system",
+    "build": {
+      "dockerfile": "../Dockerfile",
+      "args": { 
+        "UID": "1000",
+        "GID": "1000"
+      }
+    },
+    "containerUser": "dev",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode",
+          "github.vscode-github-actions",
+          "tamasfe.even-better-toml",
+          "rust-lang.rust-analyzer",
+          "bradlc.vscode-tailwindcss",
+          "mhutchie.git-graph"
+        ]
+      }
+    }
+  }
