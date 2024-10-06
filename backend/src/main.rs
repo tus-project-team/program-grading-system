@@ -11,6 +11,10 @@ use utoipa_scalar::{Scalar, Servable};
 
 #[derive(OpenApi)]
 #[openapi(
+    info(
+        title = "Program Grading System API",
+        description = "プログラム採点システムのAPI",
+    ),
     nest(
         (path = "/api", api = api::Api)
     ),
@@ -34,6 +38,7 @@ async fn main() -> Result<(), io::Error> {
     axum::serve(listner, app).await
 }
 
+/// OpenAPIのスキーマを取得する
 #[utoipa::path(
     get,
     path = "/api/openapi.json",
