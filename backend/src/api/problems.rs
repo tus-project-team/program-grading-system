@@ -10,7 +10,15 @@ use crate::components::schemas::{
 };
 
 #[derive(OpenApi)]
-#[openapi(paths(get_problem_by_id, create_problem, get_problems))]
+#[openapi(paths(
+    get_problems,
+    create_problem,
+    get_problem_by_id,
+    update_problem_by_id,
+    delete_problem_by_id,
+    submit_program_by_problem_id,
+    get_submissions_by_problem_id
+))]
 pub struct Api;
 
 pub fn router() -> axum::Router {
@@ -22,7 +30,8 @@ pub fn router() -> axum::Router {
                 .put(update_problem_by_id)
                 .delete(delete_problem_by_id),
         )
-        .route("/:id/submit", post(submit_program))
+        .route("/:id/submit", post(submit_program_by_problem_id))
+        .route("/:id/submissions", get(get_submissions_by_problem_id))
 }
 
 /// 問題の一覧を取得する
@@ -96,7 +105,7 @@ pub async fn delete_problem_by_id(Path((id,)): Path<(u64,)>) {
     todo!()
 }
 
-/// プログラムを提出する
+/// 問題に対してプログラムを提出する
 #[utoipa::path(
     post,
     path = "/{id}/submit",
@@ -107,9 +116,23 @@ pub async fn delete_problem_by_id(Path((id,)): Path<(u64,)>) {
         (status = 404, description = "指定されたIDの問題が見つかりません")
     )
 )]
-pub async fn submit_program(
+pub async fn submit_program_by_problem_id(
     Path((id,)): Path<(u64,)>,
     Json(submission): Json<SubmissionCreate>,
 ) -> Json<Submission> {
+    todo!()
+}
+
+/// 問題に対する提出一覧を取得する
+#[utoipa::path(
+    get,
+    path = "/{id}/submissions",
+    params(("id" = u64, description = "問題のID")),
+    responses(
+        (status = 200, description = "提出一覧", body = [Submission]),
+        (status = 404, description = "指定されたIDの問題が見つかりません")
+    )
+)]
+pub async fn get_submissions_by_problem_id(Path((id,)): Path<(u64,)>) -> Json<Vec<Submission>> {
     todo!()
 }
