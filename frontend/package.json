@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently --kill-others --names=frontend,backend,mock --prefix-colors=blue,green,magenta \"bun run dev:frontend\" \"bun run dev:backend\" \"bun run dev:mock\"",
+    "dev:frontend": "next dev",
+    "dev:backend": "cd ../backend && cargo run",
+    "dev:mock": "wait-on http://localhost:5000/api/openapi.json && prism mock http://localhost:5000/api/openapi.json",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -16,15 +19,18 @@
     "next": "14.2.14"
   },
   "devDependencies": {
+    "@stoplight/prism-cli": "^5.10.0",
     "@types/node": "22.7.4",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
+    "concurrently": "^9.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.14",
     "postcss": "8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "0.6.8",
     "tailwindcss": "3.4.13",
-    "typescript": "5.6.2"
+    "typescript": "5.6.2",
+    "wait-on": "^8.0.1"
   }
 }
