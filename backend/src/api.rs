@@ -5,7 +5,8 @@ use axum::Router;
 use utoipa::OpenApi;
 
 use components::schemas::{
-    Language, Problem, ProblemCreate, ProblemUpdate, Submission, SubmissionCreate, TestCase,
+    Language, Problem, ProblemCreate, ProblemUpdate, Submission, SubmissionCreate,
+    SubmissionResult, SubmissionStatus, TestCase, TestResult, TestStatus,
 };
 use paths::{problems, submissions};
 
@@ -18,7 +19,11 @@ use paths::{problems, submissions};
         TestCase,
         Language,
         Submission,
-        SubmissionCreate
+        SubmissionCreate,
+        SubmissionResult,
+        TestResult,
+        SubmissionStatus,
+        TestStatus,
     )),
     nest(
         (path = "/problems", api = problems::Api),
