@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Program Grading System Frontend
 
-## Getting Started
+## Development
 
-First, run the development server:
+### Pre-requisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+[mise]: https://mise.jdx.dev/getting-started.html
+
+開発には次のソフトウェアが必要です。
+
+- [Rust](https://www.rust-lang.org/ja)
+- [Node.js](https://nodejs.org/en/)
+- [Bun](https://bun.sh/)
+
+必要な Node.js と Bun のバージョンは [`.tool-versions`](../.tool-versions) に記載されています。
+
+### Commands
+
+#### 依存関係のインストール
+
+次のコマンドで依存関係をインストールします。
+
+```sh
+bun install --frozen-lockfile
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 開発サーバーの起動
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+次のコマンドで開発サーバーを起動します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+bun run dev
+```
 
-## Learn More
+このコマンドでは次のことが並列に行われます。
 
-To learn more about Next.js, take a look at the following resources:
+- バックエンドサーバーの起動
+- フロントエンドサーバーの起動
+- バックエンドのモックサーバーの起動
+- バックエンドのAPIのTypeScript型定義の生成
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> [!important]
+> 開発を開始する前には、必ず開発サーバーを起動してください。
+> 
+> 開発サーバーの起動時にAPIの型定義を生成するため、APIの変更を反映させるためには開発サーバーを再起動する必要があります。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### APIの型定義の生成
 
-## Deploy on Vercel
+次のコマンドでバックエンドのAPIの型定義を生成します。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sh
+bun run generate
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> [!warning]
+> このコマンドは、バックエンドのサーバーが起動している状態で実行してください。
+> バックエンドのサーバーが起動していない場合、APIの型定義を生成できません。
+>
+> バックエンドのサーバーの起動も同時に行う場合は、次のコマンドを実行してください。
+> ```sh
+> bun run sync
+> ```
+> このコマンドは、バックエンドのサーバーの起動とAPIの型定義の生成を同時に行います。
+
+#### ビルド
+
+次のコマンドでビルドします。
+
+```sh
+bun run build
+```
+
+#### リント
+
+次のコマンドでリントを実行します。
+
+```sh
+bun run lint
+```
+
+#### フォーマット
+
+次のコマンドでフォーマットを実行します。
+
+```sh
+bun run format:write
+```

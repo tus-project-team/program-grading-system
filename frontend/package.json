@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --prefix-colors=blue,green,magenta bun:dev:*",
+    "dev": "concurrently --kill-others-on-fail --prefix-colors=blue,green,magenta,gray bun:dev:*",
     "dev:frontend": "next dev",
     "dev:backend": "cd ../backend && cargo run",
     "dev:mock": "wait-on http://localhost:5000/api/openapi.json && prism mock http://localhost:5000/api/openapi.json",
