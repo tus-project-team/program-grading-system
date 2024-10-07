@@ -5,7 +5,7 @@ use axum::{
 };
 use utoipa::OpenApi;
 
-use crate::components::schemas::{
+use crate::api::components::schemas::{
     Problem, ProblemCreate, ProblemUpdate, Submission, SubmissionCreate,
 };
 

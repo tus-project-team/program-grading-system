@@ -1,5 +1,4 @@
 mod api;
-mod components;
 
 use std::io;
 

@@ -1,12 +1,13 @@
-mod problems;
-mod submissions;
+mod components;
+mod paths;
 
 use axum::Router;
 use utoipa::OpenApi;
 
-use crate::components::schemas::{
+use components::schemas::{
     Language, Problem, ProblemCreate, ProblemUpdate, Submission, SubmissionCreate, TestCase,
 };
+use paths::{problems, submissions};
 
 #[derive(OpenApi)]
 #[openapi(

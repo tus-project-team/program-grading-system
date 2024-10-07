@@ -1,7 +1,7 @@
 use axum::{routing::get, Json};
 use utoipa::OpenApi;
 
-use crate::components::schemas::Submission;
+use crate::api::components::schemas::Submission;
 
 #[derive(OpenApi)]
 #[openapi(paths(get_submission_by_id, get_submissions))]
