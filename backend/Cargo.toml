@@ -5,13 +5,10 @@ edition = "2021"
 default-run = "backend"
 
 [dependencies]
-anyhow = "1.0.89"
 axum = "0.7.7"
-futures = "0.3.31"
 hyper = { version = "1.4.1", features = ["full"] }
 serde = "1.0.210"
 tokio = { version = "1.40.0", features = ["full"] }
-tower = "0.5.1"
 tower-http = { version = "0.6.1", features = ["full"] }
 utoipa = { version = "5.0.0-rc.0", features = ["axum_extras", "debug"] }
 utoipa-scalar = { version = "0.2.0-rc.0", features = ["axum"] }
