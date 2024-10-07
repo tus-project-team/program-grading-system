@@ -55,7 +55,7 @@ pub async fn get_problems() -> Json<Vec<Problem>> {
         (status = 201, description = "作成された問題", body = Problem)
     )
 )]
-pub async fn create_problem(Json(problem): Json<ProblemCreate>) -> Json<Problem> {
+pub async fn create_problem(Json(_problem): Json<ProblemCreate>) -> Json<Problem> {
     todo!()
 }
 
@@ -69,7 +69,7 @@ pub async fn create_problem(Json(problem): Json<ProblemCreate>) -> Json<Problem>
         (status = 404, description = "指定されたIDの問題が見つかりません")
     )
 )]
-pub async fn get_problem_by_id(Path((id,)): Path<(u64,)>) -> Json<Problem> {
+pub async fn get_problem_by_id(Path(_id): Path<u64>) -> Json<Problem> {
     todo!()
 }
 
@@ -85,8 +85,8 @@ pub async fn get_problem_by_id(Path((id,)): Path<(u64,)>) -> Json<Problem> {
     )
 )]
 pub async fn update_problem_by_id(
-    Path((id,)): Path<(u64,)>,
-    Json(problem): Json<ProblemUpdate>,
+    Path((_id,)): Path<(u64,)>,
+    Json(_problem): Json<ProblemUpdate>,
 ) -> Json<Problem> {
     todo!()
 }
@@ -101,7 +101,7 @@ pub async fn update_problem_by_id(
         (status = 404, description = "指定されたIDの問題が見つかりません")
     )
 )]
-pub async fn delete_problem_by_id(Path((id,)): Path<(u64,)>) {
+pub async fn delete_problem_by_id(Path(_id): Path<u64>) {
     todo!()
 }
 
@@ -117,8 +117,8 @@ pub async fn delete_problem_by_id(Path((id,)): Path<(u64,)>) {
     )
 )]
 pub async fn submit_program_by_problem_id(
-    Path((id,)): Path<(u64,)>,
-    Json(submission): Json<SubmissionCreate>,
+    Path(_id): Path<u64>,
+    Json(_submission): Json<SubmissionCreate>,
 ) -> Json<Submission> {
     todo!()
 }
@@ -133,6 +133,6 @@ pub async fn submit_program_by_problem_id(
         (status = 404, description = "指定されたIDの問題が見つかりません")
     )
 )]
-pub async fn get_submissions_by_problem_id(Path((id,)): Path<(u64,)>) -> Json<Vec<Submission>> {
+pub async fn get_submissions_by_problem_id(Path(_id): Path<u64>) -> Json<Vec<Submission>> {
     todo!()
 }

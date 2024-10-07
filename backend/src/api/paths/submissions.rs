@@ -1,4 +1,4 @@
-use axum::{routing::get, Json};
+use axum::{extract::Path, routing::get, Json};
 use utoipa::OpenApi;
 
 use crate::api::components::schemas::Submission;
@@ -35,6 +35,6 @@ pub async fn get_submissions() -> Json<Vec<Submission>> {
         (status = 404, description = "指定されたIDの提出が見つかりません")
     )
 )]
-pub async fn get_submission_by_id() -> Json<Submission> {
+pub async fn get_submission_by_id(Path(_id): Path<u64>) -> Json<Submission> {
     todo!()
 }
