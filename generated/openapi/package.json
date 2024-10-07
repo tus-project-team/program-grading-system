@@ -1,0 +1,14 @@
+{
+  "name": "openapi",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "schema.ts",
+    "schema.json",
+    "package.json"
+  ],
+  "exports": {
+    "./schema": "./schema.ts",
+    "./schema.json": "./schema.json"
+  }
+}

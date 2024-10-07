@@ -1,0 +1,11 @@
+{
+  "name": "root",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "generated/openapi"
+  ],
+  "scripts": {}
+}
