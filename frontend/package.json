@@ -20,14 +20,14 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@stoplight/prism-cli": "^5.10.0",
+    "@stoplight/prism-cli": "5.10.0",
     "@types/node": "22.7.5",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
-    "concurrently": "^9.0.1",
+    "concurrently": "9.0.1",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.14",
-    "openapi-typescript": "^7.4.1",
+    "openapi-typescript": "7.4.1",
     "postcss": "8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "0.6.8",
