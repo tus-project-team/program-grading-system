@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cargo run",
+    "build": "cargo build && bun run generate",
+    "generate": "concurrently --kill-others-on-fail --prefix-colors=gray,blue bun:generate:*",
+    "generate:json": "cargo run --bin generate && prettier --write --semi=false ../generated/openapi/schema.json",
+    "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
+    "lint": "cargo clippy -- -D warnings",
+    "format": "cargo fmt --all -- --check",
+    "format:write": "cargo fmt --all",
+    "test": "cargo test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "openapi-typescript": "^7.4.1",
+    "prettier": "^3.3.3"
+  }
+}
