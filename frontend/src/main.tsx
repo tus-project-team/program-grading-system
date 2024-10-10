@@ -1,4 +1,6 @@
 import "@/styles/global.css"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
@@ -16,6 +18,8 @@ declare module "@tanstack/react-router" {
   }
 }
 
+const queryClient = new QueryClient()
+
 // Render the app
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- rootElement is always present
 const rootElement = document.getElementById("root")!
@@ -23,7 +27,10 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools buttonPosition="bottom-right" />
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

@@ -7,6 +7,7 @@ import react from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
 import globals from "globals"
+import query from "@tanstack/eslint-plugin-query"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config(
@@ -20,6 +21,7 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   perfectionist.configs["recommended-natural"],
+  ...query.configs["flat/recommended"],
   // @ts-expect-error eslint-plugin-react types are incorrect
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
