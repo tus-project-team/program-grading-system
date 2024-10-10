@@ -24,6 +24,13 @@ export default tseslint.config(
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
   {
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+  },
+  {
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
