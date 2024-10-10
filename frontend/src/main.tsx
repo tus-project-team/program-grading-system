@@ -1,12 +1,29 @@
+import "@/styles/global.css"
+import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
+import ReactDOM from "react-dom/client"
 
-import App from "./App.tsx"
-import "./styles/global.css"
+// Import the generated route tree
+import { routeTree } from "./routeTree.gen"
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- #root element is always present
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+// Create a new router instance
+const router = createRouter({ routeTree })
+
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router
+  }
+}
+
+// Render the app
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- rootElement is always present
+const rootElement = document.getElementById("root")!
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement)
+  root.render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  )
+}
