@@ -10,6 +10,7 @@ import globals from "globals"
 import query from "@tanstack/eslint-plugin-query"
 import tseslint from "typescript-eslint"
 import prettier from "eslint-config-prettier"
+import jsxA11y from "eslint-plugin-jsx-a11y"
 
 export default tseslint.config(
   gitignore(),
@@ -23,6 +24,7 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   perfectionist.configs["recommended-natural"],
   ...query.configs["flat/recommended"],
+  jsxA11y.flatConfigs.recommended,
   // @ts-expect-error eslint-plugin-react types are incorrect
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
