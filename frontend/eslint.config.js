@@ -9,6 +9,7 @@ import reactRefresh from "eslint-plugin-react-refresh"
 import globals from "globals"
 import query from "@tanstack/eslint-plugin-query"
 import tseslint from "typescript-eslint"
+import prettier from "eslint-config-prettier"
 
 export default tseslint.config(
   gitignore(),
@@ -45,4 +46,5 @@ export default tseslint.config(
       ],
     },
   },
+  prettier,
 )
