@@ -18,19 +18,33 @@ declare module "@tanstack/react-router" {
   }
 }
 
+const enableMocking = async () => {
+  if (process.env.NODE_ENV !== "development") {
+    return
+  }
+
+  const { worker } = await import("./mocks/browser")
+
+  // `worker.start()` returns a Promise that resolves
+  // once the Service Worker is up and ready to intercept requests.
+  return worker.start()
+}
+
 const queryClient = new QueryClient()
 
 // Render the app
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- rootElement is always present
 const rootElement = document.getElementById("root")!
 if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ReactQueryDevtools buttonPosition="bottom-right" />
-      </QueryClientProvider>
-    </StrictMode>,
-  )
+  enableMocking().then(() => {
+    const root = ReactDOM.createRoot(rootElement)
+    root.render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <ReactQueryDevtools buttonPosition="bottom-right" />
+        </QueryClientProvider>
+      </StrictMode>,
+    )
+  })
 }
