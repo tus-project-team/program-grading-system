@@ -49,4 +49,5 @@ jobs:
       - name: Build and run dev container task
         uses: devcontainers/ci@4f6b93e1ec4770fd1269cbf5803f2fe4e25eaf69
         with:
-          imageName: ghcr.io/${{ github.repository }}-devcontainer:${{ github.ref_name }}
+          imageName: ghcr.io/${{ github.repository }}-devcontainer
+          imageTag: ${{ github.ref_name }}
