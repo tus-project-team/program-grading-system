@@ -344,9 +344,12 @@
       },
       "SubmissionCreate": {
         "type": "object",
-        "required": ["problem_id"],
+        "required": ["problem_id", "student_id", "code", "language"],
         "properties": {
-          "problem_id": { "type": "integer", "format": "int64", "minimum": 0 }
+          "code": { "type": "string" },
+          "language": { "$ref": "#/components/schemas/Language" },
+          "problem_id": { "type": "integer", "format": "int64", "minimum": 0 },
+          "student_id": { "type": "integer", "format": "int64", "minimum": 0 }
         }
       },
       "SubmissionResult": {

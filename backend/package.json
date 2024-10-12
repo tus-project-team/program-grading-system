@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "cargo run",
     "build": "cargo build && bun run generate",
-    "generate": "concurrently --kill-others-on-fail --prefix-colors=gray,blue bun:generate:*",
+    "generate": "concurrently --kill-others-on-fail --group --prefix-colors=gray,blue bun:generate:*",
     "generate:json": "cargo run --bin generate && prettier --write --semi=false ../generated/openapi/schema.json",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
     "lint": "cargo clippy -- -D warnings",

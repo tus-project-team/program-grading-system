@@ -167,8 +167,12 @@ export interface components {
       test_results: components["schemas"]["TestResult"][]
     }
     SubmissionCreate: {
+      code: string
+      language: components["schemas"]["Language"]
       /** Format: int64 */
       problem_id: number
+      /** Format: int64 */
+      student_id: number
     }
     SubmissionResult: {
       message?: string | null

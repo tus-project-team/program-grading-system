@@ -52,6 +52,9 @@ pub struct Submission {
 #[derive(Serialize, Deserialize, Clone, ToSchema, Default)]
 pub struct SubmissionCreate {
     problem_id: u64,
+    student_id: u64,
+    code: String,
+    language: Language,
 }
 
 #[derive(Serialize, Deserialize, Clone, ToSchema, Default)]
