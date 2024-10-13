@@ -36,13 +36,6 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.ts", "**/*.tsx"],
-    rules: {
-      "no-unused-vars": "off",
-      "react/prop-types": "off",
-    },
-  },
-  {
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
@@ -53,6 +46,18 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    rules: {
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    },
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "no-unused-vars": "off",
+      "react/prop-types": "off",
     },
   },
   prettier,
