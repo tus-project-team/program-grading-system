@@ -327,7 +327,8 @@
           "code",
           "language",
           "result",
-          "test_results"
+          "test_results",
+          "submitted_at"
         ],
         "properties": {
           "code": { "type": "string" },
@@ -336,6 +337,7 @@
           "problem_id": { "type": "integer", "format": "int64", "minimum": 0 },
           "result": { "$ref": "#/components/schemas/SubmissionResult" },
           "student_id": { "type": "integer", "format": "int64", "minimum": 0 },
+          "submitted_at": { "type": "string", "format": "date-time" },
           "test_results": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/TestResult" }

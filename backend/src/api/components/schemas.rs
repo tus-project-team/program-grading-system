@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -47,6 +48,7 @@ pub struct Submission {
     language: Language,
     result: SubmissionResult,
     test_results: Vec<TestResult>,
+    submitted_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Clone, ToSchema, Default)]

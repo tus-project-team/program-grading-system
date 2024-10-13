@@ -164,6 +164,8 @@ export interface components {
       result: components["schemas"]["SubmissionResult"]
       /** Format: int64 */
       student_id: number
+      /** Format: date-time */
+      submitted_at: string
       test_results: components["schemas"]["TestResult"][]
     }
     SubmissionCreate: {

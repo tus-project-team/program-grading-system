@@ -14,8 +14,11 @@ export const CodePanel: FC<CodePanelProps> = ({ className, ...props }) => {
   const { language } = useProblem()
 
   return (
-    <div className={cn("flex h-full flex-col", className)} {...props}>
-      <div className="flex flex-row items-center justify-between gap-4 px-4 py-2">
+    <div
+      className={cn("flex h-full flex-col gap-2 pt-2", className)}
+      {...props}
+    >
+      <div className="flex flex-row items-center justify-between gap-4 px-4">
         <LanguageSelector />
         <div className="flex flex-row gap-2">
           <TestButton />

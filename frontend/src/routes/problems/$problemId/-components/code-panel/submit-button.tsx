@@ -24,7 +24,7 @@ export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
         code,
         language,
         problem_id: problem.id,
-        student_id: 1, // TODO: Replace with actual student ID from auth
+        student_id: 1, // todo: Replace with actual student ID from auth
       },
       params: { path: { id: problem.id } },
     })
