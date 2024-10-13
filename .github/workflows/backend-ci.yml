@@ -1,4 +1,5 @@
 name: Backend CI
+
 on:
   push:
     branches:
@@ -22,6 +23,7 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - .tool-versions
             workflows:
               - '.github/workflows/backend-ci.yml'
 
@@ -35,14 +37,12 @@ jobs:
         working-directory: ./backend
     steps:
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
-      - name: Install rustfmt
-        run: rustup component add rustfmt
+      - name: Install tools
+        uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: bun run format
 
   lint:
     name: Lint
@@ -54,14 +54,12 @@ jobs:
         working-directory: ./backend
     steps:
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
-      - name: Install clippy
-        run: rustup component add clippy
+      - name: Install tools
+        uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
       - name: Check linting
-        run: cargo clippy -- -D warnings
+        run: bun run lint
 
   build:
     name: Build
@@ -73,68 +71,9 @@ jobs:
         working-directory: ./backend
     steps:
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
-      - name: Build
-        run: cargo build
-
-  test:
-    name: Test
-    runs-on: ubuntu-24.04
-    needs: changes
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
-      - name: Test
-        run: cargo test
-
-  machete:
-    name: Machete
-    runs-on: ubuntu-24.04
-    needs: changes
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
-      - name: Install machete
-        run: cargo install cargo-machete
-      - name: Run machete
-        run: cargo machete
-
-  generate:
-    name: Generate OpenAPI Schema
-    runs-on: ubuntu-24.04
-    needs: changes
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable
       - name: Install tools
         uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Generate OpenAPI Schema
-        run: bun run generate
-      - name: Vertify the generated OpenAPI Schema is up-to-date
-        run: git diff --exit-code
+      - name: Check build
+        run: bun run build

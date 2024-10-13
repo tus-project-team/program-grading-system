@@ -1,21 +1,31 @@
 {
   "name": "backend",
-  "version": "0.1.0",
-  "private": true,
   "scripts": {
-    "dev": "cargo run",
-    "build": "cargo build && bun run generate",
-    "generate": "concurrently --kill-others-on-fail --prefix-colors=gray,blue bun:generate:*",
-    "generate:json": "cargo run --bin generate && prettier --write --semi=false ../generated/openapi/schema.json",
-    "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
-    "lint": "cargo clippy -- -D warnings",
-    "format": "cargo fmt --all -- --check",
-    "format:write": "cargo fmt --all",
-    "test": "cargo test"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsx build ./build.ts",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
+    "format": "prettier --ignore-path .gitignore --check .",
+    "format:write": "prettier --ignore-path .gitignore --write ."
+  },
+  "dependencies": {
+    "@hono/eslint-config": "^1.0.2",
+    "@hono/node-server": "^1.13.2",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.16.4",
+    "eslint": "^9.12.0",
+    "eslint-config-flat-gitignore": "^0.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "eslint-plugin-perfectionist": "^3.8.0",
+    "globals": "^15.11.0",
+    "hono": "^4.6.4",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^8.8.1"
   },
   "devDependencies": {
-    "concurrently": "9.0.1",
-    "openapi-typescript": "7.4.1",
-    "prettier": "3.3.3"
-  }
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.4"
+  },
+  "type": "module"
 }
