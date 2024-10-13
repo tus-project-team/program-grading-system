@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { $api } from "@/lib/api"
 import { LoaderCircleIcon } from "lucide-react"
 
-import { useProblem } from "../../-contexts/problem-context/problem-context"
+import { useProblem } from "../../-contexts/problem-context"
 
 export type SubmitButtonProps = {
   className?: string

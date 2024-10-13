@@ -8,7 +8,7 @@ import {
 import { cn } from "@/lib/utils"
 import { type ComponentPropsWithoutRef, FC } from "react"
 
-import { useProblem } from "../../-contexts/problem-context/problem-context"
+import { useProblem } from "../../-contexts/problem-context"
 
 export type LanguageSelectorProps = ComponentPropsWithoutRef<"div">
 

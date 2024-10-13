@@ -3,7 +3,7 @@ import type { FC } from "react"
 import { cn } from "@/lib/utils"
 import MonacoEditor from "@monaco-editor/react"
 
-import type { Language } from "../../-contexts/problem-context/problem-context"
+import type { Language } from "../../-contexts/problem-context"
 
 export type EditorProps = {
   className?: string

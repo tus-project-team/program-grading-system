@@ -7,7 +7,7 @@ import { intlFormatDistance } from "date-fns"
 import { CheckIcon, XIcon } from "lucide-react"
 import { components } from "openapi/schema"
 
-import { useProblem } from "../../-contexts/problem-context/problem-context"
+import { useProblem } from "../../-contexts/problem-context"
 
 type Submission = components["schemas"]["Submission"]
 

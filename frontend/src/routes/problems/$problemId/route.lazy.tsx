@@ -8,7 +8,7 @@ import { createLazyFileRoute } from "@tanstack/react-router"
 import { CodePanel } from "./-components/code-panel"
 import { InfoPanel } from "./-components/info-panel"
 import { ProblemPanel } from "./-components/problem-panel"
-import { ProblemProvider } from "./-contexts/problem-context/problem-context"
+import { ProblemProvider } from "./-contexts/problem-context"
 
 const Problem = () => {
   const { problemId } = Route.useParams()
