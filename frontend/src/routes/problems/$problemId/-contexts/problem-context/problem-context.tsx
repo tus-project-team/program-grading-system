@@ -1,3 +1,5 @@
+import { $api } from "@/lib/api"
+import { components } from "openapi/schema"
 import {
   createContext,
   Dispatch,
@@ -7,32 +9,30 @@ import {
   useContext,
   useState,
 } from "react"
-import { components } from "openapi/schema"
-import { $api } from "@/lib/api"
 
 export type Problem = components["schemas"]["Problem"]
 export type Language = components["schemas"]["Language"]
 
-export type ProblemContext = {
-  problem: components["schemas"]["Problem"]
-  language: Language
-  setLanguage: Dispatch<SetStateAction<Language>>
+export interface ProblemContext {
   code: string
+  language: Language
+  problem: components["schemas"]["Problem"]
   setCode: Dispatch<SetStateAction<string>>
+  setLanguage: Dispatch<SetStateAction<Language>>
 }
 
 export const ProblemContext = createContext<ProblemContext | undefined>(
   undefined,
 )
 
-export type ProblemProviderProps = {
-  problemId: number
+export interface ProblemProviderProps {
   children?: ReactNode
+  problemId: number
 }
 
 export const ProblemProvider: FC<ProblemProviderProps> = ({
-  problemId,
   children,
+  problemId,
 }) => {
   const { data: problem } = $api.useSuspenseQuery("get", "/api/problems/{id}", {
     params: {
@@ -47,7 +47,7 @@ export const ProblemProvider: FC<ProblemProviderProps> = ({
 
   return (
     <ProblemContext.Provider
-      value={{ problem, language, setLanguage, code, setCode }}
+      value={{ code, language, problem, setCode, setLanguage }}
     >
       {children}
     </ProblemContext.Provider>

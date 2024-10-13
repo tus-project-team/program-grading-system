@@ -1,13 +1,14 @@
-import { createLazyFileRoute } from "@tanstack/react-router"
-import { ProblemPanel } from "./-components/problem-panel"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import { ProblemProvider } from "./-contexts/problem-context/problem-context"
+import { createLazyFileRoute } from "@tanstack/react-router"
+
 import { CodePanel } from "./-components/code-panel"
 import { InfoPanel } from "./-components/info-panel"
+import { ProblemPanel } from "./-components/problem-panel"
+import { ProblemProvider } from "./-contexts/problem-context/problem-context"
 
 const Problem = () => {
   const { problemId } = Route.useParams()
@@ -37,6 +38,6 @@ const Problem = () => {
 
 export const Route = createLazyFileRoute("/problems/$problemId")({
   component: Problem,
-  pendingComponent: () => <div>Loading...</div>,
   errorComponent: () => <div>Error</div>,
+  pendingComponent: () => <div>Loading...</div>,
 })

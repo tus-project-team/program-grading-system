@@ -5,9 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { FC, type ComponentPropsWithoutRef } from "react"
-import { useProblem } from "../../-contexts/problem-context/problem-context"
 import { cn } from "@/lib/utils"
+import { type ComponentPropsWithoutRef, FC } from "react"
+
+import { useProblem } from "../../-contexts/problem-context/problem-context"
 
 export type LanguageSelectorProps = ComponentPropsWithoutRef<"div">
 
@@ -15,13 +16,13 @@ export const LanguageSelector: FC<LanguageSelectorProps> = ({
   className,
   ...props
 }) => {
-  const { problem, language, setLanguage } = useProblem()
+  const { language, problem, setLanguage } = useProblem()
 
   return (
     <div className={cn("w-full max-w-36", className)} {...props}>
       <Select
-        value={JSON.stringify(language)}
         onValueChange={(language) => setLanguage(JSON.parse(language))}
+        value={JSON.stringify(language)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select programming language" />

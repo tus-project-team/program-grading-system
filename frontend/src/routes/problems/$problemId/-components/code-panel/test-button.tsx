@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button"
-
 import type { FC } from "react"
 
-export type TestButtonProps = {
+import { Button } from "@/components/ui/button"
+
+export interface TestButtonProps {
   className?: string
 }
 
@@ -12,7 +12,7 @@ export const TestButton: FC<TestButtonProps> = ({ className }) => {
   }
 
   return (
-    <Button variant="outline" onClick={test}>
+    <Button className={className} onClick={test} variant="outline">
       テスト実行
     </Button>
   )

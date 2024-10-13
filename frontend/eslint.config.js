@@ -36,6 +36,13 @@ export default tseslint.config(
     },
   },
   {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "no-unused-vars": "off",
+      "react/prop-types": "off",
+    },
+  },
+  {
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,

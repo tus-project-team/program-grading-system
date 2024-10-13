@@ -1,7 +1,9 @@
 import type { ComponentPropsWithoutRef, FC } from "react"
-import { Editor } from "./editor"
-import { useProblem } from "../../-contexts/problem-context/problem-context"
+
 import { cn } from "@/lib/utils"
+
+import { useProblem } from "../../-contexts/problem-context/problem-context"
+import { Editor } from "./editor"
 import { LanguageSelector } from "./language-selector"
 import { SubmitButton } from "./submit-button"
 import { TestButton } from "./test-button"
