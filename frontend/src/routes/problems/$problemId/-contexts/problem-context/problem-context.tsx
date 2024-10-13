@@ -13,7 +13,7 @@ import {
 export type Problem = components["schemas"]["Problem"]
 export type Language = components["schemas"]["Language"]
 
-export interface ProblemContext {
+export type ProblemContext = {
   code: string
   language: Language
   problem: components["schemas"]["Problem"]
@@ -25,7 +25,7 @@ export const ProblemContext = createContext<ProblemContext | undefined>(
   undefined,
 )
 
-export interface ProblemProviderProps {
+export type ProblemProviderProps = {
   children?: ReactNode
   problemId: number
 }

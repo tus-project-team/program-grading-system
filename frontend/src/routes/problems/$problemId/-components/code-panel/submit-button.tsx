@@ -2,10 +2,11 @@ import type { FC } from "react"
 
 import { Button } from "@/components/ui/button"
 import { $api } from "@/lib/api"
+import { LoaderCircleIcon } from "lucide-react"
 
 import { useProblem } from "../../-contexts/problem-context/problem-context"
 
-export interface SubmitButtonProps {
+export type SubmitButtonProps = {
   className?: string
 }
 
@@ -36,7 +37,14 @@ export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
       onClick={submit}
       type="button"
     >
-      提出
+      {isIdle ? (
+        "提出"
+      ) : (
+        <>
+          <LoaderCircleIcon className="animate-spin" />
+          <span className="ml-2">提出中...</span>
+        </>
+      )}
     </Button>
   )
 }

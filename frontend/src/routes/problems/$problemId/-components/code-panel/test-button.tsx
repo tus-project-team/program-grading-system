@@ -2,7 +2,7 @@ import type { FC } from "react"
 
 import { Button } from "@/components/ui/button"
 
-export interface TestButtonProps {
+export type TestButtonProps = {
   className?: string
 }
 
