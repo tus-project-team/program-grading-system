@@ -11,7 +11,6 @@
     "format:write": "prettier --ignore-path .gitignore --write ."
   },
   "dependencies": {
-    "@hono/eslint-config": "^1.0.2",
     "@hono/node-server": "^1.13.2",
     "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.16.4",
