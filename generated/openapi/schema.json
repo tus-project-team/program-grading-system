@@ -7,6 +7,229 @@
     "version": "0.1.0"
   },
   "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "Language": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ]
+      },
+      "TestCase": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ]
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "id",
+          "supported_languages",
+          "test_cases",
+          "title"
+        ]
+      },
+      "ProblemCreate": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "supported_languages",
+          "test_cases",
+          "title"
+        ]
+      },
+      "ProblemUpdate": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "SubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "Accepted",
+          "WrongAnswer",
+          "RuntimeError",
+          "CompileError"
+        ]
+      },
+      "SubmissionResult": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SubmissionStatus"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "TestStatus": {
+        "type": "string",
+        "enum": [
+          "Passed",
+          "Failed"
+        ]
+      },
+      "TestResult": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TestStatus"
+          },
+          "test_case_id": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "status",
+          "test_case_id"
+        ]
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "problem_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/SubmissionResult"
+          },
+          "student_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "test_results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestResult"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "id",
+          "language",
+          "problem_id",
+          "result",
+          "student_id",
+          "test_results"
+        ]
+      },
+      "SubmissionCreate": {
+        "type": "object",
+        "properties": {
+          "problem_id": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "problem_id"
+        ]
+      }
+    },
+    "parameters": {}
+  },
   "paths": {
     "/api/problems": {
       "get": {
@@ -311,227 +534,5 @@
       }
     }
   },
-  "components": {
-    "schemas": {
-      "Language": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "version"
-        ]
-      },
-      "TestCase": {
-        "type": "object",
-        "properties": {
-          "input": {
-            "type": "string"
-          },
-          "output": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "input",
-          "output"
-        ]
-      },
-      "Problem": {
-        "type": "object",
-        "properties": {
-          "body": {
-            "type": "string"
-          },
-          "id": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "supported_languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            }
-          },
-          "test_cases": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestCase"
-            }
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "body",
-          "id",
-          "supported_languages",
-          "test_cases",
-          "title"
-        ]
-      },
-      "ProblemCreate": {
-        "type": "object",
-        "properties": {
-          "body": {
-            "type": "string"
-          },
-          "supported_languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            }
-          },
-          "test_cases": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestCase"
-            }
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "body",
-          "supported_languages",
-          "test_cases",
-          "title"
-        ]
-      },
-      "ProblemUpdate": {
-        "type": "object",
-        "properties": {
-          "body": {
-            "type": "string"
-          },
-          "supported_languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            }
-          },
-          "test_cases": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestCase"
-            }
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "SubmissionStatus": {
-        "type": "string",
-        "enum": [
-          "Accepted",
-          "WrongAnswer",
-          "RuntimeError",
-          "CompileError"
-        ]
-      },
-      "SubmissionResult": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/SubmissionStatus"
-          }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "TestStatus": {
-        "type": "string",
-        "enum": [
-          "Passed",
-          "Failed"
-        ]
-      },
-      "TestResult": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TestStatus"
-          },
-          "test_case_id": {
-            "type": "integer",
-            "minimum": 0
-          }
-        },
-        "required": [
-          "status",
-          "test_case_id"
-        ]
-      },
-      "Submission": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "id": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "problem_id": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "result": {
-            "$ref": "#/components/schemas/SubmissionResult"
-          },
-          "student_id": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "test_results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestResult"
-            }
-          }
-        },
-        "required": [
-          "code",
-          "id",
-          "language",
-          "problem_id",
-          "result",
-          "student_id",
-          "test_results"
-        ]
-      },
-      "SubmissionCreate": {
-        "type": "object",
-        "properties": {
-          "problem_id": {
-            "type": "integer",
-            "minimum": 0
-          }
-        },
-        "required": [
-          "problem_id"
-        ]
-      }
-    },
-    "parameters": {}
-  }
+  "webhooks": {}
 }
