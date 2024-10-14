@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
-    "generate": "tsx src/bin/genereate.ts",
+    "generate": "bun run generate && bun run generate:typescript",
+    "generate:json": "tsx src/bin/genereate.ts",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
