@@ -18,9 +18,9 @@ const SubmissionIdParam = z.object({
     }),
 })
 
-// 提出一覧を取得する
 const getSubmissionsRoute = createRoute({
   method: "get",
+  operationId: "getSubmissions",
   path: "/submissions",
   responses: {
     200: {
@@ -32,11 +32,13 @@ const getSubmissionsRoute = createRoute({
       description: "提出一覧",
     },
   },
+  summary: "提出一覧を取得する",
+  tags: ["submissions"],
 })
 
-// 提出の詳細を取得する
 const getSubmissionByIdRoute = createRoute({
   method: "get",
+  operationId: "getSubmissionById",
   path: "/submissions/{id}",
   request: {
     params: SubmissionIdParam,
@@ -54,6 +56,8 @@ const getSubmissionByIdRoute = createRoute({
       description: "指定されたIDの提出が見つかりません",
     },
   },
+  summary: "提出の詳細を取得する",
+  tags: ["submissions"],
 })
 
 // ルートの設定
@@ -87,13 +91,5 @@ app.openapi(getSubmissionByIdRoute, (c) => {
   }
   return c.json(submission)
 })
-
-app.doc("", () => ({
-  info: {
-    title: "Submissions API",
-    version: "v1",
-  },
-  openapi: "3.0.0",
-}))
 
 export default app

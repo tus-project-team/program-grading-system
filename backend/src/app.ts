@@ -1,21 +1,38 @@
 import { swaggerUI } from "@hono/swagger-ui"
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, z } from "@hono/zod-openapi"
 
-import problemsApp from "./api/paths/problem"
-import submissionsApp from "./api/paths/submit"
+import * as schemas from "./api/components/schemas"
+import problemsApp from "./api/paths/problems"
+import submissionsApp from "./api/paths/submissions"
 
 const app = new OpenAPIHono()
 
-app.route("/problems", problemsApp)
+app.route("/api", problemsApp)
+app.route("/api", submissionsApp)
 
-app.route("/submissions", submissionsApp)
-
-app.doc("/api/openapi.json", {
+const openApiDocument = {
   info: {
+    license: { name: "" },
     title: "Problem and Submission API",
-    version: "v1",
+    version: "0.1.0",
   },
-  openapi: "3.0.0",
+  openapi: "3.1.0",
+  paths: {},
+}
+
+app.doc("/api/openapi.json", () => {
+  const generatedSchemas = Object.fromEntries(
+    Object.entries(schemas)
+      .filter(([, schema]) => schema instanceof z.ZodType)
+      .map(([key, schema]) => [key, (schema as z.ZodType).openapi({})]),
+  )
+
+  return {
+    ...openApiDocument,
+    components: {
+      schemas: generatedSchemas,
+    },
+  }
 })
 
 app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }))

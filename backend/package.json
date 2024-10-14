@@ -3,6 +3,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
+    "generate": "tsx src/bin/genereate.ts",
+    "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
     "format": "prettier --ignore-path .gitignore --check .",
@@ -20,6 +22,7 @@
     "eslint-plugin-perfectionist": "^3.8.0",
     "globals": "^15.11.0",
     "hono": "^4.6.4",
+    "openapi-typescript": "^7.4.1",
     "prettier": "^3.3.3",
     "typescript-eslint": "^8.8.1"
   },

@@ -1,17 +1,17 @@
-import { build } from 'esbuild'
+import { build } from "esbuild"
 
 const b = () =>
   build({
-    bundle: true,
-    entryPoints: ['./src/index.ts'],
     banner: {
-      js: '#!/usr/bin/env node',
+      js: "#!/usr/bin/env node",
     },
-    platform: 'node',
-    outfile: 'bin',
-    format: 'cjs',
+    bundle: true,
+    entryPoints: ["./src/index.ts"],
+    format: "cjs",
     // For debug
     minify: false,
+    outfile: "bin",
+    platform: "node",
   })
 
 Promise.all([b()])
