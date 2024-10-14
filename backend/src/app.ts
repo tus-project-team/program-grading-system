@@ -1,7 +1,6 @@
 import { swaggerUI } from "@hono/swagger-ui"
-import { OpenAPIHono, z } from "@hono/zod-openapi"
+import { OpenAPIHono } from "@hono/zod-openapi"
 
-import * as schemas from "./api/components/schemas"
 import problemsApp from "./api/paths/problems"
 import submissionsApp from "./api/paths/submissions"
 
