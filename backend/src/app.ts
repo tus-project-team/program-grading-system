@@ -19,20 +19,7 @@ export const openApiDocument = {
   openapi: "3.1.0",
 } as const satisfies ReturnType<typeof app.getOpenAPI31Document>
 
-app.doc("/api/openapi.json", () => {
-  const generatedSchemas = Object.fromEntries(
-    Object.entries(schemas)
-      .filter(([, schema]) => schema instanceof z.ZodType)
-      .map(([key, schema]) => [key, (schema as z.ZodType).openapi({})]),
-  )
-
-  return {
-    ...openApiDocument,
-    components: {
-      schemas: generatedSchemas,
-    },
-  }
-})
+app.doc("/api/openapi.json", openApiDocument)
 
 app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }))
 
