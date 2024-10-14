@@ -1,30 +1,243 @@
 {
-  "openapi": "3.1.0",
   "info": {
-    "title": "Program Grading System API",
-    "description": "プログラム採点システムのAPI",
-    "license": { "name": "" },
+    "license": {
+      "name": ""
+    },
+    "title": "Problem and Submission API",
     "version": "0.1.0"
   },
-  "paths": {
-    "/api/openapi.json": {
-      "get": {
-        "tags": [],
-        "summary": "OpenAPIのスキーマを取得する",
-        "operationId": "get_openapi_json",
-        "responses": {
-          "200": {
-            "description": "OpenAPIのスキーマ",
-            "content": { "application/json": {} }
+  "openapi": "3.1.0",
+  "components": {
+    "schemas": {
+      "Language": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ]
+      },
+      "TestCase": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ]
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "id",
+          "supported_languages",
+          "test_cases",
+          "title"
+        ]
+      },
+      "ProblemCreate": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "supported_languages",
+          "test_cases",
+          "title"
+        ]
+      },
+      "ProblemUpdate": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "supported_languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "test_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "title": {
+            "type": "string"
           }
         }
+      },
+      "SubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "Accepted",
+          "WrongAnswer",
+          "RuntimeError",
+          "CompileError"
+        ]
+      },
+      "SubmissionResult": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SubmissionStatus"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "TestStatus": {
+        "type": "string",
+        "enum": [
+          "Passed",
+          "Failed"
+        ]
+      },
+      "TestResult": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TestStatus"
+          },
+          "test_case_id": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "status",
+          "test_case_id"
+        ]
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "problem_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "result": {
+            "$ref": "#/components/schemas/SubmissionResult"
+          },
+          "student_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "test_results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestResult"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "id",
+          "language",
+          "problem_id",
+          "result",
+          "student_id",
+          "test_results"
+        ]
+      },
+      "SubmissionCreate": {
+        "type": "object",
+        "properties": {
+          "problem_id": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "problem_id"
+        ]
       }
     },
-    "/api/problems/": {
+    "parameters": {}
+  },
+  "paths": {
+    "/api/problems": {
       "get": {
-        "tags": ["problems"],
+        "operationId": "getProblems",
         "summary": "問題の一覧を取得する",
-        "operationId": "get_problems",
+        "tags": [
+          "problems"
+        ],
         "responses": {
           "200": {
             "description": "問題の一覧",
@@ -32,7 +245,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Problem" }
+                  "items": {
+                    "$ref": "#/components/schemas/Problem"
+                  }
                 }
               }
             }
@@ -40,23 +255,28 @@
         }
       },
       "post": {
-        "tags": ["problems"],
+        "operationId": "createProblem",
         "summary": "新しい問題を作成する",
-        "operationId": "create_problem",
+        "tags": [
+          "problems"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProblemCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/ProblemCreate"
+              }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
             "description": "作成された問題",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Problem" }
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
               }
             }
           }
@@ -65,16 +285,21 @@
     },
     "/api/problems/{id}": {
       "get": {
-        "tags": ["problems"],
+        "operationId": "getProblemById",
         "summary": "問題の詳細を取得する",
-        "operationId": "get_problem_by_id",
+        "tags": [
+          "problems"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "問題のID",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
+            "in": "path",
+            "name": "id"
           }
         ],
         "responses": {
@@ -82,135 +307,152 @@
             "description": "問題の詳細",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Problem" }
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
               }
             }
           },
-          "404": { "description": "指定されたIDの問題が見つかりません" }
+          "404": {
+            "description": "指定されたIDの問題が見つかりません"
+          }
         }
       },
       "put": {
-        "tags": ["problems"],
+        "operationId": "updateProblem",
         "summary": "問題を更新する",
-        "operationId": "update_problem_by_id",
+        "tags": [
+          "problems"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "問題のID",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
+            "in": "path",
+            "name": "id"
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ProblemUpdate" }
+              "schema": {
+                "$ref": "#/components/schemas/ProblemUpdate"
+              }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "description": "更新された問題",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Problem" }
-              }
-            }
-          },
-          "404": { "description": "指定されたIDの問題が見つかりません" }
-        }
-      },
-      "delete": {
-        "tags": ["problems"],
-        "summary": "問題を削除する",
-        "operationId": "delete_problem_by_id",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "問題のID",
-            "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
-          }
-        ],
-        "responses": {
-          "204": { "description": "問題が削除されました" },
-          "404": { "description": "指定されたIDの問題が見つかりません" }
-        }
-      }
-    },
-    "/api/problems/{id}/submissions": {
-      "get": {
-        "tags": ["problems"],
-        "summary": "問題に対する提出一覧を取得する",
-        "operationId": "get_submissions_by_problem_id",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "問題のID",
-            "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "提出一覧",
-            "content": {
-              "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Submission" }
+                  "$ref": "#/components/schemas/Problem"
                 }
               }
             }
           },
-          "404": { "description": "指定されたIDの問題が見つかりません" }
+          "404": {
+            "description": "指定されたIDの問題が見つかりません"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteProblem",
+        "summary": "問題を削除する",
+        "tags": [
+          "problems"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
+            "required": true,
+            "in": "path",
+            "name": "id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "問題が削除されました"
+          },
+          "404": {
+            "description": "指定されたIDの問題が見つかりません"
+          }
         }
       }
     },
     "/api/problems/{id}/submit": {
       "post": {
-        "tags": ["problems"],
+        "operationId": "submitProgram",
         "summary": "問題に対してプログラムを提出する",
-        "operationId": "submit_program_by_problem_id",
+        "tags": [
+          "problems"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "問題のID",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
+            "in": "path",
+            "name": "id"
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SubmissionCreate" }
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionCreate"
+              }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
             "description": "提出されたプログラム",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Submission" }
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
               }
             }
           },
-          "404": { "description": "指定されたIDの問題が見つかりません" }
+          "404": {
+            "description": "指定されたIDの問題が見つかりません"
+          }
         }
       }
     },
-    "/api/submissions/": {
+    "/api/problems/{id}/submissions": {
       "get": {
-        "tags": ["submissions"],
-        "summary": "提出一覧を取得する",
-        "operationId": "get_submissions",
+        "operationId": "getSubmissions",
+        "summary": "問題に対する提出一覧を取得する",
+        "tags": [
+          "problems"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
+            "required": true,
+            "in": "path",
+            "name": "id"
+          }
+        ],
         "responses": {
           "200": {
             "description": "提出一覧",
@@ -218,7 +460,36 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Submission" }
+                  "items": {
+                    "$ref": "#/components/schemas/Submission"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "指定されたIDの問題が見つかりません"
+          }
+        }
+      }
+    },
+    "/api/submissions": {
+      "get": {
+        "operationId": "getSubmissions",
+        "summary": "提出一覧を取得する",
+        "tags": [
+          "submissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "提出一覧",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Submission"
+                  }
                 }
               }
             }
@@ -228,16 +499,21 @@
     },
     "/api/submissions/{id}": {
       "get": {
-        "tags": ["submissions"],
+        "operationId": "getSubmissionById",
         "summary": "提出の詳細を取得する",
-        "operationId": "get_submission_by_id",
+        "tags": [
+          "submissions"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "提出のID",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "1"
+            },
             "required": true,
-            "schema": { "type": "integer", "format": "int64", "minimum": 0 }
+            "in": "path",
+            "name": "id"
           }
         ],
         "responses": {
@@ -245,140 +521,18 @@
             "description": "提出の詳細",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Submission" }
+                "schema": {
+                  "$ref": "#/components/schemas/Submission"
+                }
               }
             }
           },
-          "404": { "description": "指定されたIDの提出が見つかりません" }
+          "404": {
+            "description": "指定されたIDの提出が見つかりません"
+          }
         }
       }
     }
   },
-  "components": {
-    "schemas": {
-      "Language": {
-        "type": "object",
-        "required": ["name", "version"],
-        "properties": {
-          "name": { "type": "string" },
-          "version": { "type": "string" }
-        }
-      },
-      "Problem": {
-        "type": "object",
-        "required": [
-          "id",
-          "title",
-          "body",
-          "test_cases",
-          "supported_languages"
-        ],
-        "properties": {
-          "body": { "type": "string" },
-          "id": { "type": "integer", "format": "int64", "minimum": 0 },
-          "supported_languages": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Language" }
-          },
-          "test_cases": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/TestCase" }
-          },
-          "title": { "type": "string" }
-        }
-      },
-      "ProblemCreate": {
-        "type": "object",
-        "required": ["title", "body", "test_cases", "supported_languages"],
-        "properties": {
-          "body": { "type": "string" },
-          "supported_languages": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Language" }
-          },
-          "test_cases": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/TestCase" }
-          },
-          "title": { "type": "string" }
-        }
-      },
-      "ProblemUpdate": {
-        "type": "object",
-        "properties": {
-          "body": { "type": ["string", "null"] },
-          "supported_languages": {
-            "type": ["array", "null"],
-            "items": { "$ref": "#/components/schemas/Language" }
-          },
-          "test_cases": {
-            "type": ["array", "null"],
-            "items": { "$ref": "#/components/schemas/TestCase" }
-          },
-          "title": { "type": ["string", "null"] }
-        }
-      },
-      "Submission": {
-        "type": "object",
-        "required": [
-          "id",
-          "problem_id",
-          "student_id",
-          "code",
-          "language",
-          "result",
-          "test_results"
-        ],
-        "properties": {
-          "code": { "type": "string" },
-          "id": { "type": "integer", "format": "int64", "minimum": 0 },
-          "language": { "$ref": "#/components/schemas/Language" },
-          "problem_id": { "type": "integer", "format": "int64", "minimum": 0 },
-          "result": { "$ref": "#/components/schemas/SubmissionResult" },
-          "student_id": { "type": "integer", "format": "int64", "minimum": 0 },
-          "test_results": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/TestResult" }
-          }
-        }
-      },
-      "SubmissionCreate": {
-        "type": "object",
-        "required": ["problem_id"],
-        "properties": {
-          "problem_id": { "type": "integer", "format": "int64", "minimum": 0 }
-        }
-      },
-      "SubmissionResult": {
-        "type": "object",
-        "required": ["status"],
-        "properties": {
-          "message": { "type": ["string", "null"] },
-          "status": { "$ref": "#/components/schemas/SubmissionStatus" }
-        }
-      },
-      "SubmissionStatus": {
-        "type": "string",
-        "enum": ["Accepted", "WrongAnswer", "RuntimeError", "CompileError"]
-      },
-      "TestCase": {
-        "type": "object",
-        "required": ["input", "output"],
-        "properties": {
-          "input": { "type": "string" },
-          "output": { "type": "string" }
-        }
-      },
-      "TestResult": {
-        "type": "object",
-        "required": ["test_case_id", "status"],
-        "properties": {
-          "message": { "type": ["string", "null"] },
-          "status": { "$ref": "#/components/schemas/TestStatus" },
-          "test_case_id": { "type": "integer", "format": "int64", "minimum": 0 }
-        }
-      },
-      "TestStatus": { "type": "string", "enum": ["Passed", "Failed"] }
-    }
-  }
+  "webhooks": {}
 }
