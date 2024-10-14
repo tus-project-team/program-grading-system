@@ -1,15 +1,8 @@
 import * as fs from "node:fs"
 
-import app from "../app"
+import app, { openApiDocument } from "../app"
 
-const schema = app.getOpenAPI31Document({
-  info: {
-    license: { name: "" },
-    title: "Problem and Submission API",
-    version: "0.1.0",
-  },
-  openapi: "3.1.0",
-})
+const schema = app.getOpenAPI31Document(openApiDocument)
 
 fs.writeFileSync(
   "../generated/openapi/schema.json",
