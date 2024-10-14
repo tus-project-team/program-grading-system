@@ -10,15 +10,14 @@ const app = new OpenAPIHono()
 app.route("/api", problemsApp)
 app.route("/api", submissionsApp)
 
-const openApiDocument = {
+export const openApiDocument = {
   info: {
     license: { name: "" },
     title: "Problem and Submission API",
     version: "0.1.0",
   },
   openapi: "3.1.0",
-  paths: {},
-}
+} as const satisfies ReturnType<typeof app.getOpenAPI31Document>
 
 app.doc("/api/openapi.json", () => {
   const generatedSchemas = Object.fromEntries(
