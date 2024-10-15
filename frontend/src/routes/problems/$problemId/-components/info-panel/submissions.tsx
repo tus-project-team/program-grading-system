@@ -7,7 +7,7 @@ import { intlFormatDistance } from "date-fns"
 import { CheckIcon, XIcon } from "lucide-react"
 import { components } from "openapi/schema"
 
-import { useProblem } from "../../-contexts/problem-context"
+import { useProblem } from "../../-hooks/use-problem"
 
 type Submission = components["schemas"]["Submission"]
 
@@ -19,9 +19,11 @@ export const Submissions: FC<SubmissionsProps> = ({ className }) => {
   const { problem } = useProblem()
   const { data: submissions } = $api.useSuspenseQuery(
     "get",
-    "/api/problems/{id}/submissions",
+    "/api/problems/{problemId}/submissions",
     {
-      params: { path: { id: problem.id } },
+      params: {
+        path: { problemId: problem.id },
+      },
     },
   )
 
