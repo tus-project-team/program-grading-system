@@ -6,14 +6,15 @@ const app = new OpenAPIHono()
 
 // パラメータスキーマの定義
 const IdParam = z.object({
-  id: z
-    .string()
-    .min(1)
+  problemId: z
+    .number()
+    .int()
+    .nonnegative()
     .openapi({
-      example: "1",
+      example: 1,
       param: {
         in: "path",
-        name: "id",
+        name: "problemId",
       },
     }),
 })
@@ -66,7 +67,7 @@ const createProblemRoute = createRoute({
 const getProblemRoute = createRoute({
   method: "get",
   operationId: "getProblemById",
-  path: "/problems/{id}",
+  path: "/problems/{problemId}",
   request: {
     params: IdParam,
   },
@@ -90,7 +91,7 @@ const getProblemRoute = createRoute({
 const updateProblemRoute = createRoute({
   method: "put",
   operationId: "updateProblem",
-  path: "/problems/{id}",
+  path: "/problems/{problemId}",
   request: {
     body: {
       content: {
@@ -121,7 +122,7 @@ const updateProblemRoute = createRoute({
 const deleteProblemRoute = createRoute({
   method: "delete",
   operationId: "deleteProblem",
-  path: "/problems/{id}",
+  path: "/problems/{problemId}",
   request: {
     params: IdParam,
   },
@@ -140,7 +141,7 @@ const deleteProblemRoute = createRoute({
 const submitProgramRoute = createRoute({
   method: "post",
   operationId: "submitProgram",
-  path: "/problems/{id}/submit",
+  path: "/problems/{problemId}/submit",
   request: {
     body: {
       content: {
@@ -171,7 +172,7 @@ const submitProgramRoute = createRoute({
 const getSubmissionsRoute = createRoute({
   method: "get",
   operationId: "getSubmissions",
-  path: "/problems/{id}/submissions",
+  path: "/problems/{problemId}/submissions",
   request: {
     params: IdParam,
   },
@@ -218,11 +219,11 @@ app.openapi(createProblemRoute, (c) => {
 })
 
 app.openapi(getProblemRoute, (c) => {
-  const { id } = c.req.valid("param")
+  const { problemId } = c.req.valid("param")
   // TODO: 実際のデータベースクエリを実装
   const problem: z.infer<typeof schemas.Problem> = {
     body: "この問題の本文です。",
-    id: parseInt(id),
+    id: problemId,
     supported_languages: [{ name: "Python", version: "3.9" }],
     test_cases: [{ input: "入力例", output: "出力例" }],
     title: "サンプル問題",
@@ -231,12 +232,12 @@ app.openapi(getProblemRoute, (c) => {
 })
 
 app.openapi(updateProblemRoute, (c) => {
-  const { id } = c.req.valid("param")
+  const { problemId } = c.req.valid("param")
   const updateData = c.req.valid("json")
   // TODO: 実際のデータベース更新処理を実装
   const updatedProblem: z.infer<typeof schemas.Problem> = {
     body: updateData.body ?? "更新された本文",
-    id: parseInt(id),
+    id: problemId,
     supported_languages: updateData.supported_languages ?? [
       { name: "JavaScript", version: "ES2021" },
     ],
@@ -254,13 +255,13 @@ app.openapi(deleteProblemRoute, (c) => {
 })
 
 app.openapi(submitProgramRoute, (c) => {
-  const { id } = c.req.valid("param")
+  const { problemId } = c.req.valid("param")
   // TODO: 実際の提出処理とジャッジ処理を実装
   const createdSubmission: z.infer<typeof schemas.Submission> = {
     code: "print('Hello, World!')",
     id: Date.now(),
     language: { name: "Python", version: "3.9" },
-    problem_id: parseInt(id),
+    problem_id: problemId,
     result: { message: "テストケースにパスしました", status: "Accepted" },
     student_id: 1, // 仮の学生ID
     test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
@@ -269,14 +270,14 @@ app.openapi(submitProgramRoute, (c) => {
 })
 
 app.openapi(getSubmissionsRoute, (c) => {
-  const { id } = c.req.valid("param")
+  const { problemId } = c.req.valid("param")
   // TODO: 実際のデータベースクエリを実装
   const submissions: z.infer<typeof schemas.Submission>[] = [
     {
       code: "print('Hello, World!')",
       id: 1,
       language: { name: "Python", version: "3.9" },
-      problem_id: parseInt(id),
+      problem_id: problemId,
       result: { message: "テストケースにパスしました", status: "Accepted" },
       student_id: 1,
       test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
