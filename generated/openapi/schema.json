@@ -436,7 +436,7 @@
     },
     "/api/problems/{problemId}/submissions": {
       "get": {
-        "operationId": "getSubmissions",
+        "operationId": "getSubmissionsByProblemId",
         "summary": "問題に対する提出一覧を取得する",
         "tags": [
           "problems"
