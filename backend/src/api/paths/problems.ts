@@ -169,9 +169,9 @@ const submitProgramRoute = createRoute({
   tags: ["problems"],
 })
 
-const getSubmissionsRoute = createRoute({
+const getSubmissionsByProblemIdRoute = createRoute({
   method: "get",
-  operationId: "getSubmissions",
+  operationId: "getSubmissionsByProblemId",
   path: "/problems/{problemId}/submissions",
   request: {
     params: IdParam,
@@ -269,7 +269,7 @@ app.openapi(submitProgramRoute, (c) => {
   return c.json(createdSubmission, 201)
 })
 
-app.openapi(getSubmissionsRoute, (c) => {
+app.openapi(getSubmissionsByProblemIdRoute, (c) => {
   const { problemId } = c.req.valid("param")
   // TODO: 実際のデータベースクエリを実装
   const submissions: z.infer<typeof schemas.Submission>[] = [
