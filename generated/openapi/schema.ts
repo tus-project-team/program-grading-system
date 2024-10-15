@@ -22,7 +22,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/problems/{id}": {
+  "/api/problems/{problemId}": {
     parameters: {
       query?: never
       header?: never
@@ -41,7 +41,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/problems/{id}/submit": {
+  "/api/problems/{problemId}/submit": {
     parameters: {
       query?: never
       header?: never
@@ -58,7 +58,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/problems/{id}/submissions": {
+  "/api/problems/{problemId}/submissions": {
     parameters: {
       query?: never
       header?: never
@@ -92,7 +92,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/submissions/{id}": {
+  "/api/submissions/{submissionId}": {
     parameters: {
       query?: never
       header?: never
@@ -227,7 +227,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        problemId: number
       }
       cookie?: never
     }
@@ -256,7 +256,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        problemId: number
       }
       cookie?: never
     }
@@ -289,7 +289,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        problemId: number
       }
       cookie?: never
     }
@@ -316,7 +316,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        problemId: number
       }
       cookie?: never
     }
@@ -349,7 +349,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        problemId: number
       }
       cookie?: never
     }
@@ -398,7 +398,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        submissionId: number
       }
       cookie?: never
     }

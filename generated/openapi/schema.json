@@ -283,7 +283,7 @@
         }
       }
     },
-    "/api/problems/{id}": {
+    "/api/problems/{problemId}": {
       "get": {
         "operationId": "getProblemById",
         "summary": "問題の詳細を取得する",
@@ -293,13 +293,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "problemId"
           }
         ],
         "responses": {
@@ -327,13 +327,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "problemId"
           }
         ],
         "requestBody": {
@@ -370,13 +370,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "problemId"
           }
         ],
         "responses": {
@@ -389,7 +389,7 @@
         }
       }
     },
-    "/api/problems/{id}/submit": {
+    "/api/problems/{problemId}/submit": {
       "post": {
         "operationId": "submitProgram",
         "summary": "問題に対してプログラムを提出する",
@@ -399,13 +399,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "problemId"
           }
         ],
         "requestBody": {
@@ -434,7 +434,7 @@
         }
       }
     },
-    "/api/problems/{id}/submissions": {
+    "/api/problems/{problemId}/submissions": {
       "get": {
         "operationId": "getSubmissions",
         "summary": "問題に対する提出一覧を取得する",
@@ -444,13 +444,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "problemId"
           }
         ],
         "responses": {
@@ -497,7 +497,7 @@
         }
       }
     },
-    "/api/submissions/{id}": {
+    "/api/submissions/{submissionId}": {
       "get": {
         "operationId": "getSubmissionById",
         "summary": "提出の詳細を取得する",
@@ -507,13 +507,13 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "example": "1"
+              "type": "integer",
+              "minimum": 0,
+              "example": 1
             },
             "required": true,
             "in": "path",
-            "name": "id"
+            "name": "submissionId"
           }
         ],
         "responses": {
