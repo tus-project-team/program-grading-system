@@ -6,14 +6,15 @@ const app = new OpenAPIHono()
 
 // パラメータスキーマの定義
 const SubmissionIdParam = z.object({
-  id: z
-    .string()
-    .min(1)
+  submissionId: z
+    .number()
+    .int()
+    .nonnegative()
     .openapi({
-      example: "1",
+      example: 1,
       param: {
         in: "path",
-        name: "id",
+        name: "submissionId",
       },
     }),
 })
@@ -39,7 +40,7 @@ const getSubmissionsRoute = createRoute({
 const getSubmissionByIdRoute = createRoute({
   method: "get",
   operationId: "getSubmissionById",
-  path: "/submissions/{id}",
+  path: "/submissions/{submissionId}",
   request: {
     params: SubmissionIdParam,
   },
@@ -78,11 +79,11 @@ app.openapi(getSubmissionsRoute, (c) => {
 })
 
 app.openapi(getSubmissionByIdRoute, (c) => {
-  const { id } = c.req.valid("param")
+  const { submissionId } = c.req.valid("param")
   // TODO: 実際のデータベースクエリを実装
   const submission: z.infer<typeof Submission> = {
     code: "print('Hello, World!')",
-    id: parseInt(id),
+    id: submissionId,
     language: { name: "Python", version: "3.9" },
     problem_id: 1,
     result: { message: "テストケースにパスしました", status: "Accepted" },
