@@ -63,8 +63,9 @@ export const Submission = z
   })
   .openapi("Submission")
 
-export const SubmissionCreate = z
-  .object({
-    problem_id: z.number().int().nonnegative(),
-  })
-  .openapi("SubmissionCreate")
+export const SubmissionCreate = Submission.omit({
+  id: true,
+  result: true,
+  student_id: true,
+  test_results: true,
+}).openapi("SubmissionCreate")

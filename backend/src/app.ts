@@ -1,5 +1,5 @@
-import { swaggerUI } from "@hono/swagger-ui"
 import { OpenAPIHono } from "@hono/zod-openapi"
+import { apiReference } from "@scalar/hono-api-reference"
 
 import problemsApp from "./api/paths/problems"
 import submissionsApp from "./api/paths/submissions"
@@ -20,6 +20,6 @@ export const openApiDocument = {
 
 app.doc("/api/openapi.json", openApiDocument)
 
-app.get("/api/docs", swaggerUI({ url: "/api/openapi.json" }))
+app.get("/api/docs", apiReference({ spec: { url: "/api/openapi.json" } }))
 
 export default app
