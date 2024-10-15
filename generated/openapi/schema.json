@@ -198,6 +198,10 @@
             "type": "integer",
             "minimum": 0
           },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
           "test_results": {
             "type": "array",
             "items": {
@@ -212,6 +216,7 @@
           "problem_id",
           "result",
           "student_id",
+          "submitted_at",
           "test_results"
         ]
       },

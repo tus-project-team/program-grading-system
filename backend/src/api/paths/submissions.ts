@@ -72,6 +72,7 @@ app.openapi(getSubmissionsRoute, (c) => {
       problem_id: 1,
       result: { message: "テストケースにパスしました", status: "Accepted" },
       student_id: 1,
+      submitted_at: new Date().toISOString(),
       test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
     },
   ]
@@ -88,6 +89,7 @@ app.openapi(getSubmissionByIdRoute, (c) => {
     problem_id: 1,
     result: { message: "テストケースにパスしました", status: "Accepted" },
     student_id: 1,
+    submitted_at: new Date().toISOString(),
     test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
   }
   return c.json(submission)

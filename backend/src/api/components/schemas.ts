@@ -59,6 +59,7 @@ export const Submission = z
     problem_id: z.number().int().nonnegative(),
     result: SubmissionResult,
     student_id: z.number().int().nonnegative(),
+    submitted_at: z.string().datetime(),
     test_results: z.array(TestResult),
   })
   .openapi("Submission")
@@ -67,5 +68,6 @@ export const SubmissionCreate = Submission.omit({
   id: true,
   result: true,
   student_id: true,
+  submitted_at: true,
   test_results: true,
 }).openapi("SubmissionCreate")

@@ -264,6 +264,7 @@ app.openapi(submitProgramRoute, (c) => {
     problem_id: problemId,
     result: { message: "テストケースにパスしました", status: "Accepted" },
     student_id: 1, // 仮の学生ID
+    submitted_at: new Date().toISOString(),
     test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
   }
   return c.json(createdSubmission, 201)
@@ -280,6 +281,7 @@ app.openapi(getSubmissionsByProblemIdRoute, (c) => {
       problem_id: problemId,
       result: { message: "テストケースにパスしました", status: "Accepted" },
       student_id: 1,
+      submitted_at: new Date().toISOString(),
       test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
     },
   ]
