@@ -1,4 +1,4 @@
-import type { FC } from "react"
+import type { ComponentPropsWithoutRef, FC } from "react"
 
 import { Button } from "@/components/ui/button"
 import { $api } from "@/lib/api"
@@ -11,11 +11,9 @@ import { useProblem } from "../../-hooks/use-problem"
 
 type Submission = components["schemas"]["Submission"]
 
-export type SubmissionsProps = {
-  className?: string
-}
+export type SubmissionsProps = ComponentPropsWithoutRef<"div">
 
-export const Submissions: FC<SubmissionsProps> = ({ className }) => {
+export const Submissions: FC<SubmissionsProps> = ({ className, ...props }) => {
   const { problem } = useProblem()
   const { data: submissions } = $api.useSuspenseQuery(
     "get",
@@ -28,7 +26,7 @@ export const Submissions: FC<SubmissionsProps> = ({ className }) => {
   )
 
   return (
-    <div className={cn("grid grid-cols-[auto_1fr_auto]", className)}>
+    <div className={cn("grid grid-cols-[auto_1fr_auto]", className)} {...props}>
       {submissions?.map((submission) => (
         <Button
           className="col-span-3 grid grid-cols-subgrid"
