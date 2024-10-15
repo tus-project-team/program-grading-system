@@ -66,7 +66,7 @@ export interface paths {
       cookie?: never
     }
     /** 問題に対する提出一覧を取得する */
-    get: operations["getSubmissions"]
+    get: operations["getSubmissionsByProblemId"]
     put?: never
     post?: never
     delete?: never
@@ -344,7 +344,7 @@ export interface operations {
       }
     }
   }
-  getSubmissions: {
+  getSubmissionsByProblemId: {
     parameters: {
       query?: never
       header?: never
