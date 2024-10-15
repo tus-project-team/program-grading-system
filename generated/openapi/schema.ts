@@ -167,6 +167,8 @@ export interface components {
       test_results: components["schemas"]["TestResult"][]
     }
     SubmissionCreate: {
+      code: string
+      language: components["schemas"]["Language"]
       problem_id: number
     }
   }

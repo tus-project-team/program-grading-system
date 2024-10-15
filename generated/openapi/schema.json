@@ -218,12 +218,20 @@
       "SubmissionCreate": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
           "problem_id": {
             "type": "integer",
             "minimum": 0
           }
         },
         "required": [
+          "code",
+          "language",
           "problem_id"
         ]
       }
