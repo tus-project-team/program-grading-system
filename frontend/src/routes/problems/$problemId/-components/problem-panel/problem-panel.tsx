@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, FC } from "react"
 import { cn } from "@/lib/utils"
 import Markdown from "react-markdown"
 
-import { useProblem } from "../../-contexts/problem-context"
+import { useProblem } from "../../-hooks/use-problem"
 
 export type ProblemPanelProps = ComponentPropsWithoutRef<"div">
 

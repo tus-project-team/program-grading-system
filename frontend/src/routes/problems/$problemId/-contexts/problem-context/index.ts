@@ -1,8 +1,7 @@
 export {
   type Language,
   type Problem,
-  type ProblemContext,
+  ProblemContext,
   ProblemProvider,
   type ProblemProviderProps,
-  useProblem,
 } from "./problem-context"

@@ -7,16 +7,16 @@ const queryClient = new QueryClient()
 export const Route = createFileRoute("/problems/$problemId")({
   loader: ({ params }) => {
     queryClient.ensureQueryData(
-      $api.queryOptions("get", "/api/problems/{id}", {
+      $api.queryOptions("get", "/api/problems/{problemId}", {
         params: {
-          path: { id: Number.parseInt(params.problemId) },
+          path: { problemId: Number.parseInt(params.problemId) },
         },
       }),
     )
     queryClient.ensureQueryData(
-      $api.queryOptions("get", "/api/problems/{id}/submissions", {
+      $api.queryOptions("get", "/api/problems/{problemId}/submissions", {
         params: {
-          path: { id: Number.parseInt(params.problemId) },
+          path: { problemId: Number.parseInt(params.problemId) },
         },
       }),
     )
