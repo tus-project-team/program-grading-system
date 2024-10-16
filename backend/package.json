@@ -3,6 +3,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
+    "type-check": "tsc --noEmit && tsc --noEmit ../generated/openapi/schema.ts",
     "generate": "bun run generate:json && bun run generate:typescript",
     "generate:json": "tsx src/bin/genereate.ts",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
@@ -13,14 +14,13 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
-    "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.16.4",
+    "@scalar/hono-api-reference": "^0.5.154",
     "globals": "^15.11.0",
     "hono": "^4.6.4"
   },
   "devDependencies": {
     "@types/node": "20.16.11",
-    "tsx": "4.19.1",
     "eslint": "9.12.0",
     "eslint-config-flat-gitignore": "0.3.0",
     "eslint-config-prettier": "9.1.0",
@@ -28,6 +28,8 @@
     "eslint-plugin-perfectionist": "3.8.0",
     "openapi-typescript": "7.4.1",
     "prettier": "3.3.3",
+    "tsx": "4.19.1",
+    "typescript": "5.6.3",
     "typescript-eslint": "8.8.1"
   },
   "type": "module"

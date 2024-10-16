@@ -198,6 +198,10 @@
             "type": "integer",
             "minimum": 0
           },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
           "test_results": {
             "type": "array",
             "items": {
@@ -212,18 +216,27 @@
           "problem_id",
           "result",
           "student_id",
+          "submitted_at",
           "test_results"
         ]
       },
       "SubmissionCreate": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
           "problem_id": {
             "type": "integer",
             "minimum": 0
           }
         },
         "required": [
+          "code",
+          "language",
           "problem_id"
         ]
       }
@@ -436,7 +449,7 @@
     },
     "/api/problems/{problemId}/submissions": {
       "get": {
-        "operationId": "getSubmissions",
+        "operationId": "getSubmissionsByProblemId",
         "summary": "問題に対する提出一覧を取得する",
         "tags": [
           "problems"

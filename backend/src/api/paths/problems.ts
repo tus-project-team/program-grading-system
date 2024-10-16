@@ -169,9 +169,9 @@ const submitProgramRoute = createRoute({
   tags: ["problems"],
 })
 
-const getSubmissionsRoute = createRoute({
+const getSubmissionsByProblemIdRoute = createRoute({
   method: "get",
-  operationId: "getSubmissions",
+  operationId: "getSubmissionsByProblemId",
   path: "/problems/{problemId}/submissions",
   request: {
     params: IdParam,
@@ -264,12 +264,13 @@ app.openapi(submitProgramRoute, (c) => {
     problem_id: problemId,
     result: { message: "テストケースにパスしました", status: "Accepted" },
     student_id: 1, // 仮の学生ID
+    submitted_at: new Date().toISOString(),
     test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
   }
   return c.json(createdSubmission, 201)
 })
 
-app.openapi(getSubmissionsRoute, (c) => {
+app.openapi(getSubmissionsByProblemIdRoute, (c) => {
   const { problemId } = c.req.valid("param")
   // TODO: 実際のデータベースクエリを実装
   const submissions: z.infer<typeof schemas.Submission>[] = [
@@ -280,6 +281,7 @@ app.openapi(getSubmissionsRoute, (c) => {
       problem_id: problemId,
       result: { message: "テストケースにパスしました", status: "Accepted" },
       student_id: 1,
+      submitted_at: new Date().toISOString(),
       test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
     },
   ]

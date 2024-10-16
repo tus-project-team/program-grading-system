@@ -13,6 +13,7 @@ import { createFileRoute } from "@tanstack/react-router"
 // Import Routes
 
 import { Route as rootRoute } from "./routes/__root"
+import { Route as ProblemsProblemIdRouteImport } from "./routes/problems/$problemId/route"
 
 // Create Virtual Routes
 
@@ -25,6 +26,13 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
 
+const ProblemsProblemIdRouteRoute = ProblemsProblemIdRouteImport.update({
+  path: "/problems/$problemId",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import("./routes/problems/$problemId/route.lazy").then((d) => d.Route),
+)
+
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
@@ -36,6 +44,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    "/problems/$problemId": {
+      id: "/problems/$problemId"
+      path: "/problems/$problemId"
+      fullPath: "/problems/$problemId"
+      preLoaderRoute: typeof ProblemsProblemIdRouteImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -43,32 +58,37 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
+  "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
+  "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   "/": typeof IndexLazyRoute
+  "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/"
+  fullPaths: "/" | "/problems/$problemId"
   fileRoutesByTo: FileRoutesByTo
-  to: "/"
-  id: "__root__" | "/"
+  to: "/" | "/problems/$problemId"
+  id: "__root__" | "/" | "/problems/$problemId"
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  ProblemsProblemIdRouteRoute: ProblemsProblemIdRouteRoute,
 }
 
 export const routeTree = rootRoute
@@ -83,11 +103,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/problems/$problemId"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/problems/$problemId": {
+      "filePath": "problems/$problemId/route.tsx"
     }
   }
 }

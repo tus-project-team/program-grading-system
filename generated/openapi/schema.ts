@@ -66,7 +66,7 @@ export interface paths {
       cookie?: never
     }
     /** 問題に対する提出一覧を取得する */
-    get: operations["getSubmissions"]
+    get: operations["getSubmissionsByProblemId"]
     put?: never
     post?: never
     delete?: never
@@ -164,9 +164,13 @@ export interface components {
       problem_id: number
       result: components["schemas"]["SubmissionResult"]
       student_id: number
+      /** Format: date-time */
+      submitted_at: string
       test_results: components["schemas"]["TestResult"][]
     }
     SubmissionCreate: {
+      code: string
+      language: components["schemas"]["Language"]
       problem_id: number
     }
   }
@@ -344,7 +348,7 @@ export interface operations {
       }
     }
   }
-  getSubmissions: {
+  getSubmissionsByProblemId: {
     parameters: {
       query?: never
       header?: never
