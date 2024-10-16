@@ -48,5 +48,17 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    rules: {
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    },
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "no-unused-vars": "off",
+      "react/prop-types": "off",
+    },
+  },
   prettier,
 )
