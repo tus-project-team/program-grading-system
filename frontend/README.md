@@ -69,7 +69,7 @@ bun run dev
 >    bun run dev
 >    ```
 >
-> 2. `frontend` ディレクトリに移動し、フロントエンドの開発サーバーを起動しま> す。
+> 2. `frontend` ディレクトリに移動し、フロントエンドの開発サーバーを起動します。
 >
 >    ```sh
 >    cd ../frontend
