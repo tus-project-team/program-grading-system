@@ -4,7 +4,7 @@ import createFetchClient from "openapi-fetch"
 import createQueryClient from "openapi-react-query"
 
 export const BACKEND_URL: string =
-  import.meta.env.BACKEND_URL ?? "http://localhost:5016"
+  import.meta.env.BACKEND_URL ?? "http://localhost:3000"
 
 export const client = createFetchClient<paths>({
   baseUrl: BACKEND_URL,

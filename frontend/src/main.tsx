@@ -20,7 +20,10 @@ declare module "@tanstack/react-router" {
 }
 
 const enableMocking = async () => {
-  if (process.env.NODE_ENV !== "development") {
+  if (
+    import.meta.env.PROD ||
+    import.meta.env.VITE_MSW_MOCK?.toLowerCase() === "false"
+  ) {
     return
   }
 
