@@ -40,6 +40,14 @@
 bun install
 ```
 
+#### DBのマイグレーションと初期データの投入
+
+次のコマンドでDBのマイグレーションと初期データの投入を行います。
+
+```sh
+bun run prisma migrate dev && bun run prisma db seed
+```
+
 #### 開発サーバーの起動
 
 次のコマンドで開発サーバーを起動します。`backend` ディレクトリに移動してから実行してください。

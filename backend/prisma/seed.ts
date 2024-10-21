@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 const initEnumTables = async () => {
   for (const status of TestStatus._def.values) {
-    prisma.testStatus.upsert({
+    await prisma.testStatus.upsert({
       create: {
         status,
       },
@@ -16,7 +16,7 @@ const initEnumTables = async () => {
   }
 
   for (const status of SubmissionStatus._def.values) {
-    prisma.submissionStatus.upsert({
+    await prisma.submissionStatus.upsert({
       create: {
         status,
       },
