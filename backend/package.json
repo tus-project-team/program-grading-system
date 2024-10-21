@@ -15,6 +15,7 @@
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/zod-openapi": "^0.16.4",
+    "@prisma/client": "5.21.1",
     "@scalar/hono-api-reference": "^0.5.154",
     "globals": "^15.11.0",
     "hono": "^4.6.4"
