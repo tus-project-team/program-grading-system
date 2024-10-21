@@ -21,7 +21,7 @@ If you prefer to set up the development environment manually, follow these steps
 
    - [Node.js](https://nodejs.org/)
    - [Bun](https://bun.sh/)
-   
+
    Refer to the [`.tool-versions`](./.tool-versions) file for the required versions.
 
 2. Clone the repository:
@@ -44,19 +44,62 @@ If you prefer to set up the development environment manually, follow these steps
 - Follow the coding style defined by ESLint and Prettier.
 - Run the following commands to check and fix code style issues:
 
-  ```sh
-  bun run lint:write
-  bun run format:write
-  ```
+  1. Lint the code:
+
+     ```sh
+     bun run lint:write
+     ```
+
+  2. Format the code:
+
+     ```sh
+     bun run format:write
+     ```
 
 ### Commit Messages
 
 - Use clear and descriptive commit messages.
 - Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
-## Running Tests
+## Development
 
-### Backend
+### Quick Start
+
+#### Backend
+
+Navigate to the `backend` directory and use the following commands:
+
+1. Install dependencies:
+
+   ```sh
+   bun install
+   ```
+
+2. Start the development server:
+
+   ```sh
+   bun run dev
+   ```
+
+#### Frontend
+
+Navigate to the `frontend` directory and use the following commands:
+
+1. Install dependencies:
+
+   ```sh
+   bun install
+   ```
+
+2. Start the development server:
+
+   ```sh
+   bun run dev
+   ```
+
+### Running Tests
+
+#### Backend
 
 To run tests for the backend, navigate to the `backend` directory and run:
 
@@ -64,9 +107,9 @@ To run tests for the backend, navigate to the `backend` directory and run:
 bun run test
 ```
 
-## Using Bun for Package Management and Task Running
+### Commands
 
-### Backend
+#### Backend
 
 Navigate to the `backend` directory and use the following commands:
 
@@ -100,7 +143,7 @@ Navigate to the `backend` directory and use the following commands:
   bun run format
   ```
 
-### Frontend
+#### Frontend
 
 Navigate to the `frontend` directory and use the following commands:
 
