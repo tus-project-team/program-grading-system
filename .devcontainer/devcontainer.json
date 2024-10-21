@@ -18,7 +18,8 @@
           "tamasfe.even-better-toml",
           "rust-lang.rust-analyzer",
           "bradlc.vscode-tailwindcss",
-          "mhutchie.git-graph"
+          "mhutchie.git-graph",
+          "Prisma.prisma"
         ]
       }
     }
