@@ -52,45 +52,9 @@ If you prefer to set up the development environment manually, follow these steps
 - Use clear and descriptive commit messages.
 - Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
-## Development
+## Running Tests
 
-### Quick Start
-
-#### Backend
-
-Navigate to the `backend` directory and use the following commands:
-
-1. Install dependencies:
-
-   ```sh
-   bun install
-   ```
-
-2. Start the development server:
-
-   ```sh
-   bun run dev
-   ```
-
-#### Frontend
-
-Navigate to the `frontend` directory and use the following commands:
-
-1. Install dependencies:
-
-   ```sh
-   bun install
-   ```
-
-2. Start the development server:
-
-   ```sh
-   bun run dev
-   ```
-
-### Running Tests
-
-#### Backend
+### Backend
 
 To run tests for the backend, navigate to the `backend` directory and run:
 
@@ -98,9 +62,9 @@ To run tests for the backend, navigate to the `backend` directory and run:
 bun run test
 ```
 
-### Commands
+## Using Bun for Package Management and Task Running
 
-#### Backend
+### Backend
 
 Navigate to the `backend` directory and use the following commands:
 
@@ -134,7 +98,7 @@ Navigate to the `backend` directory and use the following commands:
   bun run format
   ```
 
-#### Frontend
+### Frontend
 
 Navigate to the `frontend` directory and use the following commands:
 
