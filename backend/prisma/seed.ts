@@ -1,51 +1,29 @@
 import { PrismaClient } from "@prisma/client"
 
+import { SubmissionStatus, TestStatus } from "../src/api/components/schemas"
+
 const prisma = new PrismaClient()
 
 const initEnumTables = async () => {
-  prisma.testStatus.upsert({
-    create: {
-      status: "Passed",
-    },
-    update: {},
-    where: { status: "Passed" },
-  })
-  prisma.testStatus.upsert({
-    create: {
-      status: "Failed",
-    },
-    update: {},
-    where: { status: "Failed" },
-  })
+  for (const status of TestStatus._def.values) {
+    prisma.testStatus.upsert({
+      create: {
+        status,
+      },
+      update: {},
+      where: { status },
+    })
+  }
 
-  prisma.submissionStatus.upsert({
-    create: {
-      status: "Accepted",
-    },
-    update: {},
-    where: { status: "Accepted" },
-  })
-  prisma.submissionStatus.upsert({
-    create: {
-      status: "WrongAnswer",
-    },
-    update: {},
-    where: { status: "WrongAnswer" },
-  })
-  prisma.submissionStatus.upsert({
-    create: {
-      status: "RuntimeError",
-    },
-    update: {},
-    where: { status: "RuntimeError" },
-  })
-  prisma.submissionStatus.upsert({
-    create: {
-      status: "CompileError",
-    },
-    update: {},
-    where: { status: "CompileError" },
-  })
+  for (const status of SubmissionStatus._def.values) {
+    prisma.submissionStatus.upsert({
+      create: {
+        status,
+      },
+      update: {},
+      where: { status },
+    })
+  }
 }
 
 const main = async () => {
