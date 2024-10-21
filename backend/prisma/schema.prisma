@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  problems  Problem[] // A teacher can be assigned multiple problems
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique
+  submissions Submission[] // A student can make multiple submissions
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Problem {
+  id                 Int          @id @default(autoincrement())
+  title              String
+  body               String
+  testCases          TestCase[] // A problem has multiple test cases
+  supportedLanguages Language[] // Supported languages for the problem
+  submissions        Submission[] // Multiple students can submit to this problem
+  teachers           Teacher[] // A problem can be assigned to multiple teachers
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model TestCase {
+  id        Int          @id @default(autoincrement())
+  input     String // Input for the test case
+  output    String // Expected output for the test case
+  problem   Problem      @relation(fields: [problemId], references: [id])
+  problemId Int
+  results   TestResult[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model TestResult {
+  id           Int         @id @default(autoincrement())
+  status       TestStatus  @relation(fields: [statusId], references: [status])
+  statusId     String
+  message      String
+  testCase     TestCase    @relation(fields: [testCaseId], references: [id])
+  testCaseId   Int
+  submission   Submission? @relation(fields: [submissionId], references: [id])
+  submissionId Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model TestStatus {
+  status  String       @id // e.g., 'Passed', 'Failed'
+  results TestResult[]
+}
+
+model SupportedLanguage {
+  name        String
+  version     String
+  languages   Language[]
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@id([name, version])
+}
+
+model Language {
+  id              Int               @id @default(autoincrement())
+  language        SupportedLanguage @relation(fields: [languageName, languageVersion], references: [name, version])
+  languageName    String
+  languageVersion String
+  problem         Problem?          @relation(fields: [problemId], references: [id])
+  problemId       Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model Submission {
+  id              Int               @id @default(autoincrement())
+  code            String // Submitted code
+  language        SupportedLanguage @relation(fields: [languageName, languageVersion], references: [name, version])
+  languageName    String
+  languageVersion String
+  result          SubmissionResult  @relation(fields: [resultId], references: [id])
+  resultId        Int               @unique
+  testResults     TestResult[]
+  student         Student           @relation(fields: [studentId], references: [id])
+  studentId       Int
+  problem         Problem           @relation(fields: [problemId], references: [id])
+  problemId       Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model SubmissionResult {
+  id         Int              @id @default(autoincrement())
+  submission Submission?
+  status     SubmissionStatus @relation(fields: [statusId], references: [status])
+  statusId   String
+  message    String
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+model SubmissionStatus {
+  status  String             @id // e.g., 'Accepted', 'Wrong Answer'
+  results SubmissionResult[]
+}
