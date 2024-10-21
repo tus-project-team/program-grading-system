@@ -6,10 +6,12 @@
 
 We recommend using the Dev Container setup for a consistent development environment. Follow these steps:
 
-1. Install [Visual Studio Code](https://code.visualstudio.com/).
-2. Install the [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
-3. Open the project in Visual Studio Code.
-4. When prompted, click on "Reopen in Container".
+1. Install [Docker](https://www.docker.com/get-started) on your machine.
+2. Install [Visual Studio Code](https://code.visualstudio.com/).
+3. Install the [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+4. Open the project in Visual Studio Code.
+5. Open the command palette by pressing `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac).
+6. Type `Dev-Containers: Reopen in Container` and select it from the list.
 
 ### Manual Setup
 
