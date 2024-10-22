@@ -24,6 +24,20 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   perfectionist.configs["recommended-natural"],
+  {
+    files: ["src/routes/**/*.tsx"],
+    ignores: ["src/routes/**/-*.tsx", "src/routes/**/-*/**/*.tsx"],
+    rules: {
+      "perfectionist/sort-objects": [
+        "error",
+        {
+          // Route properties are ordered by @tanstack/eslint-plugin-router
+          // @see https://tanstack.com/router/latest/docs/eslint/create-route-property-order
+          ignorePattern: ["Route"],
+        },
+      ],
+    },
+  },
   ...query.configs["flat/recommended"],
   ...router.configs["flat/recommended"],
   jsxA11y.flatConfigs.recommended,
