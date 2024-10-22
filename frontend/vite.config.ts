@@ -5,6 +5,9 @@ import { defineConfig } from "vite"
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    target: "es2022"
+  },
   plugins: [
     TanStackRouterVite({
       generatedRouteTree: path.resolve(
@@ -28,5 +31,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
     },
-  },
+  }
 })
