@@ -1,5 +1,8 @@
 {
   "name": "backend",
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
@@ -15,6 +18,7 @@
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/zod-openapi": "^0.16.4",
+    "@prisma/client": "5.21.1",
     "@scalar/hono-api-reference": "^0.5.154",
     "globals": "^15.11.0",
     "hono": "^4.6.4"
@@ -29,6 +33,7 @@
     "eslint-plugin-unicorn": "56.0.0",
     "openapi-typescript": "7.4.1",
     "prettier": "3.3.3",
+    "prisma": "5.21.1",
     "tsx": "4.19.1",
     "typescript": "5.6.3",
     "typescript-eslint": "8.9.0"
