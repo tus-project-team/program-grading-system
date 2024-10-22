@@ -54,6 +54,7 @@
     "eslint-plugin-react": "7.37.1",
     "eslint-plugin-react-hooks": "5.0.0",
     "eslint-plugin-react-refresh": "0.4.12",
+    "eslint-plugin-unicorn": "56.0.0",
     "globals": "15.11.0",
     "msw": "2.4.11",
     "openapi": "workspace:*",
