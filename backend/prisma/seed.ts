@@ -30,12 +30,12 @@ const main = async () => {
   await initEnumTables()
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+try {
+  await main()
+  await prisma.$disconnect()
+} catch (error) {
+  console.error(error)
+  await prisma.$disconnect()
+  // eslint-disable-next-line unicorn/no-process-exit -- this is a cli app
+  process.exit(1)
+}

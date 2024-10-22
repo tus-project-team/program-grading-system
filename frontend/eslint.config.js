@@ -10,6 +10,7 @@ import perfectionist from "eslint-plugin-perfectionist"
 import react from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
+import unicorn from "eslint-plugin-unicorn"
 import globals from "globals"
 import tseslint from "typescript-eslint"
 
@@ -36,6 +37,23 @@ export default tseslint.config(
           ignorePattern: ["Route"],
         },
       ],
+    },
+  },
+  unicorn.configs["flat/recommended"],
+  {
+    rules: {
+      "unicorn/better-regex": "error",
+      "unicorn/consistent-destructuring": "error",
+      "unicorn/empty-brace-spaces": "off", // Conflicts with prettier
+      "unicorn/filename-case": [
+        "error",
+        {
+          case: "kebabCase",
+          multipleFileExtensions: false,
+        },
+      ],
+      "unicorn/no-array-reduce": "off",
+      "unicorn/prevent-abbreviations": "off",
     },
   },
   ...query.configs["flat/recommended"],
