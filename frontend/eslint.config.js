@@ -2,6 +2,7 @@
 
 import js from "@eslint/js"
 import query from "@tanstack/eslint-plugin-query"
+import router from "@tanstack/eslint-plugin-router"
 import gitignore from "eslint-config-flat-gitignore"
 import prettier from "eslint-config-prettier"
 import jsxA11y from "eslint-plugin-jsx-a11y"
@@ -24,6 +25,7 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   perfectionist.configs["recommended-natural"],
   ...query.configs["flat/recommended"],
+  ...router.configs["flat/recommended"],
   jsxA11y.flatConfigs.recommended,
   // @ts-expect-error eslint-plugin-react types are incorrect
   react.configs.flat.recommended,
