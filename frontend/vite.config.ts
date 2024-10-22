@@ -7,8 +7,19 @@ import { defineConfig } from "vite"
 export default defineConfig({
   plugins: [
     TanStackRouterVite({
+      generatedRouteTree: path.resolve(
+        import.meta.dirname,
+        "./src/route-tree.gen.ts",
+      ),
       quoteStyle: "double",
       routeFileIgnorePattern: ".(stories|test).(js|jsx|ts|tsx)",
+      routeTreeFileHeader: [
+        "/* prettier-ignore-start */",
+        "/* eslint-disable unicorn/no-abusive-eslint-disable */",
+        "/* eslint-disable */",
+        "// @ts-nocheck",
+        "// noinspection JSUnusedGlobalSymbols",
+      ],
       semicolons: false,
     }),
     react(),

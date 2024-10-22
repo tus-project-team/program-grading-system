@@ -1,5 +1,7 @@
 /* prettier-ignore-start */
 
+/* eslint-disable unicorn/no-abusive-eslint-disable */
+
 /* eslint-disable */
 
 // @ts-nocheck
@@ -22,11 +24,13 @@ const IndexLazyImport = createFileRoute("/")()
 // Create/Update Routes
 
 const IndexLazyRoute = IndexLazyImport.update({
+  id: "/",
   path: "/",
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
 
 const ProblemsProblemIdRouteRoute = ProblemsProblemIdRouteImport.update({
+  id: "/problems/$problemId",
   path: "/problems/$problemId",
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>

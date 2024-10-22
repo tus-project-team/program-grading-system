@@ -59,15 +59,17 @@ type StatusIconProps = {
 
 const StatusIcon: FC<StatusIconProps> = ({ className, status }) => {
   switch (status) {
-    case "Accepted":
+    case "Accepted": {
       return (
         <CheckIcon
           className={cn("text-green-600 dark:text-green-400", className)}
         />
       )
-    default:
+    }
+    default: {
       return (
         <XIcon className={cn("text-red-600 dark:text-red-400", className)} />
       )
+    }
   }
 }
