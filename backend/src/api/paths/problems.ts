@@ -1,8 +1,40 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
+import { PrismaClient } from "@prisma/client"
 
 import * as schemas from "../components/schemas"
 
+const prisma = new PrismaClient()
 const app = new OpenAPIHono()
+
+interface ProblemWithRelations {
+  body: string
+  createdAt: Date
+  id: number
+  supportedLanguages: {
+    createdAt: Date
+    id: number
+    language: {
+      createdAt: Date
+      name: string
+      updatedAt: Date
+      version: string
+    }
+    languageName: string
+    languageVersion: string
+    problemId: null | number
+    updatedAt: Date
+  }[]
+  testCases: {
+    createdAt: Date
+    id: number
+    input: string
+    output: string
+    problemId: number
+    updatedAt: Date
+  }[]
+  title: string
+  updatedAt: Date
+}
 
 // パラメータスキーマの定義
 const IdParam = z.object({
@@ -194,28 +226,96 @@ const getSubmissionsByProblemIdRoute = createRoute({
 })
 
 // ルートの設定
-app.openapi(getProblemsRoute, (c) => {
-  // TODO: 実際のデータベースクエリを実装
-  const problems: z.infer<typeof schemas.Problem>[] = [
-    {
-      body: "この問題の本文です。",
-      id: 1,
-      supported_languages: [{ name: "Python", version: "3.9" }],
-      test_cases: [{ input: "入力例", output: "出力例" }],
-      title: "サンプル問題",
+app.openapi(getProblemsRoute, async (c) => {
+  const problems = await prisma.problem.findMany({
+    include: {
+      supportedLanguages: {
+        include: {
+          language: true,
+        },
+      },
+      testCases: true,
     },
-  ]
-  return c.json(problems)
+  })
+
+  const formattedProblems = problems.map((problem: ProblemWithRelations) => ({
+    body: problem.body,
+    id: problem.id,
+    supported_languages: problem.supportedLanguages.map(
+      (supportedLang: ProblemWithRelations["supportedLanguages"][0]) => ({
+        name: supportedLang.language.name,
+        version: supportedLang.language.version,
+      }),
+    ),
+    test_cases: problem.testCases.map(
+      (testCase: ProblemWithRelations["testCases"][0]) => ({
+        input: testCase.input,
+        output: testCase.output,
+      }),
+    ),
+    title: problem.title,
+  }))
+
+  return c.json(formattedProblems, 200)
 })
 
-app.openapi(createProblemRoute, (c) => {
-  const problem = c.req.valid("json")
-  // TODO: 実際のデータベース挿入処理を実装
-  const createdProblem: z.infer<typeof schemas.Problem> = {
-    id: Date.now(), // 仮のID生成
-    ...problem,
+app.openapi(createProblemRoute, async (c) => {
+  const data = c.req.valid("json")
+  const createdProblem = await prisma.problem.create({
+    data: {
+      body: data.body,
+      supportedLanguages: {
+        create: data.supported_languages.map(
+          (lang: { name: string; version: string }) => ({
+            language: {
+              connectOrCreate: {
+                create: { name: lang.name, version: lang.version },
+                where: {
+                  name_version: { name: lang.name, version: lang.version },
+                },
+              },
+            },
+          }),
+        ),
+      },
+      testCases: {
+        create: data.test_cases.map(
+          (testCase: { input: string; output: string }) => ({
+            input: testCase.input,
+            output: testCase.output,
+          }),
+        ),
+      },
+      title: data.title,
+    },
+    include: {
+      supportedLanguages: {
+        include: {
+          language: true,
+        },
+      },
+      testCases: true,
+    },
+  })
+
+  const formattedProblem = {
+    body: createdProblem.body,
+    id: createdProblem.id,
+    supported_languages: createdProblem.supportedLanguages.map(
+      (lang: ProblemWithRelations["supportedLanguages"][0]) => ({
+        name: lang.language.name,
+        version: lang.language.version,
+      }),
+    ),
+    test_cases: createdProblem.testCases.map(
+      (testCase: ProblemWithRelations["testCases"][0]) => ({
+        input: testCase.input,
+        output: testCase.output,
+      }),
+    ),
+    title: createdProblem.title,
   }
-  return c.json(createdProblem, 201)
+  return c.json(formattedProblem, 201)
 })
 
 app.openapi(getProblemRoute, (c) => {
