@@ -6,36 +6,6 @@ import * as schemas from "../components/schemas"
 const prisma = new PrismaClient()
 const app = new OpenAPIHono()
 
-interface ProblemWithRelations {
-  body: string
-  createdAt: Date
-  id: number
-  supportedLanguages: {
-    createdAt: Date
-    id: number
-    language: {
-      createdAt: Date
-      name: string
-      updatedAt: Date
-      version: string
-    }
-    languageName: string
-    languageVersion: string
-    problemId: null | number
-    updatedAt: Date
-  }[]
-  testCases: {
-    createdAt: Date
-    id: number
-    input: string
-    output: string
-    problemId: number
-    updatedAt: Date
-  }[]
-  title: string
-  updatedAt: Date
-}
-
 // パラメータスキーマの定義
 const IdParam = z.object({
   problemId: z
@@ -238,21 +208,17 @@ app.openapi(getProblemsRoute, async (c) => {
     },
   })
 
-  const formattedProblems = problems.map((problem: ProblemWithRelations) => ({
+  const formattedProblems = problems.map((problem) => ({
     body: problem.body,
     id: problem.id,
-    supported_languages: problem.supportedLanguages.map(
-      (supportedLang: ProblemWithRelations["supportedLanguages"][0]) => ({
-        name: supportedLang.language.name,
-        version: supportedLang.language.version,
-      }),
-    ),
-    test_cases: problem.testCases.map(
-      (testCase: ProblemWithRelations["testCases"][0]) => ({
-        input: testCase.input,
-        output: testCase.output,
-      }),
-    ),
+    supported_languages: problem.supportedLanguages.map((supportedLang) => ({
+      name: supportedLang.language.name,
+      version: supportedLang.language.version,
+    })),
+    test_cases: problem.testCases.map((testCase) => ({
+      input: testCase.input,
+      output: testCase.output,
+    })),
     title: problem.title,
   }))
 
@@ -301,18 +267,14 @@ app.openapi(createProblemRoute, async (c) => {
   const formattedProblem = {
     body: createdProblem.body,
     id: createdProblem.id,
-    supported_languages: createdProblem.supportedLanguages.map(
-      (lang: ProblemWithRelations["supportedLanguages"][0]) => ({
-        name: lang.language.name,
-        version: lang.language.version,
-      }),
-    ),
-    test_cases: createdProblem.testCases.map(
-      (testCase: ProblemWithRelations["testCases"][0]) => ({
-        input: testCase.input,
-        output: testCase.output,
-      }),
-    ),
+    supported_languages: createdProblem.supportedLanguages.map((lang) => ({
+      name: lang.language.name,
+      version: lang.language.version,
+    })),
+    test_cases: createdProblem.testCases.map((testCase) => ({
+      input: testCase.input,
+      output: testCase.output,
+    })),
     title: createdProblem.title,
   }
   return c.json(formattedProblem, 201)
