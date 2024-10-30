@@ -1,4 +1,4 @@
-# Program Grading System Frontend
+# Shuiro Frontend
 
 プログラム採点システムのフロントエンドです。
 

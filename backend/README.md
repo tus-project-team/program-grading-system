@@ -1,4 +1,4 @@
-# Program Grading System Backend
+# Shuiro Backend
 
 プログラム採点システムのAPIサーバーです。
 
