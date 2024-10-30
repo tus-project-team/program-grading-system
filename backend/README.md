@@ -30,6 +30,9 @@
 
 それぞれ必要なバージョンは[`.tool-versions`](../.tool-versions)を参照してください。
 
+> [!tip]
+> mise もしくは asdf 等を利用している場合は、mise install もしくは asdf install によってインストールできます。
+
 ### Setup
 
 #### 環境変数の設定
