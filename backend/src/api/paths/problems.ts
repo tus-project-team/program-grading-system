@@ -280,17 +280,38 @@ app.openapi(createProblemRoute, async (c) => {
   return c.json(formattedProblem, 201)
 })
 
-app.openapi(getProblemRoute, (c) => {
+app.openapi(getProblemRoute, async (c) => {
   const { problemId } = c.req.valid("param")
-  // TODO: 実際のデータベースクエリを実装
-  const problem: z.infer<typeof schemas.Problem> = {
-    body: "この問題の本文です。",
-    id: problemId,
-    supported_languages: [{ name: "Python", version: "3.9" }],
-    test_cases: [{ input: "入力例", output: "出力例" }],
-    title: "サンプル問題",
+  const problem = await prisma.problem.findUnique({
+    include: {
+      supportedLanguages: {
+        include: { language: true },
+      },
+      testCases: true,
+    },
+    where: { id: problemId },
+  })
+  if (problem == null) {
+    return c.body(null, 404)
   }
-  return c.json(problem)
+  return c.json(
+    {
+      body: problem.body,
+      id: problem.id,
+      supported_languages: problem.supportedLanguages.map(
+        ({ languageName, languageVersion }) => ({
+          name: languageName,
+          version: languageVersion,
+        }),
+      ),
+      test_cases: problem.testCases.map((testCase) => ({
+        input: testCase.input,
+        output: testCase.output,
+      })),
+      title: problem.title,
+    },
+    200,
+  )
 })
 
 app.openapi(updateProblemRoute, (c) => {
