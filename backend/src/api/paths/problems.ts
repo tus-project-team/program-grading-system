@@ -304,9 +304,9 @@ app.openapi(getProblemRoute, async (c) => {
           version: languageVersion,
         }),
       ),
-      test_cases: problem.testCases.map((testCase) => ({
-        input: testCase.input,
-        output: testCase.output,
+      test_cases: problem.testCases.map(({ input, output }) => ({
+        input,
+        output,
       })),
       title: problem.title,
     },
