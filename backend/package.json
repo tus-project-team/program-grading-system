@@ -13,7 +13,9 @@
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
     "format": "prettier --ignore-path .gitignore --check .",
-    "format:write": "prettier --ignore-path .gitignore --write ."
+    "format:write": "prettier --ignore-path .gitignore --write .",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "20.16.13",
+    "@vitest/coverage-v8": "2.1.4",
     "eslint": "9.13.0",
     "eslint-config-flat-gitignore": "0.3.0",
     "eslint-config-prettier": "9.1.0",
@@ -36,7 +39,8 @@
     "prisma": "5.21.1",
     "tsx": "4.19.1",
     "typescript": "5.6.3",
-    "typescript-eslint": "8.9.0"
+    "typescript-eslint": "8.9.0",
+    "vitest": "2.1.4"
   },
   "type": "module"
 }
