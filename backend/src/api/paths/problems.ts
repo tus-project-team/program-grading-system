@@ -8,21 +8,17 @@ const app = new OpenAPIHono()
 
 // パラメータスキーマの定義
 const IdParam = z.object({
-  problemId: z.preprocess(
-    Number,
-    z
-      .number()
-      .int()
-      .nonnegative()
-      .openapi({
-        example: 1,
-        param: {
-          in: "path",
-          name: "problemId",
-          required: true,
-        },
-      }),
-  ),
+  problemId: z
+    .string()
+    .pipe(z.coerce.number().int().nonnegative())
+    .openapi({
+      example: "1",
+      param: {
+        in: "path",
+        name: "problemId",
+      },
+      type: "integer",
+    }),
 })
 
 const getProblemsRoute = createRoute({
