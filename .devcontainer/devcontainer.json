@@ -1,8 +1,8 @@
 {
-  "name": "program-grading-system",
+  "name": "shuiro",
   "build": {
     "dockerfile": "../Dockerfile",
-    "cacheFrom": "ghcr.io/tus-project-team/program-grading-system-devcontainer:main",
+    "cacheFrom": "ghcr.io/shuiro-dev/shuiro-devcontainer:main",
     "args": {
       "UID": "1000",
       "GID": "1000"
