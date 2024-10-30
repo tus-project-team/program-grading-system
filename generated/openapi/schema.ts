@@ -231,7 +231,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        problemId: number
+        problemId: number | null
       }
       cookie?: never
     }
@@ -260,7 +260,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        problemId: number
+        problemId: number | null
       }
       cookie?: never
     }
@@ -293,7 +293,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        problemId: number
+        problemId: number | null
       }
       cookie?: never
     }
@@ -320,7 +320,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        problemId: number
+        problemId: number | null
       }
       cookie?: never
     }
@@ -353,7 +353,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        problemId: number
+        problemId: number | null
       }
       cookie?: never
     }

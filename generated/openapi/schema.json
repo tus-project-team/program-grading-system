@@ -306,13 +306,15 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
             },
-            "required": true,
-            "in": "path",
-            "name": "problemId"
+            "required": false,
+            "name": "problemId",
+            "in": "path"
           }
         ],
         "responses": {
@@ -340,13 +342,15 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
             },
-            "required": true,
-            "in": "path",
-            "name": "problemId"
+            "required": false,
+            "name": "problemId",
+            "in": "path"
           }
         ],
         "requestBody": {
@@ -383,13 +387,15 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
             },
-            "required": true,
-            "in": "path",
-            "name": "problemId"
+            "required": false,
+            "name": "problemId",
+            "in": "path"
           }
         ],
         "responses": {
@@ -412,13 +418,15 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
             },
-            "required": true,
-            "in": "path",
-            "name": "problemId"
+            "required": false,
+            "name": "problemId",
+            "in": "path"
           }
         ],
         "requestBody": {
@@ -457,13 +465,15 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
             },
-            "required": true,
-            "in": "path",
-            "name": "problemId"
+            "required": false,
+            "name": "problemId",
+            "in": "path"
           }
         ],
         "responses": {
