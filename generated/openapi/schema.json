@@ -307,8 +307,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -341,8 +340,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -384,8 +382,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -413,8 +410,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -458,8 +454,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
