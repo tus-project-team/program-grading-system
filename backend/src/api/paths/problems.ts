@@ -19,6 +19,7 @@ const IdParam = z.object({
         param: {
           in: "path",
           name: "problemId",
+          required: true,
         },
       }),
   ),
