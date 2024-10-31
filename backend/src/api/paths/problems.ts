@@ -345,22 +345,62 @@ app.openapi(getProblemRoute, async (c) => {
   )
 })
 
-app.openapi(updateProblemRoute, (c) => {
+app.openapi(updateProblemRoute, async (c) => {
   const { problemId } = c.req.valid("param")
-  const updateData = c.req.valid("json")
+  const data = c.req.valid("json")
   // TODO: 実際のデータベース更新処理を実装
-  const updatedProblem: z.infer<typeof schemas.Problem> = {
-    body: updateData.body ?? "更新された本文",
-    id: problemId,
-    supported_languages: updateData.supported_languages ?? [
-      { name: "JavaScript", version: "ES2021" },
-    ],
-    test_cases: updateData.test_cases ?? [
-      { input: "新しい入力", output: "新しい出力" },
-    ],
-    title: updateData.title ?? "更新された問題",
-  }
-  return c.json(updatedProblem)
+  const updatedProblem = await prisma.problem.update({
+    data: {
+      body: data.body,
+      supportedLanguages: {
+        create: data.supported_languages?.map(
+          (lang: { name: string; version: string }) => ({
+            language: {
+              connectOrCreate: {
+                create: { name: lang.name, version: lang.version },
+                where: {
+                  name_version: { name: lang.name, version: lang.version },
+                },
+              },
+            },
+          }),
+        ),
+      },
+      testCases: {
+        create: data.test_cases?.map(
+          (testCase: { input: string; output: string }) => ({
+            input: testCase.input,
+            output: testCase.output,
+          }),
+        ),
+      },
+      title: data.title,
+    },
+    include: {
+      supportedLanguages: {
+        include: {
+          language: true,
+        },
+      },
+      testCases: true,
+    },
+    where: {
+      id: problemId,
+    },
+  })
+  return c.json({
+    body: updatedProblem.body,
+    id: updatedProblem.id,
+    supported_languages: updatedProblem.supportedLanguages.map((lang) => ({
+      name: lang.language.name,
+      version: lang.language.version,
+    })),
+    test_cases: updatedProblem.testCases.map((testCase) => ({
+      input: testCase.input,
+      output: testCase.output,
+    })),
+    title: updatedProblem.title,
+  } satisfies z.infer<typeof schemas.Problem>)
 })
 
 app.openapi(deleteProblemRoute, (c) => {
