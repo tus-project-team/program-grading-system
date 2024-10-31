@@ -15,7 +15,8 @@
     "format": "prettier --ignore-path .gitignore --check .",
     "format:write": "prettier --ignore-path .gitignore --write .",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "postinstall": "tsx src/bin/postinstall.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
