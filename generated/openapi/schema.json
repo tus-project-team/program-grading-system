@@ -441,6 +441,39 @@
         }
       }
     },
+    "/api/problems/{problemId}/test": {
+      "post": {
+        "operationId": "testProgram",
+        "summary": "問題に対してプログラムをテストする",
+        "tags": [
+          "problems"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "提出されたプログラムのテスト結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TestResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/problems/{problemId}/submissions": {
       "get": {
         "operationId": "getSubmissionsByProblemId",

@@ -175,6 +175,33 @@ const submitProgramRoute = createRoute({
   tags: ["problems"],
 })
 
+const testProgramRoute = createRoute({
+  method: "post",
+  operationId: "testProgram",
+  path: "/problems/{problemId}/test",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: schemas.SubmissionCreate,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.array(schemas.TestResult),
+        },
+      },
+      description: "提出されたプログラムのテスト結果",
+    },
+  },
+  summary: "問題に対してプログラムをテストする",
+  tags: ["problems"],
+})
+
 const getSubmissionsByProblemIdRoute = createRoute({
   method: "get",
   operationId: "getSubmissionsByProblemId",
@@ -432,6 +459,14 @@ app.openapi(submitProgramRoute, async (c) => {
     },
   })
   return c.json(createdSubmission, 201)
+})
+
+app.openapi(testProgramRoute, (c) => {
+  // TODO: 実際のテスト処理を実装
+  return c.json([
+    { message: "正解", status: "Passed", test_case_id: 1 },
+    { message: "正解", status: "Passed", test_case_id: 2 },
+  ] as const)
 })
 
 app.openapi(getSubmissionsByProblemIdRoute, (c) => {
