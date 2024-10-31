@@ -5,6 +5,8 @@ import { run } from "./run"
 
 type Language = z.infer<typeof schemas.Language>
 
+type TestResult = Omit<z.infer<typeof schemas.TestResult>, "test_case_id">
+
 export const test = async ({
   code,
   input,
@@ -15,6 +17,10 @@ export const test = async ({
   input: string
   language: Language
   output: string
-}) => {
-  const actualOutput = await run({ code, input, language })
+}): Promise<TestResult> => {
+  const result = await run({ code, input, language })
+  const actualOutput = result.stdout
+  return actualOutput === expectedOutput
+    ? { status: "Passed" }
+    : { status: "Failed" }
 }
