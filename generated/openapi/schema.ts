@@ -188,7 +188,6 @@ export interface components {
     SubmissionCreate: {
       code: string
       language: components["schemas"]["Language"]
-      problem_id: number
     }
   }
   responses: never
@@ -355,6 +354,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Submission"]
         }
+      }
+      /** @description 提出データが不正です */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       /** @description 指定されたIDの問題が見つかりません */
       404: {

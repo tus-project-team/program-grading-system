@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
 import { PrismaClient } from "@prisma/client"
 
+import { test } from "../../services/program"
 import * as schemas from "../components/schemas"
 
 const prisma = new PrismaClient()
@@ -162,6 +163,9 @@ const submitProgramRoute = createRoute({
         },
       },
       description: "提出されたプログラム",
+    },
+    400: {
+      description: "提出データが不正です",
     },
     404: {
       description: "指定されたIDの問題が見つかりません",
@@ -364,19 +368,96 @@ app.openapi(deleteProblemRoute, (c) => {
   return c.body(null, 204)
 })
 
-app.openapi(submitProgramRoute, (c) => {
+app.openapi(submitProgramRoute, async (c) => {
   const { problemId } = c.req.valid("param")
-  // TODO: 実際の提出処理とジャッジ処理を実装
-  const createdSubmission: z.infer<typeof schemas.Submission> = {
-    code: "print('Hello, World!')",
-    id: Date.now(),
-    language: { name: "Python", version: "3.9" },
-    problem_id: problemId,
-    result: { message: "テストケースにパスしました", status: "Accepted" },
-    student_id: 1, // 仮の学生ID
-    submitted_at: new Date().toISOString(),
-    test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
+  const data = c.req.valid("json")
+
+  const problem = await prisma.problem.findUnique({
+    include: {
+      supportedLanguages: {
+        include: { language: true },
+      },
+      testCases: true,
+    },
+    where: { id: problemId },
+  })
+  if (problem == null) {
+    return c.body(null, 404)
   }
+
+  const isSupportedLanguage = problem.supportedLanguages.some(
+    (lang) =>
+      lang.language.name === data.language.name &&
+      lang.language.version === data.language.version,
+  )
+  if (!isSupportedLanguage) {
+    // todo: messageとして提出された言語が対応していない旨を返す
+    return c.body(null, 400)
+  }
+
+  const testResults = await Promise.all(
+    problem.testCases.map(async (testCase) =>
+      test({
+        code: data.code,
+        input: testCase.input,
+        language: data.language,
+        output: testCase.output,
+      }),
+    ),
+  )
+  const submissionResult = (
+    testResults.every((result) => result.status === "Passed")
+      ? { message: "テストケースにパスしました", status: "Accepted" }
+      : { message: "テストケースにパスできませんでした", status: "WrongAnswer" }
+  ) satisfies z.infer<typeof schemas.Submission>["result"]
+
+  const createdSubmission = await prisma.submission.create({
+    data: {
+      code: data.code,
+      language: {
+        connect: {
+          name_version: {
+            name: data.language.name,
+            version: data.language.version,
+          },
+        },
+      },
+      problem: {
+        connect: {
+          id: problemId,
+        },
+      },
+      result: {
+        create: {
+          message: submissionResult.message,
+          status: {
+            connect: {
+              status: submissionResult.status,
+            },
+          },
+        },
+      },
+      student: {
+        connect: {
+          id: 1, // todo: 実際の学生IDを取得し、指定する
+        },
+      },
+      testResults: {
+        createMany: {
+          data: testResults.map((result, i) => ({
+            message: result.message ?? "",
+            statusId: result.status,
+            testCaseId: problem.testCases[i].id,
+          })),
+        },
+      },
+    },
+    include: {
+      language: true,
+      result: true,
+      testResults: true,
+    },
+  })
   return c.json(createdSubmission, 201)
 })
 
