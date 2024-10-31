@@ -29,3 +29,6 @@ lerna-debug.log*
 
 # db
 prisma/dev.db*
+
+# test
+coverage
