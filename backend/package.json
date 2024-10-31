@@ -15,7 +15,8 @@
     "format": "prettier --ignore-path .gitignore --check .",
     "format:write": "prettier --ignore-path .gitignore --write .",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "postinstall": "tsx src/bin/postinstall.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
@@ -23,7 +24,8 @@
     "@prisma/client": "5.21.1",
     "@scalar/hono-api-reference": "^0.5.154",
     "globals": "^15.11.0",
-    "hono": "^4.6.4"
+    "hono": "^4.6.4",
+    "pyodide": "0.26.3"
   },
   "devDependencies": {
     "@types/node": "20.16.13",
