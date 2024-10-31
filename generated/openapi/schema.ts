@@ -58,6 +58,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/problems/{problemId}/test": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 問題に対してプログラムをテストする */
+    post: operations["testProgram"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/problems/{problemId}/submissions": {
     parameters: {
       query?: never
@@ -351,6 +368,30 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  testProgram: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SubmissionCreate"]
+      }
+    }
+    responses: {
+      /** @description 提出されたプログラムのテスト結果 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["TestResult"][]
+        }
       }
     }
   }
