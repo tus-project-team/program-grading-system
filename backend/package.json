@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
-    "type-check": "tsc --noEmit && tsc --noEmit ../generated/openapi/schema.ts",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p ../generated/openapi/tsconfig.json",
     "generate": "bun run generate:json && bun run generate:typescript",
     "generate:json": "tsx src/bin/genereate.ts",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
