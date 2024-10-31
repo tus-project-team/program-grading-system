@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client"
 
 import { test } from "../../services/program"
 import * as schemas from "../components/schemas"
-import { deflate } from "node:zlib"
 
 const prisma = new PrismaClient()
 const app = new OpenAPIHono()
