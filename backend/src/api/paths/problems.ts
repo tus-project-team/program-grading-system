@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
-import { Prisma, PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
 import { test } from "../../services/program"
 import * as schemas from "../components/schemas"
@@ -368,12 +368,8 @@ app.openapi(submitProgramRoute, async (c) => {
     return c.body(null, 400)
   }
 
-  const testCases = problem.testCases.map((testCase) => ({
-    input: testCase.input,
-    output: testCase.output,
-  }))
   const testResults = await Promise.all(
-    testCases.map(async (testCase) =>
+    problem.testCases.map(async (testCase) =>
       test({
         code: data.code,
         input: testCase.input,
@@ -419,6 +415,20 @@ app.openapi(submitProgramRoute, async (c) => {
           id: 1, // todo: 実際の学生IDを取得し、指定する
         },
       },
+      testResults: {
+        createMany: {
+          data: testResults.map((result, i) => ({
+            message: result.message ?? "",
+            statusId: result.status,
+            testCaseId: problem.testCases[i].id,
+          })),
+        },
+      },
+    },
+    include: {
+      language: true,
+      result: true,
+      testResults: true,
     },
   })
   return c.json(createdSubmission, 201)
