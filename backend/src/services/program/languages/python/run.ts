@@ -43,7 +43,10 @@ type RunResult = {
   stdout: string
 }
 
-export const runPythonCode = async (code: string, input: string): RunResult => {
+export const runPythonCode = async (
+  code: string,
+  input: string,
+): Promise<RunResult> => {
   const pyodide = await loadPyodide({
     indexURL: path.resolve(
       import.meta.dirname,
