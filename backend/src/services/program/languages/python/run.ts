@@ -1,5 +1,4 @@
 import path from "node:path"
-import { stdin } from "node:process"
 import { loadPyodide } from "pyodide"
 
 /**
