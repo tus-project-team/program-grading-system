@@ -1,3 +1,4 @@
+import { $ } from "bun"
 import fs from "node:fs/promises"
 import path from "node:path"
 
@@ -30,5 +31,10 @@ const copyPyodideArtifacts = async () => {
   await fs.symlink(srcDir, targetDir, "dir")
 }
 
+const generatePrismaClient = async () => {
+  await $`bun run prisma generate`
+}
+
 await ensureBackendNodeModulesDir()
 await copyPyodideArtifacts()
+await generatePrismaClient()

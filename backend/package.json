@@ -16,7 +16,7 @@
     "format:write": "prettier --ignore-path .gitignore --write .",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "postinstall": "tsx src/bin/postinstall.ts"
+    "postinstall": "bun run src/bin/postinstall.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
@@ -28,6 +28,7 @@
     "pyodide": "0.26.3"
   },
   "devDependencies": {
+    "@types/bun": "1.1.12",
     "@types/node": "20.16.13",
     "@vitest/coverage-v8": "2.1.4",
     "eslint": "9.13.0",
