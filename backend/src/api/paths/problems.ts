@@ -348,7 +348,6 @@ app.openapi(getProblemRoute, async (c) => {
 app.openapi(updateProblemRoute, async (c) => {
   const { problemId } = c.req.valid("param")
   const data = c.req.valid("json")
-  // TODO: 実際のデータベース更新処理を実装
   const updatedProblem = await prisma.problem.update({
     data: {
       body: data.body,
