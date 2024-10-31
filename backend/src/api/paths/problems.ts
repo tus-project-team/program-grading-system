@@ -381,7 +381,11 @@ app.openapi(submitProgramRoute, (c) => {
 })
 
 app.openapi(testProgramRoute, (c) => {
-  const { problemId } = c.req.valid("json")
+  // TODO: 実際のテスト処理を実装
+  return c.json([
+    { message: "正解", status: "Passed", test_case_id: 1 },
+    { message: "正解", status: "Passed", test_case_id: 2 },
+  ] as const)
 })
 
 app.openapi(getSubmissionsByProblemIdRoute, (c) => {
