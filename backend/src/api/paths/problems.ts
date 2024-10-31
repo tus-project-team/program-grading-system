@@ -402,9 +402,66 @@ app.openapi(updateProblemRoute, async (c) => {
   } satisfies z.infer<typeof schemas.Problem>)
 })
 
-app.openapi(deleteProblemRoute, (c) => {
-  // TODO: 実際のデータベース削除処理を実装
-  return c.body(null, 204)
+app.openapi(deleteProblemRoute, async (c) => {
+  const { problemId } = c.req.valid("param")
+
+  try {
+    const problem = await prisma.problem.findUnique({
+      where: { id: problemId },
+    })
+
+    if (!problem) {
+      return c.body(null, 404)
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.testResult.deleteMany({
+        where: {
+          submission: {
+            problemId,
+          },
+        },
+      })
+
+      await tx.submissionResult.deleteMany({
+        where: {
+          submission: {
+            problemId,
+          },
+        },
+      })
+
+      await tx.submission.deleteMany({
+        where: { problemId },
+      })
+
+      await tx.testCase.deleteMany({
+        where: { problemId },
+      })
+
+      await tx.language.deleteMany({
+        where: { problemId },
+      })
+
+      await tx.problem.update({
+        data: {
+          teachers: {
+            set: [],
+          },
+        },
+        where: { id: problemId },
+      })
+
+      await tx.problem.delete({
+        where: { id: problemId },
+      })
+    })
+
+    return c.body(null, 204)
+  } catch (error) {
+    console.error("Problem deletion failed:", error)
+    return c.body(null, 500)
+  }
 })
 
 app.openapi(submitProgramRoute, async (c) => {
