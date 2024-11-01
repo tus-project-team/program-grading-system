@@ -135,7 +135,7 @@ app.openapi(getSubmissionsRoute, async (c) => {
       student_id: submission.studentId,
       submitted_at: submission.createdAt.toISOString(),
       test_results: formattedTestResults,
-    } as z.infer<typeof Submission>
+    } satisfies z.infer<typeof Submission>
   })
 
   return c.json(formattedSubmissions)
