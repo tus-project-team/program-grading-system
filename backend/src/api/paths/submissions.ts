@@ -117,7 +117,7 @@ app.openapi(getSubmissionsRoute, async (c) => {
         message: result.message,
         status: testStatus,
         test_case_id: result.testCaseId,
-      } as z.infer<typeof TestResult>
+      } satisfies z.infer<typeof TestResult>
     })
 
     return {
