@@ -23,6 +23,7 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
     },
   },
+  // @ts-expect-error wrong types
   perfectionist.configs["recommended-natural"],
   unicorn.configs["flat/recommended"],
   {

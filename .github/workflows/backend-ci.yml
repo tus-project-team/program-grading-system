@@ -92,8 +92,6 @@ jobs:
         uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Prisma generate
-        run: bun run prisma generate
       - name: Check test
         run: bun run test
 
@@ -111,8 +109,6 @@ jobs:
         uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Prisma generate
-        run: bun run prisma generate
       - name: Check type
         run: bun run type-check
 
@@ -130,8 +126,6 @@ jobs:
         uses: jdx/mise-action@f8dfbcc150159126838e44b882bf34bd98fd90f3 # v2.1.0
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Prisma generate
-        run: bun run prisma generate
       - name: Generate OpenAPI Schema
         run: bun run generate
       - name: Vertify the generated OpenAPI Schema is up-to-date

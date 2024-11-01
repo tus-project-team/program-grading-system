@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
-    "type-check": "tsc --noEmit && tsc --noEmit ../generated/openapi/schema.ts",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p ../generated/openapi/tsconfig.json",
     "generate": "bun run generate:json && bun run generate:typescript",
     "generate:json": "tsx src/bin/genereate.ts",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
@@ -16,7 +16,7 @@
     "format:write": "prettier --ignore-path .gitignore --write .",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "postinstall": "tsx src/bin/postinstall.ts"
+    "postinstall": "bun run src/bin/postinstall.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
@@ -28,6 +28,7 @@
     "pyodide": "0.26.3"
   },
   "devDependencies": {
+    "@types/bun": "1.1.12",
     "@types/node": "20.16.13",
     "@vitest/coverage-v8": "2.1.4",
     "eslint": "9.13.0",
@@ -44,5 +45,10 @@
     "typescript-eslint": "8.9.0",
     "vitest": "2.1.4"
   },
+  "trustedDependencies": [
+    "@prisma/engines",
+    "@prisma/client",
+    "prisma"
+  ],
   "type": "module"
 }

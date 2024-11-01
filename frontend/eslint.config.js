@@ -8,7 +8,9 @@ import prettier from "eslint-config-prettier"
 import jsxA11y from "eslint-plugin-jsx-a11y"
 import perfectionist from "eslint-plugin-perfectionist"
 import react from "eslint-plugin-react"
+// @ts-expect-error missing types
 import reactHooks from "eslint-plugin-react-hooks"
+// @ts-expect-error missing types
 import reactRefresh from "eslint-plugin-react-refresh"
 import unicorn from "eslint-plugin-unicorn"
 import globals from "globals"
@@ -24,6 +26,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
+  // @ts-expect-error wrong types
   perfectionist.configs["recommended-natural"],
   {
     files: ["src/routes/**/*.tsx"],
@@ -59,7 +62,6 @@ export default tseslint.config(
   ...query.configs["flat/recommended"],
   ...router.configs["flat/recommended"],
   jsxA11y.flatConfigs.recommended,
-  // @ts-expect-error eslint-plugin-react types are incorrect
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
   {
