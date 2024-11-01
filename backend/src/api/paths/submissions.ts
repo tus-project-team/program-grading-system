@@ -12,9 +12,14 @@ type TestStatusType = "Failed" | "Passed"
 const isValidSubmissionStatus = (
   status: string,
 ): status is SubmissionStatusType => {
-  return ["Accepted", "CompileError", "RuntimeError", "WrongAnswer"].includes(
-    status as SubmissionStatusType,
-  )
+  return (
+    [
+      "Accepted",
+      "CompileError",
+      "RuntimeError",
+      "WrongAnswer",
+    ] satisfies SubmissionStatusType[]
+  ).includes(status as SubmissionStatusType)
 }
 
 const isValidTestStatus = (status: string): status is TestStatusType => {
