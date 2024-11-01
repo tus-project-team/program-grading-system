@@ -26,7 +26,6 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
-  // @ts-expect-error wrong types
   perfectionist.configs["recommended-natural"],
   {
     files: ["src/routes/**/*.tsx"],
@@ -62,7 +61,9 @@ export default tseslint.config(
   ...query.configs["flat/recommended"],
   ...router.configs["flat/recommended"],
   jsxA11y.flatConfigs.recommended,
+  // @ts-expect-error types are broken
   react.configs.flat.recommended,
+  // @ts-expect-error types are broken
   react.configs.flat["jsx-runtime"],
   {
     settings: {
