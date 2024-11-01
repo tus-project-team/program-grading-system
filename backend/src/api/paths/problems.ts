@@ -565,22 +565,61 @@ app.openapi(testProgramRoute, (c) => {
   ] as const)
 })
 
-app.openapi(getSubmissionsByProblemIdRoute, (c) => {
+app.openapi(getSubmissionsByProblemIdRoute, async (c) => {
   const { problemId } = c.req.valid("param")
-  // TODO: 実際のデータベースクエリを実装
-  const submissions: z.infer<typeof schemas.Submission>[] = [
-    {
-      code: "print('Hello, World!')",
-      id: 1,
-      language: { name: "Python", version: "3.9" },
-      problem_id: problemId,
-      result: { message: "テストケースにパスしました", status: "Accepted" },
-      student_id: 1,
-      submitted_at: new Date().toISOString(),
-      test_results: [{ message: "正解", status: "Passed", test_case_id: 1 }],
+  const problem = await prisma.problem.findUnique({
+    where: { id: problemId },
+  })
+
+  if (!problem) {
+    return c.body(null, 404)
+  }
+
+  const submissions = await prisma.submission.findMany({
+    include: {
+      language: true,
+      result: {
+        include: {
+          status: true,
+        },
+      },
+      testResults: {
+        include: {
+          status: true,
+          testCase: true,
+        },
+      },
     },
-  ]
-  return c.json(submissions)
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      problemId,
+    },
+  })
+
+  const formattedSubmissions = submissions.map((submission) => ({
+    code: submission.code,
+    id: submission.id,
+    language: {
+      name: submission.languageName,
+      version: submission.languageVersion,
+    },
+    problem_id: submission.problemId,
+    result: {
+      message: submission.result.message,
+      status: submission.result.status.status,
+    },
+    student_id: submission.studentId,
+    submitted_at: submission.createdAt.toISOString(),
+    test_results: submission.testResults.map((result) => ({
+      message: result.message,
+      status: result.status.status,
+      test_case_id: result.testCaseId,
+    })),
+  }))
+
+  return c.json(formattedSubmissions, 200)
 })
 
 export default app
