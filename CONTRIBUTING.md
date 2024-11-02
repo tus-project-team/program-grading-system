@@ -85,8 +85,7 @@ Dev Container を使用しない場合は、以下の手順に従って開発環
 
    コミットメッセージは、[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) の仕様に従うことを推奨します。
 
-   > [!tip]
-   > コミットはなるべく小さく、単一の変更に対して行うようにすると、後で変更を追跡しやすくなります。つまり、何か変更をしたらこまめにコミットすると良いです。
+   TIP: コミットはなるべく小さく、単一の変更に対して行うようにすると、後で変更を追跡しやすくなります。つまり、何か変更をしたらこまめにコミットすると良いです。
 
 5. **リモートリポジトリに変更をプッシュする**
 
@@ -94,9 +93,51 @@ Dev Container を使用しない場合は、以下の手順に従って開発環
    git push -u origin HEAD
    ```
 
-6. **Pull Request を作成する**
+6. **[Pull Request の作成](#pull-request-の作成) を参考に、Pull Request を作成する**
 
 ### 開発の進め方
+
+#### フロントエンド
+
+1. **依存関係のインストール**
+
+   ```sh
+   bun install --frozen-lockfile
+   ```
+
+2. **開発サーバーの起動**
+
+   ```sh
+   bun run --cwd frontend dev
+   ```
+
+その他のコマンドは、[frontend/README.md](./frontend/README.md#commands) を参照してください。
+
+#### バックエンド
+
+1. **環境変数などの設定**
+
+   [backend/README.md](./backend/README.md#setup) を参照して、環境変数などを設定してください。
+
+2. **依存関係のインストール**
+
+   ```sh
+   bun install --frozen-lockfile
+   ```
+
+3. **DBのマイグレーションと初期データの投入**
+
+   ```sh
+   bun run --cwd backend prisma migrate dev && bun run --cwd backend prisma db seed
+   ```
+
+4. **開発サーバーの起動**
+
+   ```sh
+   bun run --cwd backend dev
+   ```
+
+その他のコマンドは、[backend/README.md](./backend/README.md#commands) を参照してください。
 
 ## Pull Request の作成
 
@@ -130,7 +171,7 @@ Dev Container を使用しない場合は、以下の手順に従って開発環
 
     説明の例：
 
-    ```txt
+    ```md
     close #123
 
     ## 確認事項
