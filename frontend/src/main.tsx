@@ -6,7 +6,7 @@ import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 
 // Import the generated route tree
-import { routeTree } from "./routeTree.gen"
+import { routeTree } from "./route-tree.gen"
 
 // Create a new router instance
 const router = createRouter({ routeTree })
@@ -38,17 +38,17 @@ const queryClient = new QueryClient()
 
 // Render the app
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- rootElement is always present
-const rootElement = document.getElementById("root")!
+const rootElement = document.querySelector("#root")!
 if (!rootElement.innerHTML) {
-  enableMocking().then(() => {
-    const root = ReactDOM.createRoot(rootElement)
-    root.render(
-      <StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <ReactQueryDevtools buttonPosition="bottom-right" />
-        </QueryClientProvider>
-      </StrictMode>,
-    )
-  })
+  await enableMocking()
+
+  const root = ReactDOM.createRoot(rootElement)
+  root.render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <ReactQueryDevtools buttonPosition="bottom-right" />
+      </QueryClientProvider>
+    </StrictMode>,
+  )
 }

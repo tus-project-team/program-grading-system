@@ -23,7 +23,6 @@ export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
       body: {
         code,
         language,
-        problem_id: problem.id,
       },
       params: {
         path: { problemId: problem.id },

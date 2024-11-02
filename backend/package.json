@@ -1,36 +1,54 @@
 {
   "name": "backend",
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsx build ./build.ts",
-    "type-check": "tsc --noEmit && tsc --noEmit ../generated/openapi/schema.ts",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p ../generated/openapi/tsconfig.json",
     "generate": "bun run generate:json && bun run generate:typescript",
     "generate:json": "tsx src/bin/genereate.ts",
     "generate:typescript": "openapi-typescript ../generated/openapi/schema.json -o ../generated/openapi/schema.ts && prettier --write --semi=false ../generated/openapi/schema.ts",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
     "format": "prettier --ignore-path .gitignore --check .",
-    "format:write": "prettier --ignore-path .gitignore --write ."
+    "format:write": "prettier --ignore-path .gitignore --write .",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "postinstall": "bun run src/bin/postinstall.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.2",
+    "@hono/node-server": "^1.13.4",
     "@hono/zod-openapi": "^0.16.4",
-    "@scalar/hono-api-reference": "^0.5.154",
+    "@prisma/client": "5.21.1",
+    "@scalar/hono-api-reference": "^0.5.158",
     "globals": "^15.11.0",
-    "hono": "^4.6.4"
+    "hono": "^4.6.8",
+    "pyodide": "0.26.3"
   },
   "devDependencies": {
-    "@types/node": "20.16.13",
-    "eslint": "9.13.0",
+    "@types/bun": "1.1.12",
+    "@types/node": "22.8.6",
+    "@vitest/coverage-v8": "2.1.4",
+    "eslint": "9.14.0",
     "eslint-config-flat-gitignore": "0.3.0",
     "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-jsx-a11y": "6.10.0",
-    "eslint-plugin-perfectionist": "3.9.0",
-    "openapi-typescript": "7.4.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-perfectionist": "3.9.1",
+    "eslint-plugin-unicorn": "56.0.0",
+    "openapi-typescript": "7.4.2",
     "prettier": "3.3.3",
-    "tsx": "4.19.1",
+    "prisma": "5.21.1",
+    "tsx": "4.19.2",
     "typescript": "5.6.3",
-    "typescript-eslint": "8.9.0"
+    "typescript-eslint": "8.12.2",
+    "vitest": "2.1.4"
   },
+  "trustedDependencies": [
+    "@prisma/engines",
+    "@prisma/client",
+    "prisma"
+  ],
   "type": "module"
 }

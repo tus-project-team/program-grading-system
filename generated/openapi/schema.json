@@ -228,16 +228,11 @@
           },
           "language": {
             "$ref": "#/components/schemas/Language"
-          },
-          "problem_id": {
-            "type": "integer",
-            "minimum": 0
           }
         },
         "required": [
           "code",
-          "language",
-          "problem_id"
+          "language"
         ]
       }
     },
@@ -307,8 +302,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -341,8 +335,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -384,8 +377,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -413,8 +405,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",
@@ -441,8 +432,44 @@
               }
             }
           },
+          "400": {
+            "description": "提出データが不正です"
+          },
           "404": {
             "description": "指定されたIDの問題が見つかりません"
+          }
+        }
+      }
+    },
+    "/api/problems/{problemId}/test": {
+      "post": {
+        "operationId": "testProgram",
+        "summary": "問題に対してプログラムをテストする",
+        "tags": [
+          "problems"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "提出されたプログラムのテスト結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TestResult"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -458,8 +485,7 @@
           {
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "example": 1
+              "example": "1"
             },
             "required": true,
             "in": "path",

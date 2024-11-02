@@ -1,5 +1,6 @@
+/* eslint-disable unicorn/filename-case */
+/* eslint-disable unicorn/no-abusive-eslint-disable */
 /* eslint-disable */
-/* tslint:disable */
 
 /**
  * Mock Service Worker.

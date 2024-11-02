@@ -66,6 +66,7 @@ export const Submission = z
 
 export const SubmissionCreate = Submission.omit({
   id: true,
+  problem_id: true,
   result: true,
   student_id: true,
   submitted_at: true,

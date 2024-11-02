@@ -1,4 +1,4 @@
-# Program Grading System Backend
+# Shuiro Backend
 
 プログラム採点システムのAPIサーバーです。
 
@@ -30,6 +30,20 @@
 
 それぞれ必要なバージョンは[`.tool-versions`](../.tool-versions)を参照してください。
 
+<!-- prettier-ignore -->
+> [!tip]
+> [mise](https://mise.jdx.dev/) 等を利用している場合は、`mise install` によって上記のツールをインストールできます。
+
+### Setup
+
+#### 環境変数の設定
+
+`.env.example` をコピーして `.env` ファイルを作成してください。
+
+設定する環境変数は次の通りです。
+
+- `DATABASE_URL`: データベースのURL。SQLite の DB ファイルのパスを指定してください（例：`file:./dev.db`）。詳しくは [Prismaのドキュメント](https://www.prisma.io/docs/concepts/database-connectors/sqlite) を参照してください。
+
 ### Commands
 
 #### 依存関係のインストール
@@ -38,6 +52,14 @@
 
 ```sh
 bun install
+```
+
+#### DBのマイグレーションと初期データの投入
+
+次のコマンドでDBのマイグレーションと初期データの投入を行います。
+
+```sh
+bun run prisma migrate dev && bun run prisma db seed
 ```
 
 #### 開発サーバーの起動
