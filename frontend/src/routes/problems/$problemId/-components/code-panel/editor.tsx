@@ -3,17 +3,23 @@ import type { FC } from "react"
 import { cn } from "@/lib/utils"
 import MonacoEditor from "@monaco-editor/react"
 
-import type { Language } from "../../-contexts/problem-context"
+import { useProblem } from "../../-hooks/use-problem"
 
 export type EditorProps = {
   className?: string
-  language: Language
 }
 
-export const Editor: FC<EditorProps> = ({ className, language }) => {
+export const Editor: FC<EditorProps> = ({ className }) => {
+  const { code, language, setCode } = useProblem()
+
   return (
     <div className={cn("h-full", className)}>
-      <MonacoEditor height="100%" language={language.name} />
+      <MonacoEditor
+        height="100%"
+        language={language.name.toLowerCase()}
+        onChange={(value) => value && setCode(value)}
+        value={code}
+      />
     </div>
   )
 }
