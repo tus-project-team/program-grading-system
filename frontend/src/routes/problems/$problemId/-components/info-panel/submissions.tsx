@@ -19,7 +19,7 @@ export const Submissions: FC<SubmissionsProps> = ({ className, ...props }) => {
     <div className={cn("grid grid-cols-[auto_1fr_auto]", className)} {...props}>
       {submissions.data?.map((submission) => (
         <Button
-          className="col-span-3 grid grid-cols-subgrid"
+          className="col-span-3 grid grid-cols-subgrid gap-4"
           key={submission.id}
           onClick={() => {
             // todo: Display submission details
@@ -32,7 +32,7 @@ export const Submissions: FC<SubmissionsProps> = ({ className, ...props }) => {
             <StatusIcon status={submission.result.status} />
             <span className="font-semibold">{submission.result.status}</span>
           </div>
-          <div>{submission.result.message}</div>
+          <div className="text-left">{submission.result.message}</div>
           <div className="text-right text-muted-foreground">
             {intlFormatDistance(new Date(submission.submitted_at), new Date())}
           </div>
