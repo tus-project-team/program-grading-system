@@ -28,7 +28,7 @@ export const LanguageSelector: FC<LanguageSelectorProps> = ({
           <SelectValue placeholder="Select programming language" />
         </SelectTrigger>
         <SelectContent>
-          {problem.supported_languages.map((language) => (
+          {problem.data.supported_languages.map((language) => (
             <SelectItem
               key={`${language.name}-${language.version}`}
               value={JSON.stringify(language)}

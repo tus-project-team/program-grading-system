@@ -8,8 +8,17 @@ import ReactDOM from "react-dom/client"
 // Import the generated route tree
 import { routeTree } from "./route-tree.gen"
 
+const queryClient = new QueryClient()
+
 // Create a new router instance
-const router = createRouter({ routeTree })
+const router = createRouter({
+  context: { queryClient },
+  defaultPreload: "intent",
+  // Since we're using React Query, we don't want loader calls to ever be stale
+  // This will ensure that the loader is always called when the route is preloaded or visited
+  defaultPreloadStaleTime: 0,
+  routeTree,
+})
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -33,8 +42,6 @@ const enableMocking = async () => {
   // once the Service Worker is up and ready to intercept requests.
   return worker.start()
 }
-
-const queryClient = new QueryClient()
 
 // Render the app
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- rootElement is always present
