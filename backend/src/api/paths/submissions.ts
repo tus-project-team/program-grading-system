@@ -143,7 +143,7 @@ app.openapi(getSubmissionsRoute, async (c) => {
     } satisfies z.infer<typeof Submission>
   })
 
-  return c.json(formattedSubmissions)
+  return c.json(formattedSubmissions, 200)
 })
 
 app.openapi(getSubmissionByIdRoute, async (c) => {
