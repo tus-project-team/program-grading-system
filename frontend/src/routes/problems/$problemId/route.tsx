@@ -1,11 +1,8 @@
 import { $api } from "@/lib/api"
-import { QueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
-const queryClient = new QueryClient()
-
 export const Route = createFileRoute("/problems/$problemId")({
-  loader: ({ params }) => {
+  loader: ({ context: { queryClient }, params }) => {
     queryClient.ensureQueryData(
       $api.queryOptions("get", "/api/problems/{problemId}", {
         params: {
