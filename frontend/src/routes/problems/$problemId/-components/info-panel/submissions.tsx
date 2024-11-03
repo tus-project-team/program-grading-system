@@ -1,7 +1,6 @@
 import type { ComponentPropsWithoutRef, FC } from "react"
 
 import { Button } from "@/components/ui/button"
-import { $api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { intlFormatDistance } from "date-fns"
 import { CheckIcon, XIcon } from "lucide-react"
@@ -14,20 +13,11 @@ type Submission = components["schemas"]["Submission"]
 export type SubmissionsProps = ComponentPropsWithoutRef<"div">
 
 export const Submissions: FC<SubmissionsProps> = ({ className, ...props }) => {
-  const { problem } = useProblem()
-  const { data: submissions } = $api.useSuspenseQuery(
-    "get",
-    "/api/problems/{problemId}/submissions",
-    {
-      params: {
-        path: { problemId: problem.id },
-      },
-    },
-  )
+  const { submissions } = useProblem()
 
   return (
     <div className={cn("grid grid-cols-[auto_1fr_auto]", className)} {...props}>
-      {submissions?.map((submission) => (
+      {submissions.data?.map((submission) => (
         <Button
           className="col-span-3 grid grid-cols-subgrid"
           key={submission.id}

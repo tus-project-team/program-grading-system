@@ -15,10 +15,10 @@ export const ProblemPanel: FC<ProblemPanelProps> = ({
 
   return (
     <div className={cn("space-y-4 p-4", className)} {...props}>
-      <h1 className="text-2xl font-bold">{problem.title}</h1>
+      <h1 className="text-2xl font-bold">{problem.data.title}</h1>
       <div>
         <h2 className="mb-2 text-lg font-semibold">問題文</h2>
-        <Markdown>{problem.body}</Markdown>
+        <Markdown>{problem.data.body}</Markdown>
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { $api } from "@/lib/api"
+import { UseSuspenseQueryResult } from "@tanstack/react-query"
 import { components } from "openapi/schema"
 import {
   createContext,
@@ -11,18 +12,16 @@ import {
 
 export type Problem = components["schemas"]["Problem"]
 export type Language = components["schemas"]["Language"]
+export type Submission = components["schemas"]["Submission"]
 
 export type ProblemContext = {
   code: string
   language: Language
-  problem: components["schemas"]["Problem"]
+  problem: UseSuspenseQueryResult<Problem, undefined>
   setCode: Dispatch<SetStateAction<string>>
   setLanguage: Dispatch<SetStateAction<Language>>
+  submissions: UseSuspenseQueryResult<Submission[], undefined>
 }
-
-export const ProblemContext = createContext<ProblemContext | undefined>(
-  undefined,
-)
 
 export type ProblemProviderProps = {
   children?: ReactNode
@@ -33,26 +32,35 @@ export const ProblemProvider: FC<ProblemProviderProps> = ({
   children,
   problemId,
 }) => {
-  const { data: problem } = $api.useSuspenseQuery(
+  const problem = $api.useSuspenseQuery("get", "/api/problems/{problemId}", {
+    params: {
+      path: { problemId },
+    },
+  })
+  const submissions = $api.useSuspenseQuery(
     "get",
-    "/api/problems/{problemId}",
+    "/api/problems/{problemId}/submissions",
     {
       params: {
-        path: { problemId },
+        path: { problemId: problem.data.id },
       },
     },
   )
 
   const [language, setLanguage] = useState<Language>(
-    problem.supported_languages[0],
+    problem.data.supported_languages[0],
   )
   const [code, setCode] = useState("")
 
   return (
     <ProblemContext.Provider
-      value={{ code, language, problem, setCode, setLanguage }}
+      value={{ code, language, problem, setCode, setLanguage, submissions }}
     >
       {children}
     </ProblemContext.Provider>
   )
 }
+
+export const ProblemContext = createContext<ProblemContext | undefined>(
+  undefined,
+)

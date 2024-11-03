@@ -11,11 +11,14 @@ export type SubmitButtonProps = {
 }
 
 export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
-  const { code, language, problem } = useProblem()
+  const { code, language, problem, submissions } = useProblem()
 
-  const { isIdle, mutate } = $api.useMutation(
+  const { isPending, mutate } = $api.useMutation(
     "post",
     "/api/problems/{problemId}/submit",
+    {
+      onSettled: () => submissions.refetch(),
+    },
   )
 
   const submit = () => {
@@ -25,7 +28,7 @@ export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
         language,
       },
       params: {
-        path: { problemId: problem.id },
+        path: { problemId: problem.data.id },
       },
     })
   }
@@ -33,17 +36,17 @@ export const SubmitButton: FC<SubmitButtonProps> = ({ className }) => {
   return (
     <Button
       className={className}
-      disabled={!isIdle}
+      disabled={isPending}
       onClick={submit}
       type="button"
     >
-      {isIdle ? (
-        "提出"
-      ) : (
+      {isPending ? (
         <>
           <LoaderCircleIcon className="animate-spin" />
           <span className="ml-2">提出中...</span>
         </>
+      ) : (
+        "提出"
       )}
     </Button>
   )
