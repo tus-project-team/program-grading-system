@@ -1,18 +1,42 @@
 import { z } from "@hono/zod-openapi"
 
+export const SupportedLanguage = z
+  .object({
+    name: z.string(),
+    version: z.string(),
+  })
+  .openapi("SupportedLanguage")
+
 export const Language = z
   .object({
+    id: z.number().int().nonnegative(),
     name: z.string(),
     version: z.string(),
   })
   .openapi("Language")
 
+export const LanguageCreate = Language.omit({ id: true }).openapi(
+  "LanguageCreate",
+)
+
+export const LanguageUpdate = Language.openapi("LanguageUpdate")
+
 export const TestCase = z
   .object({
+    id: z.number().int().nonnegative(),
     input: z.string(),
     output: z.string(),
   })
   .openapi("TestCase")
+
+export const TestCaseCreate = TestCase.omit({ id: true }).openapi(
+  "TestCaseCreate",
+)
+
+export const TestCaseUpdate = TestCase.partial({
+  input: true,
+  output: true,
+}).openapi("TestCaseUpdate")
 
 export const Problem = z
   .object({
@@ -24,10 +48,23 @@ export const Problem = z
   })
   .openapi("Problem")
 
-export const ProblemCreate = Problem.omit({ id: true }).openapi("ProblemCreate")
+export const ProblemCreate = Problem.omit({ id: true })
+  .merge(
+    z.object({
+      supported_languages: z.array(LanguageCreate),
+      test_cases: z.array(TestCaseCreate),
+    } satisfies Partial<Record<keyof z.infer<typeof Problem>, unknown>>),
+  )
+  .openapi("ProblemCreate")
 
-export const ProblemUpdate = Problem.partial()
-  .omit({ id: true })
+export const ProblemUpdate = Problem.omit({ id: true })
+  .merge(
+    z.object({
+      supported_languages: z.array(LanguageUpdate),
+      test_cases: z.array(TestCaseUpdate),
+    } satisfies Partial<Record<keyof z.infer<typeof Problem>, unknown>>),
+  )
+  .partial()
   .openapi("ProblemUpdate")
 
 export const SubmissionStatus = z
@@ -55,7 +92,7 @@ export const Submission = z
   .object({
     code: z.string(),
     id: z.number().int().nonnegative(),
-    language: Language,
+    language: SupportedLanguage,
     problem_id: z.number().int().nonnegative(),
     result: SubmissionResult,
     student_id: z.number().int().nonnegative(),

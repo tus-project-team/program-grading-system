@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi"
 import * as schemas from "../../api/components/schemas"
 import { runPythonCode } from "./languages"
 
-type Language = z.infer<typeof schemas.Language>
+type SupportedLanguage = z.infer<typeof schemas.SupportedLanguage>
 
 export const run = ({
   code,
@@ -12,7 +12,7 @@ export const run = ({
 }: {
   code: string
   input: string
-  language: Language
+  language: SupportedLanguage
 }) => {
   switch (language.name) {
     case "Python": {

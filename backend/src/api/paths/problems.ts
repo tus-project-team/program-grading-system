@@ -239,19 +239,26 @@ app.openapi(getProblemsRoute, async (c) => {
     },
   })
 
-  const formattedProblems = problems.map((problem) => ({
-    body: problem.body,
-    id: problem.id,
-    supported_languages: problem.supportedLanguages.map((supportedLang) => ({
-      name: supportedLang.language.name,
-      version: supportedLang.language.version,
-    })),
-    test_cases: problem.testCases.map((testCase) => ({
-      input: testCase.input,
-      output: testCase.output,
-    })),
-    title: problem.title,
-  }))
+  const formattedProblems = problems.map(
+    (problem) =>
+      ({
+        body: problem.body,
+        id: problem.id,
+        supported_languages: problem.supportedLanguages.map(
+          ({ id, language }) => ({
+            id: id,
+            name: language.name,
+            version: language.version,
+          }),
+        ),
+        test_cases: problem.testCases.map(({ id, input, output }) => ({
+          id,
+          input,
+          output,
+        })),
+        title: problem.title,
+      }) satisfies z.infer<typeof schemas.Problem>,
+  )
 
   return c.json(formattedProblems, 200)
 })
@@ -265,11 +272,8 @@ app.openapi(createProblemRoute, async (c) => {
         create: data.supported_languages.map(
           (lang: { name: string; version: string }) => ({
             language: {
-              connectOrCreate: {
-                create: { name: lang.name, version: lang.version },
-                where: {
-                  name_version: { name: lang.name, version: lang.version },
-                },
+              connect: {
+                name_version: { name: lang.name, version: lang.version },
               },
             },
           }),
@@ -299,15 +303,17 @@ app.openapi(createProblemRoute, async (c) => {
     body: createdProblem.body,
     id: createdProblem.id,
     supported_languages: createdProblem.supportedLanguages.map((lang) => ({
+      id: lang.id,
       name: lang.language.name,
       version: lang.language.version,
     })),
     test_cases: createdProblem.testCases.map((testCase) => ({
+      id: testCase.id,
       input: testCase.input,
       output: testCase.output,
     })),
     title: createdProblem.title,
-  }
+  } satisfies z.infer<typeof schemas.Problem>
   return c.json(formattedProblem, 201)
 })
 
@@ -330,17 +336,19 @@ app.openapi(getProblemRoute, async (c) => {
       body: problem.body,
       id: problem.id,
       supported_languages: problem.supportedLanguages.map(
-        ({ languageName, languageVersion }) => ({
-          name: languageName,
-          version: languageVersion,
+        ({ id, language }) => ({
+          id,
+          name: language.name,
+          version: language.version,
         }),
       ),
-      test_cases: problem.testCases.map(({ input, output }) => ({
+      test_cases: problem.testCases.map(({ id, input, output }) => ({
+        id,
         input,
         output,
       })),
       title: problem.title,
-    },
+    } satisfies z.infer<typeof schemas.Problem>,
     200,
   )
 })
@@ -352,26 +360,44 @@ app.openapi(updateProblemRoute, async (c) => {
     data: {
       body: data.body,
       supportedLanguages: {
-        create: data.supported_languages?.map(
-          (lang: { name: string; version: string }) => ({
+        upsert: data.supported_languages?.map((lang) => ({
+          create: {
             language: {
-              connectOrCreate: {
-                create: { name: lang.name, version: lang.version },
-                where: {
-                  name_version: { name: lang.name, version: lang.version },
+              connect: {
+                name_version: {
+                  name: lang.name,
+                  version: lang.version,
                 },
               },
             },
-          }),
-        ),
+          },
+          update: {
+            language: {
+              connect: {
+                name_version: {
+                  name: lang.name,
+                  version: lang.version,
+                },
+              },
+            },
+          },
+          where: {
+            id: lang.id,
+            problemId,
+          },
+        })),
       },
       testCases: {
-        create: data.test_cases?.map(
-          (testCase: { input: string; output: string }) => ({
+        update: data.test_cases?.map((testCase) => ({
+          data: {
             input: testCase.input,
             output: testCase.output,
-          }),
-        ),
+          },
+          where: {
+            id: testCase.id,
+            problemId,
+          },
+        })),
       },
       title: data.title,
     },
@@ -383,23 +409,28 @@ app.openapi(updateProblemRoute, async (c) => {
       },
       testCases: true,
     },
-    where: {
-      id: problemId,
-    },
+    where: { id: problemId },
   })
-  return c.json({
-    body: updatedProblem.body,
-    id: updatedProblem.id,
-    supported_languages: updatedProblem.supportedLanguages.map((lang) => ({
-      name: lang.language.name,
-      version: lang.language.version,
-    })),
-    test_cases: updatedProblem.testCases.map((testCase) => ({
-      input: testCase.input,
-      output: testCase.output,
-    })),
-    title: updatedProblem.title,
-  } satisfies z.infer<typeof schemas.Problem>)
+  return c.json(
+    {
+      body: updatedProblem.body,
+      id: updatedProblem.id,
+      supported_languages: updatedProblem.supportedLanguages.map(
+        ({ id, language }) => ({
+          id,
+          name: language.name,
+          version: language.version,
+        }),
+      ),
+      test_cases: updatedProblem.testCases.map(({ id, input, output }) => ({
+        id,
+        input,
+        output,
+      })),
+      title: updatedProblem.title,
+    } satisfies z.infer<typeof schemas.Problem>,
+    200,
+  )
 })
 
 app.openapi(deleteProblemRoute, async (c) => {
