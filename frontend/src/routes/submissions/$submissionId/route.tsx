@@ -36,7 +36,7 @@ type TestCase = components["schemas"]["TestCase"]
 
 const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle>基本情報</CardTitle>
       </CardHeader>
