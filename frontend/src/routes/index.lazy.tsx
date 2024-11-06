@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card"
 import { createLazyFileRoute } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 type Problem = {
-  id: string
+  id: number
   memoryLimit: string
   timeLimit: string
   title: string
@@ -13,22 +14,34 @@ type Problem = {
 const fetchProblems = async (): Promise<Problem[]> => {
   return [
     {
-      id: "PracticeA",
+      id: 1,
       memoryLimit: "256 MB",
       timeLimit: "2 sec",
-      title: "Welcome to AtCoder",
+      title: "問題1",
     },
     {
-      id: "ABC086A",
+      id: 2,
       memoryLimit: "256 MB",
       timeLimit: "2 sec",
-      title: "Product",
+      title: "問題2",
     },
     {
-      id: "ABC081A",
+      id: 3,
       memoryLimit: "256 MB",
       timeLimit: "2 sec",
-      title: "Placing Marbles",
+      title: "問題3",
+    },
+    {
+      id: 4,
+      memoryLimit: "256 MB",
+      timeLimit: "2 sec",
+      title: "問題4",
+    },
+    {
+      id: 5,
+      memoryLimit: "256 MB",
+      timeLimit: "2 sec",
+      title: "問題5",
     },
     // 他の問題も追加可能
   ]
@@ -51,18 +64,26 @@ const ProblemList = () => {
       <Card>
         <table className="min-w-full bg-white border-collapse border border-gray-300">
           <thead>
-            <tr>
-              <th className="py-2 px-4 border border-gray-300">問題名</th>
-              <th className="py-2 px-4 border border-gray-300">実行時間制限</th>
-              <th className="py-2 px-4 border border-gray-300">メモリ制限</th>
+            <tr className="bg-gray-100">
+              <th className="py-2 px-4 border border-gray-300 font-semibold">ID</th>
+              <th className="py-2 px-4 border border-gray-300 font-semibold">問題名</th>
+              <th className="py-2 px-4 border border-gray-300 font-semibold text-right">実行時間制限</th>
+              <th className="py-2 px-4 border border-gray-300 font-semibold text-right">メモリ制限</th>
+              <th className="py-2 px-4 border border-gray-300 font-semibold">提出</th>
             </tr>
           </thead>
           <tbody>
             {problems.map((problem) => (
-              <tr key={problem.id}>
-                <td className="py-2 px-4 border border-gray-300">{problem.title}</td>
+              <tr className="hover:bg-gray-100" key={problem.id}>
+                <td className="py-2 px-4 border border-gray-300">{problem.id}</td>
+                <td className="py-2 px-4 border border-gray-300 text-blue-500 underline">
+                  <Link to={`/problems/${problem.id}`}>{problem.title}</Link>
+                </td>
                 <td className="py-2 px-4 border border-gray-300 text-right">{problem.timeLimit}</td>
                 <td className="py-2 px-4 border border-gray-300 text-right">{problem.memoryLimit}</td>
+                <td className="py-2 px-4 border border-gray-300 text-blue-500 underline">
+                  <Link to={`/submit/${problem.id}`}>提出</Link>
+                </td>
               </tr>
             ))}
           </tbody>
