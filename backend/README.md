@@ -18,6 +18,10 @@
   - [**Bun**](https://bun.sh/) - JavaScript all-in-one toolkit (used for package management, task running, and more)
   - [**Node.js**](https://nodejs.org/) - JavaScript runtime (used for running JavaScript code outside of a web browser)
 
+## Directory Structure
+
+ディレクトリ構成などは、[ARCHITECTURE.md](./ARCHITECTURE.md) を参照してください。
+
 ## 🚀 Development
 
 ### Prerequisites
