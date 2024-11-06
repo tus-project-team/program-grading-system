@@ -2,16 +2,10 @@
 
 プログラム採点システム
 
-## 🚀 Development
+## 🏗️ Architecture
 
-### Directory Structure
+ディレクトリ構成などのアーキテクチャについては[ARCHITECTURE.md](./ARCHITECTURE.md)を参照してください。
 
-| Directory                   | Description                                |
-| --------------------------- | ------------------------------------------ |
-| [`frontend`](./frontend/)   | フロントエンド                             |
-| [`backend`](./backend/)     | バックエンド                               |
-| [`runtime`](./runtime/)     | プログラム実行基盤                         |
-| [`generated`](./generated/) | ソースコードから自動生成されたファイルたち |
-| [`cli`](./cli/)             | CLIツール                                  |
+## 🤝 Contributing
 
-コマンド等はそれぞれのディレクトリ内の`README.md`を参照してください。
+貢献方法については、[CONTRIBUTING.md](./CONTRIBUTING.md)を参照してください。開発環境の構築方法やコマンド一覧へのリンク、コーディングガイドラインなどが記載されています。

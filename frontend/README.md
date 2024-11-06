@@ -26,6 +26,10 @@
   - [**date-fns**](https://date-fns.org/) - Date Utility Library
   - [**MSW**](https://mswjs.io/) - Mock Service Worker (used for mocking API requests)
 
+## Directory Structure
+
+ディレクトリ構成などは、[ARCHITECTURE.md](./ARCHITECTURE.md) を参照してください。
+
 ## 🚀 Development
 
 ### Prerequisites
