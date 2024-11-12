@@ -1,60 +1,14 @@
 import { testClient } from "hono/testing"
 import { describe, expect, test } from "vitest"
 
-import { prisma } from "../../db"
 import { createSubmission } from "../../db/test-helpers"
 import app from "./submissions"
 
 describe("getSubmissions", () => {
   test("should return a list of submissions", async () => {
-    const submission = await prisma.submission.create({
-      data: {
-        code: "const x = 42",
-        language: {
-          create: {
-            name: "JavaScript",
-            version: "ES6",
-          },
-        },
-        problem: {
-          create: {
-            body: "Write a program that assigns 42 to x",
-            title: "Assignment",
-          },
-        },
-        result: {
-          create: {
-            message: "Success",
-            status: {
-              connect: {
-                status: "Accepted",
-              },
-            },
-          },
-        },
-        student: {
-          create: {
-            email: "alice@example.com",
-            name: "Alice",
-          },
-        },
-      },
-      include: {
-        language: true,
-        result: {
-          include: {
-            status: true,
-          },
-        },
-        student: true,
-        testResults: {
-          include: {
-            status: true,
-          },
-        },
-      },
-    })
-    const submissions = [submission]
+    const submission1 = await createSubmission()
+    const submission2 = await createSubmission()
+    const submissions = [submission1, submission2]
 
     const response = await testClient(app).submissions.$get()
     expect(response.status).toBe(200)
