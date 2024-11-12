@@ -14,7 +14,7 @@
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
     "format": "prettier --ignore-path .gitignore --check .",
     "format:write": "prettier --ignore-path .gitignore --write .",
-    "test": "vitest",
+    "test": "DATABASE_URL=file:./test.db bun run prisma migrate reset --force && DATABASE_URL=file:./test.db vitest",
     "coverage": "vitest run --coverage",
     "postinstall": "bun run src/bin/postinstall.ts"
   },
@@ -28,6 +28,7 @@
     "pyodide": "0.26.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "9.2.0",
     "@types/bun": "1.1.13",
     "@types/node": "22.9.0",
     "@vitest/coverage-v8": "2.1.4",

@@ -28,7 +28,7 @@ lerna-debug.log*
 .DS_Store
 
 # db
-prisma/dev.db*
+prisma/*.db*
 
 # test
 coverage
