@@ -161,4 +161,22 @@ export const createStudent = (data: Partial<Prisma.StudentCreateInput> = {}) =>
 
 ### Phase 3: テスト後にデータをリセットする
 
-[vitest-environment-vprisma](https://github.com/aiji42/vitest-environment-vprisma) を導入する
+次のような関数を定義し、テスト後に毎回呼び出すようにする。
+
+```ts
+export const resetDb = async () => {
+  await prisma.$transaction([
+    prisma.submission.deleteMany(),
+    prisma.submissionResult.deleteMany(),
+    prisma.testResult.deleteMany(),
+    prisma.testCase.deleteMany(),
+    prisma.problem.deleteMany(),
+    prisma.language.deleteMany(),
+    prisma.supportedLanguage.deleteMany(),
+    prisma.student.deleteMany(),
+    prisma.teacher.deleteMany(),
+  ])
+}
+```
+
+上記の実装では、連番のIDが初期値にリセットされないが、テストを実行するうえで大きな問題にはならないと考えられるため、特に対応はしない。
