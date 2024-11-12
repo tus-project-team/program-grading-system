@@ -5,6 +5,23 @@ import { faker } from "@faker-js/faker"
 import { SubmissionStatus, TestStatus } from "../api/components/schemas"
 import { prisma } from "./prisma"
 
+/**
+ * Reset the database by deleting all tables except for enum tables
+ */
+export const resetDb = async () => {
+  await prisma.$transaction([
+    prisma.submission.deleteMany(),
+    prisma.submissionResult.deleteMany(),
+    prisma.testResult.deleteMany(),
+    prisma.testCase.deleteMany(),
+    prisma.problem.deleteMany(),
+    prisma.language.deleteMany(),
+    prisma.supportedLanguage.deleteMany(),
+    prisma.student.deleteMany(),
+    prisma.teacher.deleteMany(),
+  ])
+}
+
 const kebabCase = (str: string) => str.replaceAll(/\s/g, "-").toLowerCase()
 
 /**
@@ -233,6 +250,9 @@ export const createSubmissionResult = (
 ) =>
   prisma.submissionResult.create({
     data: createSubmissionResultData(data),
+    include: {
+      status: true,
+    },
   })
 
 const createLanguageDataForSubmission =
@@ -304,8 +324,16 @@ export const createSubmission = (
     data: createSubmissionData(data),
     include: {
       language: true,
-      result: true,
+      result: {
+        include: {
+          status: true,
+        },
+      },
       student: true,
-      testResults: true,
+      testResults: {
+        include: {
+          status: true,
+        },
+      },
     },
   })
