@@ -39,11 +39,38 @@ Rai
     - リレーションが複数ある場合、リレーションを考慮したリセットは難しく、元に戻し忘れる可能性がある
 
 - **解決案2**: テスト中のDB操作を一回のトランザクションとして扱い、テスト後にトランザクションをロールバックする
+
   - **Pros**:
     - データを基に戻し忘れる可能性がない
   - **Cons**:
+
     - 自前で実装しない場合、[jest-prisma](https://github.com/Quramy/jest-prisma) や [vitest-environment-vprisma](https://github.com/aiji42/vitest-environment-vprisma) などのライブラリを導入する必要がある
+
+      - [vitest-environment-vprisma](https://github.com/aiji42/vitest-environment-vprisma) を導入しようとしたところ、次のエラーが発生した
+
+        ```plaintext
+        Error: jest-prisma needs "interactiveTransactions" preview feature.
+        ❯ PrismaEnvironmentDelegate.beginTransaction ../node_modules/@quramy/jest-prisma-core/lib/delegate.js:97:23
+        ❯ ../node_modules/vitest-environment-vprisma/dist/setup.mjs:2:3
+              1| global.beforeEach(async () => {
+              2|   await Promise.all([
+              |   ^
+              3|     global.vPrismaDelegate.handleTestEvent({ name: "test_start" }),
+              4|     global.vPrismaDelegate.handleTestEvent({ name: "test_fn_start" })
+        ```
+
+        `@prisma/client` のバージョンは `5.22.0` であり、`"interactiveTransactions"` は有効になっているはずなため、原因が不明であり、解決策が見つからなかった
+
     - 本番環境と異なる挙動をする可能性がある
+
+- **解決案3**: テスト後に、データベース内にある全てのデータを削除する
+
+  - **Pros**:
+    - データを基に戻し忘れる可能性がない
+  - **Cons**:
+    - テスト後にデータベース内の全てのデータを削除するため、テストが遅くなる可能性がある
+  - **参考文献**:
+    - https://www.prisma.io/blog/testing-series-3-aBUyF8nxAn#add-a-vitest-configuration-file-for-integration-tests
 
 #### 課題2: テスト前のデータ投入
 
@@ -83,7 +110,7 @@ Rai
 
 課題1については、リレーションが複数ある場合に手動でリセットするのは困難であるため、解決案2を採用する。
 
-課題2については、テスト毎に prisma の API を直接使用するのは手間がかかるため、解決案2を採用する。
+課題2については、テスト毎に prisma の API を直接使用するのは手間がかかるため、解決案3を採用する。
 
 ## Implementation Timeline
 
