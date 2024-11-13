@@ -458,4 +458,30 @@ mod tokenizer_tests {
             })
         );
     }
+
+    #[test]
+    fn tokenize_identifier_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_identifier(), None);
+    }
+
+    #[test]
+    fn tokenize_identifier_returns_none_for_non_alphabetic() {
+        let mut tokenizer = Tokenizer::new("123".to_string());
+        assert_eq!(tokenizer.tokenize_identifier(), None);
+    }
+
+    #[test]
+    fn tokenize_identifier_returns_identifier() {
+        let mut tokenizer = Tokenizer::new("abc123".to_string());
+        assert_eq!(
+            tokenizer.tokenize_identifier(),
+            Some(Token {
+                kind: TokenKind::Identifier,
+                value: "abc123".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(6, 1, 7),
+            })
+        );
+    }
 }
