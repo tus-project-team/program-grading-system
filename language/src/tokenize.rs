@@ -1,3 +1,4 @@
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TokenKind {
     Integer,
     Identifier,
@@ -7,6 +8,7 @@ pub enum TokenKind {
     Comment,   // Single-line or multi-line comments
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Token {
     /// Kind of the token
     pub kind: TokenKind,
@@ -181,6 +183,8 @@ impl Tokenizer {
             if !c.is_ascii_digit() {
                 return None;
             }
+        } else {
+            return None;
         }
 
         let start_position = self.source.position;
@@ -210,6 +214,8 @@ impl Tokenizer {
             if !(c.is_ascii_alphabetic() || c == &'_') {
                 return None;
             }
+        } else {
+            return None;
         }
 
         let start_position = self.source.position;
@@ -254,6 +260,8 @@ impl Tokenizer {
             if !(c.is_ascii_alphabetic() || c == &'_') {
                 return None;
             }
+        } else {
+            return None;
         }
 
         let start_position = self.source.position;
@@ -418,5 +426,36 @@ mod source_tests {
         assert_eq!(source.position.index, 3);
         assert_eq!(source.position.line, 2);
         assert_eq!(source.position.column, 2);
+    }
+}
+
+#[cfg(test)]
+mod tokenizer_tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_integer_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_integer(), None);
+    }
+
+    #[test]
+    fn tokenize_integer_returns_none_for_non_digit() {
+        let mut tokenizer = Tokenizer::new("abc".to_string());
+        assert_eq!(tokenizer.tokenize_integer(), None);
+    }
+
+    #[test]
+    fn tokenize_integer_returns_integer() {
+        let mut tokenizer = Tokenizer::new("123abc".to_string());
+        assert_eq!(
+            tokenizer.tokenize_integer(),
+            Some(Token {
+                kind: TokenKind::Integer,
+                value: "123".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(3, 1, 4),
+            })
+        );
     }
 }
