@@ -24,7 +24,7 @@
     "date-fns": "4.1.0",
     "lucide-react": "^0.454.0",
     "openapi-fetch": "0.13.0",
-    "openapi-react-query": "0.2.4",
+    "openapi-react-query": "0.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "9.0.1",
