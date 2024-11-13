@@ -242,12 +242,12 @@ impl Tokenizer {
 
     fn tokenize_operator(&mut self) -> Option<Token> {
         match self.source.current_char()? {
-            '=' => match self.source.peek_char(1)? {
-                '=' => Some(self.create_token(TokenKind::Operator, 2)),
+            '=' => match self.source.peek_char(1) {
+                Some('=') => Some(self.create_token(TokenKind::Operator, 2)),
                 _ => Some(self.create_token(TokenKind::Operator, 1)),
             },
-            '!' => match self.source.peek_char(1)? {
-                '=' => Some(self.create_token(TokenKind::Operator, 2)),
+            '!' => match self.source.peek_char(1) {
+                Some('=') => Some(self.create_token(TokenKind::Operator, 2)),
                 _ => Some(self.create_token(TokenKind::Operator, 1)),
             },
             '+' | '-' | '*' | '/' => Some(self.create_token(TokenKind::Operator, 1)),
@@ -308,24 +308,18 @@ impl Tokenizer {
                             break;
                         }
                         length += 1;
-                        self.source.advance();
                     }
                     Some(self.create_token(TokenKind::Comment, length))
                 }
                 '*' => {
-                    self.source.advance();
-                    self.source.advance();
                     let mut length = 2;
                     while let Some(c) = self.source.current_char() {
                         if c == &'*' {
                             if let Some('/') = self.source.peek_char(1) {
-                                self.source.advance();
-                                self.source.advance();
                                 length += 2;
                                 break;
                             }
                         }
-                        self.source.advance();
                         length += 1;
                     }
                     Some(self.create_token(TokenKind::Comment, length))
@@ -483,5 +477,351 @@ mod tokenizer_tests {
                 end_position: Position::new(6, 1, 7),
             })
         );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_operator(), None);
+    }
+
+    #[test]
+    fn tokenize_operator_returns_none_for_non_operator() {
+        {
+            let mut tokenizer = Tokenizer::new("abc".to_string());
+            assert_eq!(tokenizer.tokenize_operator(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("123".to_string());
+            assert_eq!(tokenizer.tokenize_operator(), None);
+        }
+    }
+
+    #[test]
+    fn tokenize_operator_returns_equal_operator() {
+        let mut tokenizer = Tokenizer::new("==".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "==".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_assign_operator() {
+        let mut tokenizer = Tokenizer::new("=".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "=".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_not_equal_operator() {
+        let mut tokenizer = Tokenizer::new("!=".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "!=".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_not_operator() {
+        let mut tokenizer = Tokenizer::new("!".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "!".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_plus_operator() {
+        let mut tokenizer = Tokenizer::new("+".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "+".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_minus_operator() {
+        let mut tokenizer = Tokenizer::new("-".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "-".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_multiply_operator() {
+        let mut tokenizer = Tokenizer::new("*".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "*".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_divide_operator() {
+        let mut tokenizer = Tokenizer::new("/".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "/".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_keyword(), None);
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_none_for_non_keyword() {
+        {
+            let mut tokenizer = Tokenizer::new("abc".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("fuga".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
+        }
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_if_keyword() {
+        let mut tokenizer = Tokenizer::new("if".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "if".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_else_keyword() {
+        let mut tokenizer = Tokenizer::new("else".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "else".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(4, 1, 5),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_while_keyword() {
+        let mut tokenizer = Tokenizer::new("while".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "while".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(5, 1, 6),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_for_keyword() {
+        let mut tokenizer = Tokenizer::new("for".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "for".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(3, 1, 4),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_return_keyword() {
+        let mut tokenizer = Tokenizer::new("return".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "return".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(6, 1, 7),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_delimiter(), None);
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_none_for_non_delimiter() {
+        {
+            let mut tokenizer = Tokenizer::new("123".to_string());
+            assert_eq!(tokenizer.tokenize_delimiter(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("abc".to_string());
+            assert_eq!(tokenizer.tokenize_delimiter(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("=".to_string());
+            assert_eq!(tokenizer.tokenize_delimiter(), None);
+        }
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_open_parentheses() {
+        let mut tokenizer = Tokenizer::new("(".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: "(".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_close_parentheses() {
+        let mut tokenizer = Tokenizer::new(")".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: ")".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_open_braces() {
+        let mut tokenizer = Tokenizer::new("{".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: "{".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_close_braces() {
+        let mut tokenizer = Tokenizer::new("}".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: "}".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_open_brackets() {
+        let mut tokenizer = Tokenizer::new("[".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: "[".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_close_brackets() {
+        let mut tokenizer = Tokenizer::new("]".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: "]".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_comment_returns_none_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize_comment(), None);
+    }
+
+    #[test]
+    fn tokenize_comment_returns_none_for_non_comment() {
+        {
+            let mut tokenizer = Tokenizer::new("abc".to_string());
+            assert_eq!(tokenizer.tokenize_comment(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("123".to_string());
+            assert_eq!(tokenizer.tokenize_comment(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("/".to_string());
+            assert_eq!(tokenizer.tokenize_comment(), None);
+        }
     }
 }
