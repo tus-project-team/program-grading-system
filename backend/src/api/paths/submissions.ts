@@ -1,10 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
-import { PrismaClient } from "@prisma/client"
 
+import { prisma } from "../../db"
 import { Submission, SubmissionStatus, TestResult } from "../components/schemas"
-
-const app = new OpenAPIHono()
-const prisma = new PrismaClient()
 
 type SubmissionStatusType = z.infer<typeof SubmissionStatus>
 type TestStatusType = "Failed" | "Passed"
@@ -84,115 +81,115 @@ const getSubmissionByIdRoute = createRoute({
 })
 
 // ルートの設定
-app.openapi(getSubmissionsRoute, async (c) => {
-  const submissions = await prisma.submission.findMany({
-    include: {
-      language: true,
-      problem: true,
-      result: {
-        include: {
-          status: true,
+const app = new OpenAPIHono()
+  .openapi(getSubmissionsRoute, async (c) => {
+    const submissions = await prisma.submission.findMany({
+      include: {
+        language: true,
+        problem: true,
+        result: {
+          include: {
+            status: true,
+          },
+        },
+        testResults: {
+          include: {
+            status: true,
+            testCase: true,
+          },
         },
       },
-      testResults: {
-        include: {
-          status: true,
-          testCase: true,
-        },
+      orderBy: {
+        createdAt: "desc",
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
-
-  const formattedSubmissions = submissions.map((submission) => {
-    const submissionStatus = submission.result.status.status
-    if (!isValidSubmissionStatus(submissionStatus)) {
-      throw new Error(`Invalid submission status: ${submissionStatus}`)
-    }
-
-    const formattedTestResults = submission.testResults.map((result) => {
-      const testStatus = result.status.status
-      if (!isValidTestStatus(testStatus)) {
-        throw new Error(`Invalid test status: ${testStatus}`)
-      }
-
-      return {
-        message: result.message,
-        status: testStatus,
-        test_case_id: result.testCaseId,
-      } satisfies z.infer<typeof TestResult>
     })
 
-    return {
-      code: submission.code,
-      id: submission.id,
-      language: {
-        name: submission.languageName,
-        version: submission.languageVersion,
-      },
-      problem_id: submission.problemId,
-      result: {
-        message: submission.result.message,
-        status: submissionStatus,
-      },
-      student_id: submission.studentId,
-      submitted_at: submission.createdAt.toISOString(),
-      test_results: formattedTestResults,
-    } satisfies z.infer<typeof Submission>
-  })
+    const formattedSubmissions = submissions.map((submission) => {
+      const submissionStatus = submission.result.status.status
+      if (!isValidSubmissionStatus(submissionStatus)) {
+        throw new Error(`Invalid submission status: ${submissionStatus}`)
+      }
 
-  return c.json(formattedSubmissions, 200)
-})
-
-app.openapi(getSubmissionByIdRoute, async (c) => {
-  const { submissionId } = c.req.valid("param")
-
-  const submission = await prisma.submission.findUnique({
-    include: { result: true, testResults: true },
-    where: {
-      id: submissionId,
-    },
-  })
-  if (!submission) {
-    return c.body(null, 404)
-  }
-
-  const submissionStatus = submission.result.statusId
-  if (!isValidSubmissionStatus(submissionStatus)) {
-    throw new Error(`Invalid submission status: ${submissionStatus}`)
-  }
-
-  return c.json(
-    {
-      code: submission.code,
-      id: submission.id,
-      language: {
-        name: submission.languageName,
-        version: submission.languageVersion,
-      },
-      problem_id: submission.problemId,
-      result: {
-        message: submission.result.message,
-        status: submissionStatus,
-      },
-      student_id: submission.studentId,
-      submitted_at: submission.createdAt.toISOString(),
-      test_results: submission.testResults.map((result) => {
-        const testStatus = result.statusId
+      const formattedTestResults = submission.testResults.map((result) => {
+        const testStatus = result.status.status
         if (!isValidTestStatus(testStatus)) {
           throw new Error(`Invalid test status: ${testStatus}`)
         }
+
         return {
           message: result.message,
           status: testStatus,
           test_case_id: result.testCaseId,
-        }
-      }),
-    } satisfies z.infer<typeof Submission>,
-    200,
-  )
-})
+        } satisfies z.infer<typeof TestResult>
+      })
+
+      return {
+        code: submission.code,
+        id: submission.id,
+        language: {
+          name: submission.languageName,
+          version: submission.languageVersion,
+        },
+        problem_id: submission.problemId,
+        result: {
+          message: submission.result.message,
+          status: submissionStatus,
+        },
+        student_id: submission.studentId,
+        submitted_at: submission.createdAt.toISOString(),
+        test_results: formattedTestResults,
+      } satisfies z.infer<typeof Submission>
+    })
+
+    return c.json(formattedSubmissions, 200)
+  })
+  .openapi(getSubmissionByIdRoute, async (c) => {
+    const { submissionId } = c.req.valid("param")
+
+    const submission = await prisma.submission.findUnique({
+      include: { result: true, testResults: true },
+      where: {
+        id: submissionId,
+      },
+    })
+    if (!submission) {
+      return c.body(null, 404)
+    }
+
+    const submissionStatus = submission.result.statusId
+    if (!isValidSubmissionStatus(submissionStatus)) {
+      throw new Error(`Invalid submission status: ${submissionStatus}`)
+    }
+
+    return c.json(
+      {
+        code: submission.code,
+        id: submission.id,
+        language: {
+          name: submission.languageName,
+          version: submission.languageVersion,
+        },
+        problem_id: submission.problemId,
+        result: {
+          message: submission.result.message,
+          status: submissionStatus,
+        },
+        student_id: submission.studentId,
+        submitted_at: submission.createdAt.toISOString(),
+        test_results: submission.testResults.map((result) => {
+          const testStatus = result.statusId
+          if (!isValidTestStatus(testStatus)) {
+            throw new Error(`Invalid test status: ${testStatus}`)
+          }
+          return {
+            message: result.message,
+            status: testStatus,
+            test_case_id: result.testCaseId,
+          }
+        }),
+      } satisfies z.infer<typeof Submission>,
+      200,
+    )
+  })
 
 export default app
