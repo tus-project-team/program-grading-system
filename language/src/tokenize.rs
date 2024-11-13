@@ -2,6 +2,9 @@ pub enum TokenKind {
     Integer,
     Identifier,
     Operator,
+    Keyword,
+    Delimiter, // Parentheses, brackets, braces, etc.
+    Comment,   // Single-line or multi-line comments
 }
 
 pub struct Token {
@@ -11,11 +14,15 @@ pub struct Token {
     /// Value of the token
     pub value: String,
 
-    /// Position of the token in the source
-    pub position: Position,
+    /// Start position of the token in the source
+    pub start_position: Position,
+
+    /// End position of the token in the source
+    pub end_position: Position,
 }
 
 /// Position of a character in the source
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Position {
     /// 0-based index of the character in the source
     pub index: usize,
@@ -139,8 +146,209 @@ impl Tokenizer {
         }
     }
 
-    pub fn tokenize() -> Vec<Token> {
-        todo!()
+    /// Tokenize the source code
+    pub fn tokenize(&mut self) -> Vec<Token> {
+        let mut tokens = Vec::new();
+        while let Some(token) = self.next_token() {
+            tokens.push(token);
+        }
+        tokens
+    }
+
+    fn skip_whitespaces(&mut self) -> Option<()> {
+        while let Some(c) = self.source.current_char() {
+            if c.is_whitespace() {
+                self.source.advance();
+            } else {
+                break;
+            }
+        }
+        Some(())
+    }
+
+    fn next_token(&mut self) -> Option<Token> {
+        self.skip_whitespaces()?;
+        self.tokenize_keyword()
+            .or_else(|| self.tokenize_comment())
+            .or_else(|| self.tokenize_delimiter())
+            .or_else(|| self.tokenize_operator())
+            .or_else(|| self.tokenize_integer())
+            .or_else(|| self.tokenize_identifier())
+    }
+
+    fn tokenize_integer(&mut self) -> Option<Token> {
+        if let Some(c) = self.source.current_char() {
+            if !c.is_ascii_digit() {
+                return None;
+            }
+        }
+
+        let start_position = self.source.position;
+        while let Some(c) = self.source.current_char() {
+            if c.is_ascii_digit() {
+                self.source.advance();
+            } else {
+                break;
+            }
+        }
+        let end_position = self.source.position;
+
+        Some(Token {
+            kind: TokenKind::Integer,
+            value: {
+                let start = start_position.index;
+                let end = end_position.index;
+                self.source.source[start..end].iter().collect()
+            },
+            start_position,
+            end_position,
+        })
+    }
+
+    fn tokenize_identifier(&mut self) -> Option<Token> {
+        if let Some(c) = self.source.current_char() {
+            if !(c.is_ascii_alphabetic() || c == &'_') {
+                return None;
+            }
+        }
+
+        let start_position = self.source.position;
+        while let Some(c) = self.source.current_char() {
+            if c.is_ascii_alphanumeric() || c == &'_' {
+                self.source.advance();
+            } else {
+                break;
+            }
+        }
+        let end_position = self.source.position;
+
+        Some(Token {
+            kind: TokenKind::Identifier,
+            value: {
+                let start = start_position.index;
+                let end = end_position.index;
+                self.source.source[start..end].iter().collect()
+            },
+            start_position,
+            end_position,
+        })
+    }
+
+    fn tokenize_operator(&mut self) -> Option<Token> {
+        match self.source.current_char()? {
+            '=' => match self.source.peek_char(1)? {
+                '=' => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => Some(self.create_token(TokenKind::Operator, 1)),
+            },
+            '!' => match self.source.peek_char(1)? {
+                '=' => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => Some(self.create_token(TokenKind::Operator, 1)),
+            },
+            '+' | '-' | '*' | '/' => Some(self.create_token(TokenKind::Operator, 1)),
+            _ => None,
+        }
+    }
+
+    fn tokenize_keyword(&mut self) -> Option<Token> {
+        if let Some(c) = self.source.current_char() {
+            if !(c.is_ascii_alphabetic() || c == &'_') {
+                return None;
+            }
+        }
+
+        let start_position = self.source.position;
+        let length = {
+            let mut length = 0;
+            while let Some(c) = self.source.peek_char(length) {
+                if c.is_ascii_alphabetic() || c == &'_' {
+                    length += 1;
+                } else {
+                    break;
+                }
+            }
+            length
+        };
+
+        let keyword: String = {
+            let start = start_position.index;
+            let end = start + length;
+            self.source.source[start..end].iter().collect()
+        };
+
+        match keyword.as_str() {
+            "if" | "else" | "while" | "for" | "return" => {
+                Some(self.create_token(TokenKind::Keyword, length))
+            }
+            _ => None,
+        }
+    }
+
+    fn tokenize_delimiter(&mut self) -> Option<Token> {
+        match self.source.current_char()? {
+            '(' | ')' | '{' | '}' | '[' | ']' => Some(self.create_token(TokenKind::Delimiter, 1)),
+            _ => None,
+        }
+    }
+
+    fn tokenize_comment(&mut self) -> Option<Token> {
+        match self.source.current_char()? {
+            '/' => match self.source.peek_char(1)? {
+                '/' => {
+                    let mut length = 2;
+                    while let Some(c) = self.source.current_char() {
+                        if c == &'\n' {
+                            break;
+                        }
+                        length += 1;
+                        self.source.advance();
+                    }
+                    Some(self.create_token(TokenKind::Comment, length))
+                }
+                '*' => {
+                    self.source.advance();
+                    self.source.advance();
+                    let mut length = 2;
+                    while let Some(c) = self.source.current_char() {
+                        if c == &'*' {
+                            if let Some('/') = self.source.peek_char(1) {
+                                self.source.advance();
+                                self.source.advance();
+                                length += 2;
+                                break;
+                            }
+                        }
+                        self.source.advance();
+                        length += 1;
+                    }
+                    Some(self.create_token(TokenKind::Comment, length))
+                }
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    /// Create a new token by advancing the source by the given length
+    ///
+    /// ### Arguments
+    ///
+    /// - `kind` is the kind of the token to create
+    /// - `length` is the number of characters to advance
+    fn create_token(&mut self, kind: TokenKind, length: usize) -> Token {
+        let start_position = self.source.position;
+        for _ in 0..length {
+            self.source.advance();
+        }
+        let end_position = self.source.position;
+
+        Token {
+            kind,
+            value: self.source.source[(start_position.index)..(end_position.index)]
+                .iter()
+                .collect(),
+            start_position,
+            end_position,
+        }
     }
 }
 
