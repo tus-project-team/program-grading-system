@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import { $api } from "@/lib/api"
 import MonacoEditor from "@monaco-editor/react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createLazyFileRoute, Link } from "@tanstack/react-router"
 import {
   ArrowLeft,
   Check,
@@ -266,6 +266,6 @@ const SubmissionDetail = () => {
   )
 }
 
-export const Route = createFileRoute("/admin/submissions/$submissionId")({
+export const Route = createLazyFileRoute("/admin/submissions/$submissionId")({
   component: SubmissionDetail,
 })
