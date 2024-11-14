@@ -1,3 +1,10 @@
 {
-  "folders": [{ "path": "." }, { "path": "backend" }, { "path": "frontend" }, { "path": "runtime" }, { "path": "cli" }]
+  "folders": [
+    { "path": "." },
+    { "path": "backend" },
+    { "path": "frontend" },
+    { "path": "runtime" },
+    { "path": "cli" },
+    { "path": "language" },
+  ],
 }
