@@ -957,4 +957,149 @@ mod tokenizer_tests {
             })
         );
     }
+
+    #[test]
+    fn tokenize_returns_empty_for_empty_source() {
+        let mut tokenizer = Tokenizer::new("".to_string());
+        assert_eq!(tokenizer.tokenize(), vec![]);
+    }
+
+    #[test]
+    fn tokenize_returns_empty_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize(), vec![]);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\t".to_string());
+            assert_eq!(tokenizer.tokenize(), vec![]);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize(), vec![]);
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_integer() {
+        let integers = ["0", "123", "1234567890"];
+        for integer in integers.iter() {
+            let mut tokenizer = Tokenizer::new(integer.to_string());
+            assert_eq!(
+                tokenizer.tokenize(),
+                vec![Token {
+                    kind: TokenKind::Integer,
+                    value: integer.to_string(),
+                    start_position: Position::new(0, 1, 1),
+                    end_position: Position::new(integer.len(), 1, integer.len() + 1),
+                }],
+                "Failed for integer '{}'",
+                integer
+            );
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_identifier() {
+        let identifiers = ["abc", "abc123", "_abc", "_abc123"];
+        for identifier in identifiers.iter() {
+            let mut tokenizer = Tokenizer::new(identifier.to_string());
+            assert_eq!(
+                tokenizer.tokenize(),
+                vec![Token {
+                    kind: TokenKind::Identifier,
+                    value: identifier.to_string(),
+                    start_position: Position::new(0, 1, 1),
+                    end_position: Position::new(identifier.len(), 1, identifier.len() + 1),
+                }],
+                "Failed for identifier '{}'",
+                identifier
+            );
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_operator() {
+        let operators = ["==", "!=", "=", "!", "+", "-", "*", "/"];
+        for operator in operators.iter() {
+            let mut tokenizer = Tokenizer::new(operator.to_string());
+            assert_eq!(
+                tokenizer.tokenize(),
+                vec![Token {
+                    kind: TokenKind::Operator,
+                    value: operator.to_string(),
+                    start_position: Position::new(0, 1, 1),
+                    end_position: Position::new(operator.len(), 1, operator.len() + 1),
+                }],
+                "Failed for operator '{}'",
+                operator
+            );
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_keyword() {
+        let keywords = ["if", "else", "while", "for", "return"];
+        for keyword in keywords.iter() {
+            let mut tokenizer = Tokenizer::new(keyword.to_string());
+            assert_eq!(
+                tokenizer.tokenize(),
+                vec![Token {
+                    kind: TokenKind::Keyword,
+                    value: keyword.to_string(),
+                    start_position: Position::new(0, 1, 1),
+                    end_position: Position::new(keyword.len(), 1, keyword.len() + 1),
+                }],
+                "Failed for keyword '{}'",
+                keyword
+            );
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_delimiter() {
+        let delimiters = ["(", ")", "{", "}", "[", "]"];
+        for delimiter in delimiters.iter() {
+            let mut tokenizer = Tokenizer::new(delimiter.to_string());
+            assert_eq!(
+                tokenizer.tokenize(),
+                vec![Token {
+                    kind: TokenKind::Delimiter,
+                    value: delimiter.to_string(),
+                    start_position: Position::new(0, 1, 1),
+                    end_position: Position::new(delimiter.len(), 1, delimiter.len() + 1),
+                }],
+                "Failed for delimiter '{}'",
+                delimiter
+            );
+        }
+    }
+
+    #[test]
+    fn tokenize_returns_single_line_comment() {
+        let mut tokenizer = Tokenizer::new("// abc\n".to_string());
+        assert_eq!(
+            tokenizer.tokenize(),
+            vec![Token {
+                kind: TokenKind::Comment,
+                value: "// abc\n".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(7, 2, 1),
+            },]
+        )
+    }
+
+    #[test]
+    fn tokenize_returns_multi_line_comment() {
+        let mut tokenizer = Tokenizer::new("/* abc */".to_string());
+        assert_eq!(
+            tokenizer.tokenize(),
+            vec![Token {
+                kind: TokenKind::Comment,
+                value: "/* abc */".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(9, 1, 10),
+            },]
+        )
+    }
 }
