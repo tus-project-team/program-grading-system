@@ -22,7 +22,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "4.1.0",
-    "lucide-react": "^0.454.0",
+    "lucide-react": "^0.456.0",
     "openapi-fetch": "0.13.0",
     "openapi-react-query": "0.2.5",
     "react": "^18.3.1",
