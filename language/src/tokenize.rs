@@ -434,9 +434,23 @@ mod tokenizer_tests {
     }
 
     #[test]
+    fn tokenize_integer_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_integer(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_integer(), None);
+        }
+    }
+
+    #[test]
     fn tokenize_integer_returns_none_for_non_digit() {
-        let mut tokenizer = Tokenizer::new("abc".to_string());
-        assert_eq!(tokenizer.tokenize_integer(), None);
+        {
+            let mut tokenizer = Tokenizer::new("abc".to_string());
+            assert_eq!(tokenizer.tokenize_integer(), None);
+        }
     }
 
     #[test]
@@ -457,6 +471,18 @@ mod tokenizer_tests {
     fn tokenize_identifier_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_identifier(), None);
+    }
+
+    #[test]
+    fn tokenize_identifier_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_identifier(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_identifier(), None);
+        }
     }
 
     #[test]
@@ -486,6 +512,18 @@ mod tokenizer_tests {
     }
 
     #[test]
+    fn tokenize_operator_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_operator(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_operator(), None);
+        }
+    }
+
+    #[test]
     fn tokenize_operator_returns_none_for_non_operator() {
         {
             let mut tokenizer = Tokenizer::new("abc".to_string());
@@ -494,6 +532,10 @@ mod tokenizer_tests {
         {
             let mut tokenizer = Tokenizer::new("123".to_string());
             assert_eq!(tokenizer.tokenize_operator(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("(".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
         }
     }
 
@@ -616,13 +658,29 @@ mod tokenizer_tests {
     }
 
     #[test]
+    fn tokenize_keyword_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
+        }
+    }
+
+    #[test]
     fn tokenize_keyword_returns_none_for_non_keyword() {
+        {
+            let mut tokenizer = Tokenizer::new("123".to_string());
+            assert_eq!(tokenizer.tokenize_keyword(), None);
+        }
         {
             let mut tokenizer = Tokenizer::new("abc".to_string());
             assert_eq!(tokenizer.tokenize_keyword(), None);
         }
         {
-            let mut tokenizer = Tokenizer::new("fuga".to_string());
+            let mut tokenizer = Tokenizer::new("=".to_string());
             assert_eq!(tokenizer.tokenize_keyword(), None);
         }
     }
@@ -701,6 +759,18 @@ mod tokenizer_tests {
     fn tokenize_delimiter_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_delimiter(), None);
+    }
+
+    #[test]
+    fn tokenize_delimiter_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_delimiter(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_delimiter(), None);
+        }
     }
 
     #[test]
@@ -807,6 +877,18 @@ mod tokenizer_tests {
     fn tokenize_comment_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_comment(), None);
+    }
+
+    #[test]
+    fn tokenize_comment_returns_none_for_whitespace() {
+        {
+            let mut tokenizer = Tokenizer::new(" ".to_string());
+            assert_eq!(tokenizer.tokenize_comment(), None);
+        }
+        {
+            let mut tokenizer = Tokenizer::new("\n".to_string());
+            assert_eq!(tokenizer.tokenize_comment(), None);
+        }
     }
 
     #[test]
