@@ -66,6 +66,13 @@ bun install
 bun run prisma migrate dev && bun run prisma db seed
 ```
 
+> [!tip]
+> デバッグ用に、最初からいくつかのフェイクデータを投入する場合は、次のコマンドを実行してください。
+>
+> ```sh
+> bun run prisma db seed -- --fake
+> ```
+
 #### 開発サーバーの起動
 
 次のコマンドで開発サーバーを起動します。`backend` ディレクトリに移動してから実行してください。
@@ -76,6 +83,14 @@ bun run dev
 
 `http://localhost:3000` にてAPIサーバーが起動します。
 また、`http://localhost:3000/api/docs` にてAPIリファレンスが表示されます。
+
+#### テスト
+
+次のコマンドでテストを実行します。
+
+```sh
+bun run test
+```
 
 #### ビルド
 

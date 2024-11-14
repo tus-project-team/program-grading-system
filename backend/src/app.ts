@@ -14,8 +14,6 @@ app.use(
     origin: "http://localhost:5173",
   }),
 )
-app.route("/api", problemsApp)
-app.route("/api", submissionsApp)
 
 export const openApiDocument = {
   info: {
@@ -26,8 +24,12 @@ export const openApiDocument = {
   openapi: "3.1.0",
 } as const satisfies ReturnType<typeof app.getOpenAPI31Document>
 
-app.doc("/api/openapi.json", openApiDocument)
+export const routes = app
+  .doc("/api/openapi.json", openApiDocument)
+  .route("/api", problemsApp)
+  .route("/api", submissionsApp)
+  .get("/api/docs", apiReference({ spec: { url: "/api/openapi.json" } }))
 
-app.get("/api/docs", apiReference({ spec: { url: "/api/openapi.json" } }))
+export type AppType = typeof routes
 
 export default app

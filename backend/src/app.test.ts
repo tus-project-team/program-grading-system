@@ -1,10 +1,12 @@
+import { testClient } from "hono/testing"
 import { describe, expect, test } from "vitest"
 
-import app from "./app"
+import app, { type AppType } from "./app"
 
 describe("OpenAPI Schema", () => {
   test("GET /api/openapi.json returns the OpenAPI schema", async () => {
-    const res = await app.request("/api/openapi.json")
+    const client = testClient<AppType>(app)
+    const res = await client.api["openapi.json"].$get()
     expect(res.status).toBe(200)
     expect(res.headers.get("Content-Type")?.split(";")).toContain(
       "application/json",
@@ -13,7 +15,8 @@ describe("OpenAPI Schema", () => {
   })
 
   test("GET /api/docs returns the API documentation", async () => {
-    const res = await app.request("/api/docs")
+    const client = testClient<AppType>(app)
+    const res = await client.api.docs.$get()
     expect(res.status).toBe(200)
     expect(res.headers.get("Content-Type")?.split(";")).toContain("text/html")
     expect(await res.text()).not.toBe(null)
