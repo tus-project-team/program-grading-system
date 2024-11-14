@@ -303,19 +303,19 @@ impl Tokenizer {
             '/' => match self.source.peek_char(1)? {
                 '/' => {
                     let mut length = 2;
-                    while let Some(c) = self.source.current_char() {
+                    while let Some(c) = self.source.peek_char(length) {
+                        length += 1;
                         if c == &'\n' {
                             break;
                         }
-                        length += 1;
                     }
                     Some(self.create_token(TokenKind::Comment, length))
                 }
                 '*' => {
                     let mut length = 2;
-                    while let Some(c) = self.source.current_char() {
+                    while let Some(c) = self.source.peek_char(length) {
                         if c == &'*' {
-                            if let Some('/') = self.source.peek_char(1) {
+                            if let Some('/') = self.source.peek_char(length + 1) {
                                 length += 2;
                                 break;
                             }
@@ -426,6 +426,7 @@ mod source_tests {
 #[cfg(test)]
 mod tokenizer_tests {
     use super::*;
+    use indoc::indoc;
 
     #[test]
     fn tokenize_integer_returns_none_for_empty_source() {
@@ -905,5 +906,55 @@ mod tokenizer_tests {
             let mut tokenizer = Tokenizer::new("/".to_string());
             assert_eq!(tokenizer.tokenize_comment(), None);
         }
+    }
+
+    #[test]
+    fn tokenize_comment_returns_single_line_comment() {
+        let mut tokenizer = Tokenizer::new("// abc\nlet a = 1".to_string());
+        assert_eq!(
+            tokenizer.tokenize_comment(),
+            Some(Token {
+                kind: TokenKind::Comment,
+                value: "// abc\n".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(7, 2, 1),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_comment_returns_multi_line_comment() {
+        let mut tokenizer = Tokenizer::new("/* abc */let a = 1".to_string());
+        assert_eq!(
+            tokenizer.tokenize_comment(),
+            Some(Token {
+                kind: TokenKind::Comment,
+                value: "/* abc */".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(9, 1, 10),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_comment_returns_multi_line_comment_with_multiple_lines() {
+        let mut tokenizer = Tokenizer::new(
+            indoc! {"
+                /* abc
+                def
+                ghi */
+                let a = 1
+            "}
+            .to_string(),
+        );
+        assert_eq!(
+            tokenizer.tokenize_comment(),
+            Some(Token {
+                kind: TokenKind::Comment,
+                value: "/* abc\ndef\nghi */".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(17, 3, 7),
+            })
+        );
     }
 }
