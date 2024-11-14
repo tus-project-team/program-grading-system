@@ -23,7 +23,7 @@ impl Source {
     /// ### Examples
     ///
     /// ```
-    /// use language::tokenize::Source;
+    /// use language::tokenize::source::Source;
     ///
     /// let source = Source::new("abc".to_string());
     /// assert_eq!(source.current_char(), Some(&'a'));
@@ -42,7 +42,7 @@ impl Source {
     /// ### Examples
     ///
     /// ```
-    /// use language::tokenize::Source;
+    /// use language::tokenize::source::Source;
     ///
     /// let source = Source::new("abc".to_string());
     /// assert_eq!(source.peek_char(0), Some(&'a'));
@@ -59,7 +59,7 @@ impl Source {
     /// ### Examples
     ///
     /// ```
-    /// use language::tokenize::Source;
+    /// use language::tokenize::source::Source;
     ///
     /// let mut source = Source::new("a\nb".to_string());
     /// assert_eq!(source.current_char(), Some(&'a'));
