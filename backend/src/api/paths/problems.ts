@@ -1,11 +1,8 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
-import { PrismaClient } from "@prisma/client"
 
+import { prisma } from "../../db"
 import { test } from "../../services/program"
 import * as schemas from "../components/schemas"
-
-const prisma = new PrismaClient()
-const app = new OpenAPIHono()
 
 // パラメータスキーマの定義
 const IdParam = z.object({
@@ -227,185 +224,343 @@ const getSubmissionsByProblemIdRoute = createRoute({
 })
 
 // ルートの設定
-app.openapi(getProblemsRoute, async (c) => {
-  const problems = await prisma.problem.findMany({
-    include: {
-      supportedLanguages: {
-        include: {
-          language: true,
+const app = new OpenAPIHono()
+  .openapi(getProblemsRoute, async (c) => {
+    const problems = await prisma.problem.findMany({
+      include: {
+        supportedLanguages: {
+          include: {
+            language: true,
+          },
         },
+        testCases: true,
       },
-      testCases: true,
-    },
-  })
+    })
 
-  const formattedProblems = problems.map((problem) => ({
-    body: problem.body,
-    id: problem.id,
-    supported_languages: problem.supportedLanguages.map((supportedLang) => ({
-      name: supportedLang.language.name,
-      version: supportedLang.language.version,
-    })),
-    test_cases: problem.testCases.map((testCase) => ({
-      input: testCase.input,
-      output: testCase.output,
-    })),
-    title: problem.title,
-  }))
-
-  return c.json(formattedProblems, 200)
-})
-
-app.openapi(createProblemRoute, async (c) => {
-  const data = c.req.valid("json")
-  const createdProblem = await prisma.problem.create({
-    data: {
-      body: data.body,
-      supportedLanguages: {
-        create: data.supported_languages.map(
-          (lang: { name: string; version: string }) => ({
-            language: {
-              connectOrCreate: {
-                create: { name: lang.name, version: lang.version },
-                where: {
-                  name_version: { name: lang.name, version: lang.version },
-                },
-              },
-            },
-          }),
-        ),
-      },
-      testCases: {
-        create: data.test_cases.map(
-          (testCase: { input: string; output: string }) => ({
-            input: testCase.input,
-            output: testCase.output,
-          }),
-        ),
-      },
-      title: data.title,
-    },
-    include: {
-      supportedLanguages: {
-        include: {
-          language: true,
-        },
-      },
-      testCases: true,
-    },
-  })
-
-  const formattedProblem = {
-    body: createdProblem.body,
-    id: createdProblem.id,
-    supported_languages: createdProblem.supportedLanguages.map((lang) => ({
-      name: lang.language.name,
-      version: lang.language.version,
-    })),
-    test_cases: createdProblem.testCases.map((testCase) => ({
-      input: testCase.input,
-      output: testCase.output,
-    })),
-    title: createdProblem.title,
-  }
-  return c.json(formattedProblem, 201)
-})
-
-app.openapi(getProblemRoute, async (c) => {
-  const { problemId } = c.req.valid("param")
-  const problem = await prisma.problem.findUnique({
-    include: {
-      supportedLanguages: {
-        include: { language: true },
-      },
-      testCases: true,
-    },
-    where: { id: problemId },
-  })
-  if (problem == null) {
-    return c.body(null, 404)
-  }
-  return c.json(
-    {
+    const formattedProblems = problems.map((problem) => ({
       body: problem.body,
       id: problem.id,
-      supported_languages: problem.supportedLanguages.map(
-        ({ languageName, languageVersion }) => ({
-          name: languageName,
-          version: languageVersion,
-        }),
-      ),
-      test_cases: problem.testCases.map(({ input, output }) => ({
-        input,
-        output,
+      supported_languages: problem.supportedLanguages.map((supportedLang) => ({
+        name: supportedLang.language.name,
+        version: supportedLang.language.version,
+      })),
+      test_cases: problem.testCases.map((testCase) => ({
+        input: testCase.input,
+        output: testCase.output,
       })),
       title: problem.title,
-    },
-    200,
-  )
-})
+    }))
 
-app.openapi(updateProblemRoute, async (c) => {
-  const { problemId } = c.req.valid("param")
-  const data = c.req.valid("json")
-  const updatedProblem = await prisma.problem.update({
-    data: {
-      body: data.body,
-      supportedLanguages: {
-        create: data.supported_languages?.map(
-          (lang: { name: string; version: string }) => ({
-            language: {
-              connectOrCreate: {
-                create: { name: lang.name, version: lang.version },
-                where: {
-                  name_version: { name: lang.name, version: lang.version },
+    return c.json(formattedProblems, 200)
+  })
+  .openapi(createProblemRoute, async (c) => {
+    const data = c.req.valid("json")
+    const createdProblem = await prisma.problem.create({
+      data: {
+        body: data.body,
+        supportedLanguages: {
+          create: data.supported_languages.map(
+            (lang: { name: string; version: string }) => ({
+              language: {
+                connectOrCreate: {
+                  create: { name: lang.name, version: lang.version },
+                  where: {
+                    name_version: { name: lang.name, version: lang.version },
+                  },
                 },
               },
+            }),
+          ),
+        },
+        testCases: {
+          create: data.test_cases.map(
+            (testCase: { input: string; output: string }) => ({
+              input: testCase.input,
+              output: testCase.output,
+            }),
+          ),
+        },
+        title: data.title,
+      },
+      include: {
+        supportedLanguages: {
+          include: {
+            language: true,
+          },
+        },
+        testCases: true,
+      },
+    })
+
+    const formattedProblem = {
+      body: createdProblem.body,
+      id: createdProblem.id,
+      supported_languages: createdProblem.supportedLanguages.map((lang) => ({
+        name: lang.language.name,
+        version: lang.language.version,
+      })),
+      test_cases: createdProblem.testCases.map((testCase) => ({
+        input: testCase.input,
+        output: testCase.output,
+      })),
+      title: createdProblem.title,
+    }
+    return c.json(formattedProblem, 201)
+  })
+  .openapi(getProblemRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
+    const problem = await prisma.problem.findUnique({
+      include: {
+        supportedLanguages: {
+          include: { language: true },
+        },
+        testCases: true,
+      },
+      where: { id: problemId },
+    })
+    if (problem == null) {
+      return c.body(null, 404)
+    }
+    return c.json(
+      {
+        body: problem.body,
+        id: problem.id,
+        supported_languages: problem.supportedLanguages.map(
+          ({ languageName, languageVersion }) => ({
+            name: languageName,
+            version: languageVersion,
+          }),
+        ),
+        test_cases: problem.testCases.map(({ input, output }) => ({
+          input,
+          output,
+        })),
+        title: problem.title,
+      },
+      200,
+    )
+  })
+  .openapi(updateProblemRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
+    const data = c.req.valid("json")
+    const updatedProblem = await prisma.problem.update({
+      data: {
+        body: data.body,
+        supportedLanguages: {
+          create: data.supported_languages?.map(
+            (lang: { name: string; version: string }) => ({
+              language: {
+                connectOrCreate: {
+                  create: { name: lang.name, version: lang.version },
+                  where: {
+                    name_version: { name: lang.name, version: lang.version },
+                  },
+                },
+              },
+            }),
+          ),
+        },
+        testCases: {
+          create: data.test_cases?.map(
+            (testCase: { input: string; output: string }) => ({
+              input: testCase.input,
+              output: testCase.output,
+            }),
+          ),
+        },
+        title: data.title,
+      },
+      include: {
+        supportedLanguages: {
+          include: {
+            language: true,
+          },
+        },
+        testCases: true,
+      },
+      where: {
+        id: problemId,
+      },
+    })
+    return c.json({
+      body: updatedProblem.body,
+      id: updatedProblem.id,
+      supported_languages: updatedProblem.supportedLanguages.map((lang) => ({
+        name: lang.language.name,
+        version: lang.language.version,
+      })),
+      test_cases: updatedProblem.testCases.map((testCase) => ({
+        input: testCase.input,
+        output: testCase.output,
+      })),
+      title: updatedProblem.title,
+    } satisfies z.infer<typeof schemas.Problem>)
+  })
+  .openapi(deleteProblemRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
+
+    try {
+      const problem = await prisma.problem.findUnique({
+        where: { id: problemId },
+      })
+
+      if (!problem) {
+        return c.body(null, 404)
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.testResult.deleteMany({
+          where: {
+            submission: {
+              problemId,
             },
-          }),
-        ),
+          },
+        })
+
+        await tx.submissionResult.deleteMany({
+          where: {
+            submission: {
+              problemId,
+            },
+          },
+        })
+
+        await tx.submission.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.testCase.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.language.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.problem.update({
+          data: {
+            teachers: {
+              set: [],
+            },
+          },
+          where: { id: problemId },
+        })
+
+        await tx.problem.delete({
+          where: { id: problemId },
+        })
+      })
+
+      return c.body(null, 204)
+    } catch (error) {
+      console.error("Problem deletion failed:", error)
+      return c.body(null, 500)
+    }
+  })
+  .openapi(submitProgramRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
+    const data = c.req.valid("json")
+
+    const problem = await prisma.problem.findUnique({
+      include: {
+        supportedLanguages: {
+          include: { language: true },
+        },
+        testCases: true,
       },
-      testCases: {
-        create: data.test_cases?.map(
-          (testCase: { input: string; output: string }) => ({
-            input: testCase.input,
-            output: testCase.output,
-          }),
-        ),
-      },
-      title: data.title,
-    },
-    include: {
-      supportedLanguages: {
-        include: {
-          language: true,
+      where: { id: problemId },
+    })
+    if (problem == null) {
+      return c.body(null, 404)
+    }
+
+    const isSupportedLanguage = problem.supportedLanguages.some(
+      (lang) =>
+        lang.language.name === data.language.name &&
+        lang.language.version === data.language.version,
+    )
+    if (!isSupportedLanguage) {
+      // todo: messageとして提出された言語が対応していない旨を返す
+      return c.body(null, 400)
+    }
+
+    const testResults = await Promise.all(
+      problem.testCases.map(async (testCase) =>
+        test({
+          code: data.code,
+          input: testCase.input,
+          language: data.language,
+          output: testCase.output,
+        }),
+      ),
+    )
+    const submissionResult = (
+      testResults.every((result) => result.status === "Passed")
+        ? { message: "テストケースにパスしました", status: "Accepted" }
+        : {
+            message: "テストケースにパスできませんでした",
+            status: "WrongAnswer",
+          }
+    ) satisfies z.infer<typeof schemas.Submission>["result"]
+
+    const createdSubmission = await prisma.submission.create({
+      data: {
+        code: data.code,
+        language: {
+          connect: {
+            name_version: {
+              name: data.language.name,
+              version: data.language.version,
+            },
+          },
+        },
+        problem: {
+          connect: {
+            id: problemId,
+          },
+        },
+        result: {
+          create: {
+            message: submissionResult.message,
+            status: {
+              connect: {
+                status: submissionResult.status,
+              },
+            },
+          },
+        },
+        student: {
+          connect: {
+            id: 1, // todo: 実際の学生IDを取得し、指定する
+          },
+        },
+        testResults: {
+          createMany: {
+            data: testResults.map((result, i) => ({
+              message: result.message ?? "",
+              statusId: result.status,
+              testCaseId: problem.testCases[i].id,
+            })),
+          },
         },
       },
-      testCases: true,
-    },
-    where: {
-      id: problemId,
-    },
+      include: {
+        language: true,
+        result: true,
+        testResults: true,
+      },
+    })
+    return c.json(createdSubmission, 201)
   })
-  return c.json({
-    body: updatedProblem.body,
-    id: updatedProblem.id,
-    supported_languages: updatedProblem.supportedLanguages.map((lang) => ({
-      name: lang.language.name,
-      version: lang.language.version,
-    })),
-    test_cases: updatedProblem.testCases.map((testCase) => ({
-      input: testCase.input,
-      output: testCase.output,
-    })),
-    title: updatedProblem.title,
-  } satisfies z.infer<typeof schemas.Problem>)
-})
-
-app.openapi(deleteProblemRoute, async (c) => {
-  const { problemId } = c.req.valid("param")
-
-  try {
+  .openapi(testProgramRoute, (c) => {
+    // TODO: 実際のテスト処理を実装
+    return c.json([
+      { message: "正解", status: "Passed", test_case_id: 1 },
+      { message: "正解", status: "Passed", test_case_id: 2 },
+    ] as const)
+  })
+  .openapi(getSubmissionsByProblemIdRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
     const problem = await prisma.problem.findUnique({
       where: { id: problemId },
     })
@@ -414,212 +569,51 @@ app.openapi(deleteProblemRoute, async (c) => {
       return c.body(null, 404)
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.testResult.deleteMany({
-        where: {
-          submission: {
-            problemId,
+    const submissions = await prisma.submission.findMany({
+      include: {
+        language: true,
+        result: {
+          include: {
+            status: true,
           },
         },
-      })
-
-      await tx.submissionResult.deleteMany({
-        where: {
-          submission: {
-            problemId,
+        testResults: {
+          include: {
+            status: true,
+            testCase: true,
           },
         },
-      })
-
-      await tx.submission.deleteMany({
-        where: { problemId },
-      })
-
-      await tx.testCase.deleteMany({
-        where: { problemId },
-      })
-
-      await tx.language.deleteMany({
-        where: { problemId },
-      })
-
-      await tx.problem.update({
-        data: {
-          teachers: {
-            set: [],
-          },
-        },
-        where: { id: problemId },
-      })
-
-      await tx.problem.delete({
-        where: { id: problemId },
-      })
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      where: {
+        problemId,
+      },
     })
 
-    return c.body(null, 204)
-  } catch (error) {
-    console.error("Problem deletion failed:", error)
-    return c.body(null, 500)
-  }
-})
-
-app.openapi(submitProgramRoute, async (c) => {
-  const { problemId } = c.req.valid("param")
-  const data = c.req.valid("json")
-
-  const problem = await prisma.problem.findUnique({
-    include: {
-      supportedLanguages: {
-        include: { language: true },
-      },
-      testCases: true,
-    },
-    where: { id: problemId },
-  })
-  if (problem == null) {
-    return c.body(null, 404)
-  }
-
-  const isSupportedLanguage = problem.supportedLanguages.some(
-    (lang) =>
-      lang.language.name === data.language.name &&
-      lang.language.version === data.language.version,
-  )
-  if (!isSupportedLanguage) {
-    // todo: messageとして提出された言語が対応していない旨を返す
-    return c.body(null, 400)
-  }
-
-  const testResults = await Promise.all(
-    problem.testCases.map(async (testCase) =>
-      test({
-        code: data.code,
-        input: testCase.input,
-        language: data.language,
-        output: testCase.output,
-      }),
-    ),
-  )
-  const submissionResult = (
-    testResults.every((result) => result.status === "Passed")
-      ? { message: "テストケースにパスしました", status: "Accepted" }
-      : { message: "テストケースにパスできませんでした", status: "WrongAnswer" }
-  ) satisfies z.infer<typeof schemas.Submission>["result"]
-
-  const createdSubmission = await prisma.submission.create({
-    data: {
-      code: data.code,
+    const formattedSubmissions = submissions.map((submission) => ({
+      code: submission.code,
+      id: submission.id,
       language: {
-        connect: {
-          name_version: {
-            name: data.language.name,
-            version: data.language.version,
-          },
-        },
+        name: submission.languageName,
+        version: submission.languageVersion,
       },
-      problem: {
-        connect: {
-          id: problemId,
-        },
-      },
+      problem_id: submission.problemId,
       result: {
-        create: {
-          message: submissionResult.message,
-          status: {
-            connect: {
-              status: submissionResult.status,
-            },
-          },
-        },
+        message: submission.result.message,
+        status: submission.result.status.status,
       },
-      student: {
-        connect: {
-          id: 1, // todo: 実際の学生IDを取得し、指定する
-        },
-      },
-      testResults: {
-        createMany: {
-          data: testResults.map((result, i) => ({
-            message: result.message ?? "",
-            statusId: result.status,
-            testCaseId: problem.testCases[i].id,
-          })),
-        },
-      },
-    },
-    include: {
-      language: true,
-      result: true,
-      testResults: true,
-    },
+      student_id: submission.studentId,
+      submitted_at: submission.createdAt.toISOString(),
+      test_results: submission.testResults.map((result) => ({
+        message: result.message,
+        status: result.status.status,
+        test_case_id: result.testCaseId,
+      })),
+    }))
+
+    return c.json(formattedSubmissions, 200)
   })
-  return c.json(createdSubmission, 201)
-})
-
-app.openapi(testProgramRoute, (c) => {
-  // TODO: 実際のテスト処理を実装
-  return c.json([
-    { message: "正解", status: "Passed", test_case_id: 1 },
-    { message: "正解", status: "Passed", test_case_id: 2 },
-  ] as const)
-})
-
-app.openapi(getSubmissionsByProblemIdRoute, async (c) => {
-  const { problemId } = c.req.valid("param")
-  const problem = await prisma.problem.findUnique({
-    where: { id: problemId },
-  })
-
-  if (!problem) {
-    return c.body(null, 404)
-  }
-
-  const submissions = await prisma.submission.findMany({
-    include: {
-      language: true,
-      result: {
-        include: {
-          status: true,
-        },
-      },
-      testResults: {
-        include: {
-          status: true,
-          testCase: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: {
-      problemId,
-    },
-  })
-
-  const formattedSubmissions = submissions.map((submission) => ({
-    code: submission.code,
-    id: submission.id,
-    language: {
-      name: submission.languageName,
-      version: submission.languageVersion,
-    },
-    problem_id: submission.problemId,
-    result: {
-      message: submission.result.message,
-      status: submission.result.status.status,
-    },
-    student_id: submission.studentId,
-    submitted_at: submission.createdAt.toISOString(),
-    test_results: submission.testResults.map((result) => ({
-      message: result.message,
-      status: result.status.status,
-      test_case_id: result.testCaseId,
-    })),
-  }))
-
-  return c.json(formattedSubmissions, 200)
-})
 
 export default app
