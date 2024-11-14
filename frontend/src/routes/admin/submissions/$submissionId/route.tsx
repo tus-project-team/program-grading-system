@@ -307,6 +307,6 @@ const SubmissionDetail = () => {
   )
 }
 
-export const Route = createFileRoute("/submissions/$submissionId")({
+export const Route = createFileRoute("/admin/submissions/$submissionId")({
   component: SubmissionDetail,
 })
