@@ -157,7 +157,7 @@ impl Tokenizer {
         tokens
     }
 
-    fn skip_whitespaces(&mut self) -> Option<()> {
+    fn skip_whitespace(&mut self) -> Option<()> {
         while let Some(c) = self.source.current_char() {
             if c.is_whitespace() {
                 self.source.advance();
@@ -169,7 +169,7 @@ impl Tokenizer {
     }
 
     fn next_token(&mut self) -> Option<Token> {
-        self.skip_whitespaces()?;
+        self.skip_whitespace()?;
         self.tokenize_keyword()
             .or_else(|| self.tokenize_comment())
             .or_else(|| self.tokenize_delimiter())
