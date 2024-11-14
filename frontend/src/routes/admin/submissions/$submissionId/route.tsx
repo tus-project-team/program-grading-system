@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -14,10 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
 import { $api } from "@/lib/api"
 import MonacoEditor from "@monaco-editor/react"
-import { Label } from "@radix-ui/react-label"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArrowLeft,
@@ -237,38 +234,6 @@ const TestResults = ({
   )
 }
 
-const Feedback = () => {
-  const [feedback, setFeedback] = useState("")
-
-  const handleFeedbackSubmit = async () => {
-    console.log("フィードバックを送信:", feedback)
-    setFeedback("")
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>フィードバック</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Label className="sr-only" htmlFor="feedback">
-          フィードバック
-        </Label>
-        <Textarea
-          id="feedback"
-          onChange={(e) => setFeedback(e.target.value)}
-          placeholder="学生へのフィードバックを入力してください"
-          rows={5}
-          value={feedback}
-        />
-      </CardContent>
-      <CardFooter>
-        <Button onClick={handleFeedbackSubmit}>フィードバックを送信</Button>
-      </CardFooter>
-    </Card>
-  )
-}
-
 const SubmissionDetail = () => {
   const submissionId = Number.parseInt(Route.useParams().submissionId)
   const { data } = $api.useSuspenseQuery(
@@ -299,7 +264,6 @@ const SubmissionDetail = () => {
             submission={data}
             testCases={problemData.data.test_cases}
           />
-          <Feedback />
         </div>
         <SubmissionedCode submission={data} />
       </div>
