@@ -343,45 +343,119 @@ const app = new OpenAPIHono()
   .openapi(updateProblemRoute, async (c) => {
     const { problemId } = c.req.valid("param")
     const data = c.req.valid("json")
-    const updatedProblem = await prisma.problem.update({
-      data: {
-        body: data.body,
-        supportedLanguages: {
-          create: data.supported_languages?.map(
-            (lang: { name: string; version: string }) => ({
-              language: {
-                connectOrCreate: {
-                  create: { name: lang.name, version: lang.version },
-                  where: {
-                    name_version: { name: lang.name, version: lang.version },
+
+    const problem = await prisma.problem.findUnique({
+      where: { id: problemId },
+    })
+    if (problem == null) {
+      return c.body(null, 404)
+    }
+
+    const updatedProblem = await prisma.$transaction(async (tx) => {
+      await tx.language.deleteMany({
+        where: {
+          languageName: {
+            notIn: data.supported_languages.map(({ name }) => name),
+          },
+          languageVersion: {
+            notIn: data.supported_languages.map(({ version }) => version),
+          },
+          problemId,
+        },
+      })
+      await tx.testResult.deleteMany({
+        where: {
+          testCase: {
+            input: {
+              notIn: data.test_cases.map(({ input }) => input),
+            },
+            output: {
+              notIn: data.test_cases.map(({ output }) => output),
+            },
+            problemId,
+          },
+        },
+      })
+      await tx.testCase.deleteMany({
+        where: {
+          input: {
+            notIn: data.test_cases.map(({ input }) => input),
+          },
+          output: {
+            notIn: data.test_cases.map(({ output }) => output),
+          },
+          problemId,
+        },
+      })
+      return tx.problem.update({
+        data: {
+          body: data.body,
+          supportedLanguages: {
+            upsert: data.supported_languages.map(({ name, version }) => ({
+              create: {
+                language: {
+                  connect: {
+                    name_version: {
+                      name,
+                      version,
+                    },
                   },
                 },
               },
-            }),
-          ),
-        },
-        testCases: {
-          create: data.test_cases?.map(
-            (testCase: { input: string; output: string }) => ({
-              input: testCase.input,
-              output: testCase.output,
-            }),
-          ),
-        },
-        title: data.title,
-      },
-      include: {
-        supportedLanguages: {
-          include: {
-            language: true,
+              update: {
+                language: {
+                  connect: {
+                    name_version: {
+                      name,
+                      version,
+                    },
+                  },
+                },
+              },
+              where: {
+                languageName_languageVersion_problemId: {
+                  languageName: name,
+                  languageVersion: version,
+                  problemId,
+                },
+              },
+            })),
           },
+          testCases: {
+            upsert: data.test_cases.map(({ input, output }) => ({
+              create: {
+                input,
+                output,
+              },
+              update: {
+                input,
+                output,
+              },
+              where: {
+                input_output_problemId: {
+                  input,
+                  output,
+                  problemId,
+                },
+              },
+            })),
+          },
+          title: data.title,
         },
-        testCases: true,
-      },
-      where: {
-        id: problemId,
-      },
+        include: {
+          supportedLanguages: {
+            include: {
+              language: true,
+            },
+          },
+          testCases: true,
+        },
+        where: {
+          id: problemId,
+        },
+      })
     })
+
     return c.json({
       body: updatedProblem.body,
       id: updatedProblem.id,
