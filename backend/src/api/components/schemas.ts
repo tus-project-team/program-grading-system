@@ -26,7 +26,7 @@ export const Problem = z
 
 export const ProblemCreate = Problem.omit({ id: true }).openapi("ProblemCreate")
 
-export const ProblemUpdate = Problem.partial()
+export const ProblemUpdate = Problem
   .omit({ id: true })
   .openapi("ProblemUpdate")
 
