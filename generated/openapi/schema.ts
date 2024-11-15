@@ -152,10 +152,10 @@ export interface components {
       title: string
     }
     ProblemUpdate: {
-      body?: string
-      supported_languages?: components["schemas"]["Language"][]
-      test_cases?: components["schemas"]["TestCase"][]
-      title?: string
+      body: string
+      supported_languages: components["schemas"]["Language"][]
+      test_cases: components["schemas"]["TestCase"][]
+      title: string
     }
     /** @enum {string} */
     SubmissionStatus:
