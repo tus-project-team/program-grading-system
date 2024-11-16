@@ -8,9 +8,9 @@ export const Editor = () => {
   return (
     <MonacoEditor
       className="py-2 pl-1"
-      height="400px"
+      height="100%"
       language="markdown"
-      onChange={(value) => value && setSource(value)}
+      onChange={(value) => setSource(value ?? "")}
       value={source}
     />
   )

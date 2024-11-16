@@ -1,11 +1,32 @@
+import { cn } from "@/lib/utils"
+import { ComponentPropsWithoutRef, FC } from "react"
+
 import { MarkdownEditorProvider } from "../contexts/markdown-editor-context"
+import { MarkdownEditorProviderProps } from "../contexts/markdown-editor-context/markdown-editor-provider"
 import { Editor } from "./editor"
 import { Preview } from "./preview"
 
-export const MarkdownEditor = () => {
+export type MarkdownEditorProps = ComponentPropsWithoutRef<"div"> &
+  MarkdownEditorProviderProps
+
+export const MarkdownEditor: FC<MarkdownEditorProps> = ({
+  className,
+  defaultSource,
+  onChangeSource,
+  ...props
+}) => {
   return (
-    <MarkdownEditorProvider>
-      <div className="divide grid grid-cols-2 divide-x rounded-lg border">
+    <MarkdownEditorProvider
+      defaultSource={defaultSource}
+      onChangeSource={onChangeSource}
+    >
+      <div
+        className={cn(
+          "divide grid h-full grid-cols-2 divide-x rounded-md border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          className,
+        )}
+        {...props}
+      >
         <Editor />
         <Preview />
       </div>
