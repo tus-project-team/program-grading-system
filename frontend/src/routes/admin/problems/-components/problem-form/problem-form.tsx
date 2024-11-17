@@ -284,7 +284,7 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                       </ul>
                     </div>
                   ) : (
-                    <span>問題を更新</span>
+                    <span>{submitButtonLabel}</span>
                   )}
                 </TooltipContent>
               </Tooltip>
