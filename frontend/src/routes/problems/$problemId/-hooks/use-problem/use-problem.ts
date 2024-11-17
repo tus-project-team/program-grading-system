@@ -1,6 +1,6 @@
 import { useContext } from "react"
 
-import { ProblemContext } from "../../-contexts/problem-context"
+import { ProblemContext } from "../../-context/problem-context"
 
 export const useProblem = () => {
   const context = useContext(ProblemContext)

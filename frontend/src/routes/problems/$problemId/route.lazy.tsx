@@ -25,7 +25,7 @@ import { useEffect } from "react"
 import { CodePanel } from "./-components/code-panel"
 import { InfoPanel } from "./-components/info-panel"
 import { ProblemPanel } from "./-components/problem-panel"
-import { ProblemProvider } from "./-contexts/problem-context"
+import { ProblemProvider } from "./-context/problem-context"
 
 const Problem = () => {
   const { problemId } = Route.useParams()

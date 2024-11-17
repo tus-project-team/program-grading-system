@@ -13,6 +13,7 @@
   - [**OpenAPI TypeScript**](https://openapi-ts.dev/) - OpenAPI Client Generator (used for type-safe API requests)
 - **Components**:
   - [**shadcn/ui**](https://ui.shadcn.com/) - UI Components
+  - [**Radix UI**](https://radix-ui.com/) - Headless UI Components Library
 - **Styling**:
   - [**Tailwind CSS**](https://tailwindcss.com/) - Utility-First CSS Framework
 - **Language**:
@@ -24,6 +25,9 @@
   - [**Lucide**](https://lucide.dev/) - Icons
   - [**Monaco Editor**](https://microsoft.github.io/monaco-editor/) - Code Editor
   - [**date-fns**](https://date-fns.org/) - Date Utility Library
+  - [**TanStack Table**](https://tanstack.com/table/latest) - Table Library
+  - [**TanStack Form**](https://tanstack.com/form/latest) - Form Library
+  - [**Valibot**](https://valibot.dev/) - Validation Library
   - [**MSW**](https://mswjs.io/) - Mock Service Worker (used for mocking API requests)
 
 ## Directory Structure
