@@ -1,12 +1,6 @@
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
@@ -15,19 +9,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { MarkdownEditor } from "@/features/markdown-editor"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { ColumnDef } from "@tanstack/react-table"
+import { useForm } from "@tanstack/react-form"
+import { zodValidator } from "@tanstack/zod-form-adapter"
 import { Trash2Icon } from "lucide-react"
-import { components } from "openapi/schema"
 import { FC, ReactNode } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { DataTable } from "./data-table"
 
-type TestCase = components["schemas"]["TestCase"]
-
-const formSchema = z.object({
+const problemSchema = z.object({
   body: z.string(),
   supported_languages: z.array(
     z.object({
@@ -46,8 +36,8 @@ const formSchema = z.object({
 
 export type ProblemFormProps = {
   children?: ReactNode
-  onSubmit: (values: z.infer<typeof formSchema>) => void
-  problem: z.infer<typeof formSchema>
+  onSubmit: (values: z.infer<typeof problemSchema>) => void
+  problem: z.infer<typeof problemSchema>
 }
 
 export const ProblemForm: FC<ProblemFormProps> = ({
@@ -55,118 +45,157 @@ export const ProblemForm: FC<ProblemFormProps> = ({
   onSubmit,
   problem,
 }) => {
-  const testCasesColumns: ColumnDef<TestCase>[] = [
-    {
-      accessorKey: "input",
-      cell: ({ row }) => (
-        <Textarea
-          className="min-h-fit"
-          placeholder="Input"
-          rows={1}
-          {...form.register(`test_cases.${row.index}.input`)}
-        />
-      ),
-      header: "Input",
-    },
-    {
-      accessorKey: "output",
-      cell: ({ row }) => (
-        <Textarea
-          className="min-h-fit"
-          placeholder="Expected output"
-          rows={1}
-          {...form.register(`test_cases.${row.index}.output`)}
-        />
-      ),
-      header: "Output",
-    },
-    {
-      cell: ({ row }) => (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => testCases.remove(row.index)}
-                size="icon"
-                type="button"
-                variant="destructive"
-              >
-                <Trash2Icon strokeWidth={2.5} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <span>テストケースを削除</span>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ),
-      id: "actions",
-      size: 5,
-    },
-  ]
-
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     defaultValues: problem,
-    resolver: zodResolver(formSchema),
-  })
-
-  const testCases = useFieldArray({
-    control: form.control,
-    name: "test_cases",
+    onSubmit: (values) => {
+      console.log(values.value)
+      onSubmit(values.value)
+    },
+    validatorAdapter: zodValidator(),
+    validators: {
+      onChange: problemSchema,
+    },
   })
 
   return (
-    <Form {...form}>
-      <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>タイトル</FormLabel>
-              <FormControl>
-                <Input placeholder="問題のタイトル" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="body"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>問題文</FormLabel>
-              <FormControl>
-                <MarkdownEditor
-                  className="h-96"
-                  defaultSource={field.value}
-                  onChangeSource={(source) => form.setValue("body", source)}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <div>
-          <h2 className="mb-4 text-lg font-semibold">テストケース</h2>
-          <DataTable columns={testCasesColumns} data={testCases.fields}>
-            <Button
-              className="w-full rounded-b-md rounded-t-none border-t"
-              onClick={() => testCases.append({ input: "", output: "" })}
-              type="button"
-              variant="ghost"
+    <form
+      className="space-y-8"
+      onSubmit={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        form.handleSubmit()
+      }}
+    >
+      <form.Field name="title">
+        {(field) => (
+          <div className="space-y-2">
+            <Label htmlFor={field.name}>問題のタイトル</Label>
+            <Input
+              id={field.name}
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              value={field.state.value}
+            />
+            {/* TODO: Display field info (e.g., validation errors) */}
+          </div>
+        )}
+      </form.Field>
+      <form.Field name="body">
+        {(field) => (
+          <div className="space-y-2">
+            <Label htmlFor={field.name}>問題文</Label>
+            <MarkdownEditor
+              className="h-96"
+              id={field.name}
+              onBlur={field.handleBlur}
+              setSource={field.handleChange}
+              source={field.state.value}
+            />
+          </div>
+        )}
+      </form.Field>
+      <div>
+        <h2 className="mb-4 text-lg font-semibold">テストケース</h2>
+        <form.Field mode="array" name="test_cases">
+          {(testCases) => (
+            <DataTable
+              columns={[
+                {
+                  accessorKey: "input",
+                  cell: ({ row }) => (
+                    <form.Field
+                      key={row.index}
+                      name={`test_cases[${row.index}].input`}
+                    >
+                      {(field) => (
+                        <Textarea
+                          className="min-h-fit"
+                          id={field.name}
+                          name={field.name}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Input"
+                          rows={1}
+                          value={field.state.value}
+                        />
+                      )}
+                    </form.Field>
+                  ),
+                  header: "Input",
+                },
+                {
+                  accessorKey: "output",
+                  cell: ({ row }) => (
+                    <form.Field
+                      key={row.index}
+                      name={`test_cases[${row.index}].output`}
+                    >
+                      {(field) => (
+                        <Textarea
+                          className="min-h-fit"
+                          id={field.name}
+                          name={field.name}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Expected output"
+                          rows={1}
+                          value={field.state.value}
+                        />
+                      )}
+                    </form.Field>
+                  ),
+                  header: "Output",
+                },
+                {
+                  cell: ({ row }) => (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => testCases.removeValue(row.index)}
+                            size="icon"
+                            type="button"
+                            variant="destructive"
+                          >
+                            <Trash2Icon strokeWidth={2.5} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span>テストケースを削除</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ),
+                  id: "actions",
+                  meta: {
+                    className: "w-4",
+                  },
+                },
+              ]}
+              data={testCases.state.value}
             >
-              <span className="mr-auto text-muted-foreground">+ 新規追加</span>
-            </Button>
-          </DataTable>
-        </div>
-        <div>
-          <h2 className="mb-4 text-lg font-semibold">
-            解答可能なプログラミング言語
-          </h2>
-          <p>WIP</p>
-        </div>
-        <div className="flex flex-row justify-end">{children}</div>
-      </form>
-    </Form>
+              <Button
+                className="w-full rounded-b-md rounded-t-none border-t"
+                onClick={() => testCases.pushValue({ input: "", output: "" })}
+                type="button"
+                variant="ghost"
+              >
+                <span className="mr-auto text-muted-foreground">
+                  + 新規追加
+                </span>
+              </Button>
+            </DataTable>
+          )}
+        </form.Field>
+      </div>
+      <div>
+        <h2 className="mb-4 text-lg font-semibold">
+          解答可能なプログラミング言語
+        </h2>
+        <p>WIP</p>
+      </div>
+      <div className="flex flex-row justify-end">{children}</div>
+    </form>
   )
 }

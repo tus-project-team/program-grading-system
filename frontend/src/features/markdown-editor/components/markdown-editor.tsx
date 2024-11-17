@@ -13,12 +13,16 @@ export const MarkdownEditor: FC<MarkdownEditorProps> = ({
   className,
   defaultSource,
   onChangeSource,
+  setSource,
+  source,
   ...props
 }) => {
   return (
     <MarkdownEditorProvider
       defaultSource={defaultSource}
       onChangeSource={onChangeSource}
+      setSource={setSource}
+      source={source}
     >
       <div
         className={cn(
