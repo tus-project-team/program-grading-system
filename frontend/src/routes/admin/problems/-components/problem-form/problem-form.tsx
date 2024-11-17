@@ -34,10 +34,12 @@ const problemSchema = z.object({
   title: z.string(),
 })
 
+type Problem = z.infer<typeof problemSchema>
+
 export type ProblemFormProps = {
   children?: ReactNode
-  onSubmit: (values: z.infer<typeof problemSchema>) => void
-  problem: z.infer<typeof problemSchema>
+  onSubmit: (values: Problem) => void
+  problem: Problem
 }
 
 export const ProblemForm: FC<ProblemFormProps> = ({
