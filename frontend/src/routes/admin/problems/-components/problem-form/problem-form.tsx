@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { MarkdownEditor } from "@/features/markdown-editor"
+import { cn } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { Trash2Icon } from "lucide-react"
@@ -95,6 +96,9 @@ export const ProblemForm: FC<ProblemFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor={field.name}>問題のタイトル</Label>
             <Input
+              className={cn(
+                field.state.meta.errors.length > 0 && "border-destructive",
+              )}
               id={field.name}
               name={field.name}
               onBlur={field.handleBlur}
@@ -107,7 +111,12 @@ export const ProblemForm: FC<ProblemFormProps> = ({
       </form.Field>
       <form.Field name="body">
         {(field) => (
-          <div className="space-y-2">
+          <div
+            className={cn(
+              "space-y-2",
+              field.state.meta.errors.length > 0 && "border-destructive",
+            )}
+          >
             <Label htmlFor={field.name}>問題文</Label>
             <MarkdownEditor
               className="h-[600px] md:h-[400px]"
@@ -137,7 +146,11 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                         {(field) => (
                           <>
                             <Textarea
-                              className="min-h-fit font-mono"
+                              className={cn(
+                                "min-h-fit font-mono",
+                                field.state.meta.errors.length > 0 &&
+                                  "border-destructive",
+                              )}
                               id={field.name}
                               name={field.name}
                               onBlur={field.handleBlur}
@@ -167,7 +180,11 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                         {(field) => (
                           <>
                             <Textarea
-                              className="min-h-fit font-mono"
+                              className={cn(
+                                "min-h-fit font-mono",
+                                field.state.meta.errors.length > 0 &&
+                                  "border-destructive",
+                              )}
                               id={field.name}
                               name={field.name}
                               onBlur={field.handleBlur}
