@@ -2,7 +2,7 @@ import { $api } from "@/lib/api"
 import { createLazyFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 
-import { ProblemForm, SubmitButton } from "../-components/problem-form"
+import { ProblemForm } from "../-components/problem-form"
 
 const Problem = () => {
   const { problemId } = Route.useParams()
@@ -34,13 +34,9 @@ const Problem = () => {
           })
         }}
         problem={problem.data}
-      >
-        <SubmitButton
-          label="問題を更新"
-          submitting={updateProblem.isPending}
-          submittingLabel="問題を更新中..."
-        />
-      </ProblemForm>
+        submitButtonLabel="問題を更新"
+        submitButtonSubmittingLabel="問題を更新中..."
+      />
     </div>
   )
 }
