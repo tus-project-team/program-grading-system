@@ -11,12 +11,13 @@ import {
 import { MarkdownEditor } from "@/features/markdown-editor"
 import { useForm } from "@tanstack/react-form"
 import { valibotValidator } from "@tanstack/valibot-form-adapter"
-import { LoaderCircleIcon, Trash2Icon } from "lucide-react"
+import { Trash2Icon } from "lucide-react"
 import { FC } from "react"
 import * as v from "valibot"
 
 import { DataTable } from "./data-table"
 import { FieldInfo } from "./field-info"
+import { SubmitButton } from "./submit-button"
 
 const problemSchema = v.object({
   body: v.string(),
@@ -245,50 +246,13 @@ export const ProblemForm: FC<ProblemFormProps> = ({
           })}
         >
           {({ canSubmit, errors, isSubmitting }) => (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-disabled={!canSubmit}
-                    className="aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-primary"
-                    onClick={(e) => {
-                      if (!canSubmit) {
-                        e.preventDefault()
-                      }
-                    }}
-                    type="submit"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <LoaderCircleIcon className="animate-spin" />
-                        <span className="ml-2">
-                          {submitButtonSubmittingLabel}
-                        </span>
-                      </>
-                    ) : (
-                      submitButtonLabel
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {errors.length > 0 ? (
-                    <div>
-                      <span>次のエラーを修正してください：</span>
-                      <ul className="list-inside list-disc">
-                        {errors.map((error, index) =>
-                          error
-                            ?.toString()
-                            .split(", ")
-                            .map((err, i) => <li key={index + i}>{err}</li>),
-                        )}
-                      </ul>
-                    </div>
-                  ) : (
-                    <span>{submitButtonLabel}</span>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <SubmitButton
+              canSubmit={canSubmit}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              label={submitButtonLabel}
+              submittingLabel={submitButtonSubmittingLabel}
+            />
           )}
         </form.Subscribe>
       </div>
