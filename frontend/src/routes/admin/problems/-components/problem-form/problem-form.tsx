@@ -10,31 +10,31 @@ import {
 } from "@/components/ui/tooltip"
 import { MarkdownEditor } from "@/features/markdown-editor"
 import { useForm } from "@tanstack/react-form"
-import { zodValidator } from "@tanstack/zod-form-adapter"
+import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { Trash2Icon } from "lucide-react"
 import { FC, ReactNode } from "react"
-import { z } from "zod"
+import * as v from "valibot"
 
 import { DataTable } from "./data-table"
 
-const problemSchema = z.object({
-  body: z.string(),
-  supported_languages: z.array(
-    z.object({
-      name: z.string(),
-      version: z.string(),
+const problemSchema = v.object({
+  body: v.string(),
+  supported_languages: v.set(
+    v.object({
+      name: v.string(),
+      version: v.string(),
     }),
   ),
-  test_cases: z.array(
-    z.object({
-      input: z.string(),
-      output: z.string(),
+  test_cases: v.array(
+    v.object({
+      input: v.string(),
+      output: v.string(),
     }),
   ),
-  title: z.string(),
+  title: v.string(),
 })
 
-type Problem = z.infer<typeof problemSchema>
+type Problem = v.InferInput<typeof problemSchema>
 
 export type ProblemFormProps = {
   children?: ReactNode
@@ -53,7 +53,7 @@ export const ProblemForm: FC<ProblemFormProps> = ({
       console.log(values.value)
       onSubmit(values.value)
     },
-    validatorAdapter: zodValidator(),
+    validatorAdapter: valibotValidator(),
     validators: {
       onChange: problemSchema,
     },
