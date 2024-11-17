@@ -86,7 +86,7 @@ export const ProblemForm: FC<ProblemFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor={field.name}>問題文</Label>
             <MarkdownEditor
-              className="h-96"
+              className="h-[600px] md:h-[400px]"
               id={field.name}
               onBlur={field.handleBlur}
               setSource={field.handleChange}
@@ -110,14 +110,16 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                     >
                       {(field) => (
                         <Textarea
-                          className="min-h-fit"
+                          className="min-h-fit font-mono"
                           id={field.name}
                           name={field.name}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
                           placeholder="Input"
                           rows={1}
+                          spellCheck="false"
                           value={field.state.value}
+                          wrap="off"
                         />
                       )}
                     </form.Field>
@@ -133,14 +135,16 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                     >
                       {(field) => (
                         <Textarea
-                          className="min-h-fit"
+                          className="min-h-fit font-mono"
                           id={field.name}
                           name={field.name}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
                           placeholder="Expected output"
                           rows={1}
+                          spellCheck="false"
                           value={field.state.value}
+                          wrap="off"
                         />
                       )}
                     </form.Field>

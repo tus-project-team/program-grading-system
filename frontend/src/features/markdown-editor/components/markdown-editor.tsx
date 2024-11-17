@@ -26,7 +26,7 @@ export const MarkdownEditor: FC<MarkdownEditorProps> = ({
     >
       <div
         className={cn(
-          "divide grid h-full grid-cols-2 divide-x rounded-md border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "divide grid h-full grid-cols-1 grid-rows-[50%_50%] divide-y rounded-md border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:grid-cols-2 md:grid-rows-1 md:divide-x md:divide-y-0",
           className,
         )}
         {...props}

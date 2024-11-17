@@ -17,7 +17,7 @@ const Problem = () => {
   const updateProblem = $api.useMutation("put", "/api/problems/{problemId}")
 
   return (
-    <div className="mx-auto w-full max-w-screen-lg py-6">
+    <div className="mx-auto w-full max-w-screen-xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-semibold">問題の更新</h1>
       <ProblemForm
         onSubmit={(values) => {
