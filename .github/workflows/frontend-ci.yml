@@ -92,5 +92,5 @@ jobs:
         uses: jdx/mise-action@53d027c2e96fed8f955f5d95bff910a3e031cc58 # v2.1.6
       - name: Install dependencies
         run: bun install --frozen-lockfile
-      - name: Check build
+      - name: Check test
         run: bun run test
