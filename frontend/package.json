@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "vitest",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "lint:write": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix .",
     "format": "prettier --ignore-path .gitignore --check .",
