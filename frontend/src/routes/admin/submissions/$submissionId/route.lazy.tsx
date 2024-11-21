@@ -23,7 +23,7 @@ export const SubmissionDetail = () => {
   return (
     <div className="container mx-auto flex h-screen flex-col p-4">
       <div className="mb-6">
-        <Link href=".">
+        <Link href="..">
           <Button size="sm" variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             提出一覧に戻る
