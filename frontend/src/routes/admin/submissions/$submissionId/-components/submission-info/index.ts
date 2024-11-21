@@ -1,1 +1,1 @@
-export { SubmissionInfo } from './submission-info';
+export { SubmissionInfo } from "./submission-info"
