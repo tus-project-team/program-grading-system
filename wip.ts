@@ -19,7 +19,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Route as rootRoute } from "./routes/__root"
 import { Route as ProblemsProblemIdRouteImport } from "./routes/problems/$problemId/route"
 import { Route as AdminProblemsKannriImport } from "./routes/admin/problems/kannri"
-import { Route as AdminProblemsProblemIdIndexImport } from "./routes/admin/problems/$problemId/index"
 
 // Create Virtual Routes
 
@@ -56,17 +55,6 @@ const AdminProblemsKannriRoute = AdminProblemsKannriImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AdminProblemsProblemIdIndexRoute =
-  AdminProblemsProblemIdIndexImport.update({
-    id: "/admin/problems/$problemId/",
-    path: "/admin/problems/$problemId/",
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import("./routes/admin/problems/$problemId/index.lazy").then(
-      (d) => d.Route,
-    ),
-  )
-
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
@@ -99,13 +87,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AdminProblemsKannriImport
       parentRoute: typeof rootRoute
     }
-    "/admin/problems/$problemId/": {
-      id: "/admin/problems/$problemId/"
-      path: "/admin/problems/$problemId"
-      fullPath: "/admin/problems/$problemId"
-      preLoaderRoute: typeof AdminProblemsProblemIdIndexImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -116,7 +97,6 @@ export interface FileRoutesByFullPath {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
-  "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -124,7 +104,6 @@ export interface FileRoutesByTo {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
-  "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
 
 export interface FileRoutesById {
@@ -133,7 +112,6 @@ export interface FileRoutesById {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems/": typeof ProblemsIndexLazyRoute
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
-  "/admin/problems/$problemId/": typeof AdminProblemsProblemIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -143,21 +121,14 @@ export interface FileRouteTypes {
     | "/problems/$problemId"
     | "/problems"
     | "/admin/problems/kannri"
-    | "/admin/problems/$problemId"
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | "/"
-    | "/problems/$problemId"
-    | "/problems"
-    | "/admin/problems/kannri"
-    | "/admin/problems/$problemId"
+  to: "/" | "/problems/$problemId" | "/problems" | "/admin/problems/kannri"
   id:
     | "__root__"
     | "/"
     | "/problems/$problemId"
     | "/problems/"
     | "/admin/problems/kannri"
-    | "/admin/problems/$problemId/"
   fileRoutesById: FileRoutesById
 }
 
@@ -166,7 +137,6 @@ export interface RootRouteChildren {
   ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
   ProblemsIndexLazyRoute: typeof ProblemsIndexLazyRoute
   AdminProblemsKannriRoute: typeof AdminProblemsKannriRoute
-  AdminProblemsProblemIdIndexRoute: typeof AdminProblemsProblemIdIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -174,7 +144,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProblemsProblemIdRouteRoute: ProblemsProblemIdRouteRoute,
   ProblemsIndexLazyRoute: ProblemsIndexLazyRoute,
   AdminProblemsKannriRoute: AdminProblemsKannriRoute,
-  AdminProblemsProblemIdIndexRoute: AdminProblemsProblemIdIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -190,8 +159,7 @@ export const routeTree = rootRoute
         "/",
         "/problems/$problemId",
         "/problems/",
-        "/admin/problems/kannri",
-        "/admin/problems/$problemId/"
+        "/admin/problems/kannri"
       ]
     },
     "/": {
@@ -205,9 +173,6 @@ export const routeTree = rootRoute
     },
     "/admin/problems/kannri": {
       "filePath": "admin/problems/kannri.tsx"
-    },
-    "/admin/problems/$problemId/": {
-      "filePath": "admin/problems/$problemId/index.tsx"
     }
   }
 }
