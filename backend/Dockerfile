@@ -52,7 +52,7 @@ RUN mkdir -p /tmp/prod/app/node_modules/.prisma/client \
     chmod 777 /tmp/prod/app/prisma/data && \
     chmod 666 /tmp/prod/app/prisma/data/deploy.db
 
-FROM gcr.io/distroless/cc-debian12:nonroot@sha256:fe61a509ada74719dbab670d4c0d127bd9b2e0114d18d4bb0a3b25c5d6695a49 AS production
+FROM gcr.io/distroless/cc-debian12:nonroot@sha256:ce79e1448516ef8909ccdc7f09b7e9186c53e5c964394580f92d9726a349286c AS production
 WORKDIR /
 COPY --from=build /tmp/prod/node_modules /node_modules
 COPY --from=build /tmp/prod/app /app

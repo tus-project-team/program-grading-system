@@ -20,6 +20,26 @@
 
 アプリ全体で使われる[コンテキスト](https://ja.react.dev/learn/passing-data-deeply-with-context)がここにあります。
 
+#### `src/features`
+
+機能ごとにまとめられたコンポーネント、コンテキスト、フックなどがここにあります。
+
+##### `src/features/<feature-name>/components`
+
+機能を構成するコンポーネントがここにあります。
+
+##### `src/features/<feature-name>/context`
+
+機能を構成するコンテキストがここにあります。
+
+##### `src/features/<feature-name>/hooks`
+
+機能を構成するフックがここにあります。
+
+##### `src/features/<feature-name>/lib`
+
+機能を構成する関数などがここにあります。
+
 #### `src/hooks`
 
 アプリ全体で使われる[フック](https://ja.react.dev/learn/reusing-logic-with-custom-hooks)がここにあります。
@@ -45,7 +65,7 @@ APIクライアントやユーティリティ関数などがここにありま�
 | Directory     | Description                      |
 | ------------- | -------------------------------- |
 | `-components` | ルート内で使われるコンポーネント |
-| `-contexts`   | ルート内で使われるコンテキスト   |
+| `-context`    | ルート内で使われるコンテキスト   |
 | `-hooks`      | ルート内で使われるフック         |
 | `-lib`        | ルート内で使われる関数など       |
 
@@ -62,7 +82,7 @@ src/routes/problems/
 │        ├── index.ts        // 公開するコンポーネントをexportする
 │        ├── problem.tsx     // 問題表示
 │        └── solution.tsx    // 解答表示
-├── -contexts
+├── -context
 │   └── problem
 │        ├── index.ts        // 公開するコンテキスト等をexportする
 │        └── problem.tsx     // 問題コンテキスト

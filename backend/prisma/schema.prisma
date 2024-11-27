@@ -49,6 +49,8 @@ model TestCase {
   results   TestResult[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+
+  @@unique([input, output, problemId])
 }
 
 model TestResult {
@@ -62,6 +64,8 @@ model TestResult {
   submissionId Int?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  @@unique([testCaseId, submissionId])
 }
 
 model TestStatus {
@@ -89,6 +93,8 @@ model Language {
   problemId       Int?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+
+  @@unique([languageName, languageVersion, problemId])
 }
 
 model Submission {
