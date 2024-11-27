@@ -244,3 +244,39 @@ describe("updateProblem", () => {
     expect(response.status).toBe(404)
   })
 })
+
+describe("getProblem", () => {
+  test("should retrieve a problem by ID", async () => {
+    const problem = await createProblem()
+    const response = await testClient(app).problems[":problemId"].$get({
+      param: {
+        problemId: problem.id.toString(),
+      },
+    })
+
+    expect(response.status).toBe(200)
+    if (response.status !== 200) return // type guard
+
+    const actual = await response.json()
+    expect(actual).toEqual({
+      body: problem.body,
+      id: problem.id,
+      supported_languages: problem.supportedLanguages.map(({languageName, languageVersion}) => ({
+        name: languageName,
+        version: languageVersion
+      })),
+      test_cases: problem.testCases,
+      title: problem.title
+    } satisfies typeof actual)
+  })
+
+  test("should return 404 if problem not found", async () => {
+    const problemCount = await prisma.problem.count()
+    const response = await testClient(app).problems[":problemId"].$get({
+      param: {
+        problemId: (problemCount + 1).toString(),
+      },
+    })
+    expect(response.status).toBe(404)
+  })
+})
