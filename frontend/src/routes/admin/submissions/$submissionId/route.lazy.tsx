@@ -32,7 +32,7 @@ export const SubmissionDetail = () => {
       </div>
       <h1 className="mb-6 text-2xl font-bold">提出詳細</h1>
       <div className="flex flex-1 gap-6">
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col gap-6">
           <SubmissionInfo submission={data} />
           <TestResults
             submission={data}
