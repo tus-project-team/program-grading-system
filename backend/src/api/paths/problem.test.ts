@@ -261,12 +261,14 @@ describe("getProblem", () => {
     expect(actual).toEqual({
       body: problem.body,
       id: problem.id,
-      supported_languages: problem.supportedLanguages.map(({languageName, languageVersion}) => ({
-        name: languageName,
-        version: languageVersion
-      })),
+      supported_languages: problem.supportedLanguages.map(
+        ({ languageName, languageVersion }) => ({
+          name: languageName,
+          version: languageVersion,
+        }),
+      ),
       test_cases: problem.testCases,
-      title: problem.title
+      title: problem.title,
     } satisfies typeof actual)
   })
 
