@@ -7,11 +7,7 @@ import { ReadOnlyCodeBlock } from "./read-only-code-block"
 
 type Submission = components["schemas"]["Submission"]
 
-export const SubmittedCode = ({
-  submission,
-}: {
-  submission: Submission
-}) => {
+export const SubmittedCode = ({ submission }: { submission: Submission }) => {
   const [isCopied, setIsCopied] = useState(false)
 
   const copyToClipboard = async () => {
@@ -28,10 +24,16 @@ export const SubmittedCode = ({
     <Card className="flex flex-1 flex-col">
       <CardHeader>
         <CardTitle>提出されたコード</CardTitle>
-        <div className="relative">
+      </CardHeader>
+      <CardContent className="flex-1 overflow-auto">
+        <div className="relative h-full overflow-x-auto rounded-md bg-gray-100 p-4">
+          <ReadOnlyCodeBlock
+            code={submission.code}
+            language={submission.language.name.toLowerCase()}
+          />
           <button
             aria-label="コードをコピー"
-            className="absolute right-2 top-2 rounded-md bg-white p-2 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute right-5 top-5 rounded-md bg-white p-2 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={copyToClipboard}
           >
             {isCopied ? (
@@ -40,14 +42,6 @@ export const SubmittedCode = ({
               <Copy className="h-4 w-4" />
             )}
           </button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-auto">
-        <div className="h-full overflow-x-auto rounded-md bg-gray-100 p-4">
-          <ReadOnlyCodeBlock
-            code={submission.code}
-            language={submission.language.name.toLowerCase()}
-          />
         </div>
       </CardContent>
     </Card>
