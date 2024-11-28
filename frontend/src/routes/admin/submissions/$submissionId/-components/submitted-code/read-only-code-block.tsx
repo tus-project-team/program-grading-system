@@ -11,6 +11,7 @@ export const ReadOnlyCodeBlock = ({
     height="100%"
     language={language}
     options={{
+      fixedOverflowWidgets: true,
       lineNumbers: "on",
       minimap: { enabled: false },
       readOnly: true,
