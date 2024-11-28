@@ -1,2 +1,7 @@
-// src/routes/problems/-contexts/index.ts
-export { ProblemsProvider, useProblemsContext } from "./problems-context"
+export {
+  type Language,
+  type Problem,
+  ProblemContext,
+  ProblemProvider,
+  type ProblemProviderProps,
+} from "./problems-context"
