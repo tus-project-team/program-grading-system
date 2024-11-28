@@ -18,13 +18,13 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { Route as rootRoute } from "./routes/__root"
 import { Route as ProblemsProblemIdRouteImport } from "./routes/problems/$problemId/route"
-import { Route as AdminProblemsKannriImport } from "./routes/admin/problems/kannri"
 import { Route as AdminProblemsProblemIdIndexImport } from "./routes/admin/problems/$problemId/index"
 
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute("/")()
 const ProblemsIndexLazyImport = createFileRoute("/problems/")()
+const AdminProblemsIndexLazyImport = createFileRoute("/admin/problems/")()
 
 // Create/Update Routes
 
@@ -50,11 +50,13 @@ const ProblemsProblemIdRouteRoute = ProblemsProblemIdRouteImport.update({
   import("./routes/problems/$problemId/route.lazy").then((d) => d.Route),
 )
 
-const AdminProblemsKannriRoute = AdminProblemsKannriImport.update({
-  id: "/admin/problems/kannri",
-  path: "/admin/problems/kannri",
+const AdminProblemsIndexLazyRoute = AdminProblemsIndexLazyImport.update({
+  id: "/admin/problems/",
+  path: "/admin/problems/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any).lazy(() =>
+  import("./routes/admin/problems/index.lazy").then((d) => d.Route),
+)
 
 const AdminProblemsProblemIdIndexRoute =
   AdminProblemsProblemIdIndexImport.update({
@@ -92,11 +94,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProblemsIndexLazyImport
       parentRoute: typeof rootRoute
     }
-    "/admin/problems/kannri": {
-      id: "/admin/problems/kannri"
-      path: "/admin/problems/kannri"
-      fullPath: "/admin/problems/kannri"
-      preLoaderRoute: typeof AdminProblemsKannriImport
+    "/admin/problems/": {
+      id: "/admin/problems/"
+      path: "/admin/problems"
+      fullPath: "/admin/problems"
+      preLoaderRoute: typeof AdminProblemsIndexLazyImport
       parentRoute: typeof rootRoute
     }
     "/admin/problems/$problemId/": {
@@ -115,7 +117,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
-  "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+  "/admin/problems": typeof AdminProblemsIndexLazyRoute
   "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
 
@@ -123,7 +125,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
-  "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+  "/admin/problems": typeof AdminProblemsIndexLazyRoute
   "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
 
@@ -132,7 +134,7 @@ export interface FileRoutesById {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems/": typeof ProblemsIndexLazyRoute
-  "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+  "/admin/problems/": typeof AdminProblemsIndexLazyRoute
   "/admin/problems/$problemId/": typeof AdminProblemsProblemIdIndexRoute
 }
 
@@ -142,21 +144,21 @@ export interface FileRouteTypes {
     | "/"
     | "/problems/$problemId"
     | "/problems"
-    | "/admin/problems/kannri"
+    | "/admin/problems"
     | "/admin/problems/$problemId"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
     | "/problems/$problemId"
     | "/problems"
-    | "/admin/problems/kannri"
+    | "/admin/problems"
     | "/admin/problems/$problemId"
   id:
     | "__root__"
     | "/"
     | "/problems/$problemId"
     | "/problems/"
-    | "/admin/problems/kannri"
+    | "/admin/problems/"
     | "/admin/problems/$problemId/"
   fileRoutesById: FileRoutesById
 }
@@ -165,7 +167,7 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
   ProblemsIndexLazyRoute: typeof ProblemsIndexLazyRoute
-  AdminProblemsKannriRoute: typeof AdminProblemsKannriRoute
+  AdminProblemsIndexLazyRoute: typeof AdminProblemsIndexLazyRoute
   AdminProblemsProblemIdIndexRoute: typeof AdminProblemsProblemIdIndexRoute
 }
 
@@ -173,7 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   ProblemsProblemIdRouteRoute: ProblemsProblemIdRouteRoute,
   ProblemsIndexLazyRoute: ProblemsIndexLazyRoute,
-  AdminProblemsKannriRoute: AdminProblemsKannriRoute,
+  AdminProblemsIndexLazyRoute: AdminProblemsIndexLazyRoute,
   AdminProblemsProblemIdIndexRoute: AdminProblemsProblemIdIndexRoute,
 }
 
@@ -190,7 +192,7 @@ export const routeTree = rootRoute
         "/",
         "/problems/$problemId",
         "/problems/",
-        "/admin/problems/kannri",
+        "/admin/problems/",
         "/admin/problems/$problemId/"
       ]
     },
@@ -203,8 +205,8 @@ export const routeTree = rootRoute
     "/problems/": {
       "filePath": "problems/index.lazy.tsx"
     },
-    "/admin/problems/kannri": {
-      "filePath": "admin/problems/kannri.tsx"
+    "/admin/problems/": {
+      "filePath": "admin/problems/index.lazy.tsx"
     },
     "/admin/problems/$problemId/": {
       "filePath": "admin/problems/$problemId/index.tsx"
