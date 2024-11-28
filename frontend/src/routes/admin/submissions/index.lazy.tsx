@@ -72,7 +72,7 @@ const columns = [
   }),
 ]
 
-export default function SubmissionList() {
+const SubmissionList = () => {
   const submissions = $api.useSuspenseQuery("get", "/api/submissions")
 
   const table = useReactTable({
