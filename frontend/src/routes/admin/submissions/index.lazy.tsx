@@ -162,7 +162,7 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleString()
 }
 
-function getStatusColor(status: string) {
+const getStatusColor = (status: string) => {
   switch (status) {
     case "Accepted": {
       return "bg-green-500 hover:bg-green-400"
