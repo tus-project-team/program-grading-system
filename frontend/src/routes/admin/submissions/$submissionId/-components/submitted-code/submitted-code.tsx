@@ -7,7 +7,7 @@ import { ReadOnlyCodeBlock } from "./read-only-code-block"
 
 type Submission = components["schemas"]["Submission"]
 
-export const SubmissionedCode = ({
+export const SubmittedCode = ({
   submission,
 }: {
   submission: Submission

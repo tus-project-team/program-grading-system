@@ -1,1 +1,1 @@
-export { SubmissionedCode } from "./submissioned-code"
+export { SubmittedCode } from "./submitted-code"

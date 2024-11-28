@@ -4,7 +4,7 @@ import { createLazyFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 
 import { SubmissionInfo } from "./-components/submission-info"
-import { SubmissionedCode } from "./-components/submissioned-code"
+import { SubmittedCode } from "./-components/submitted-code"
 import { TestResults } from "./-components/test-results"
 
 export const SubmissionDetail = () => {
@@ -39,7 +39,7 @@ export const SubmissionDetail = () => {
             testCases={problemData.data.test_cases}
           />
         </div>
-        <SubmissionedCode submission={data} />
+        <SubmittedCode submission={data} />
       </div>
     </div>
   )
