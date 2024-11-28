@@ -1,14 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
   Table,
   TableBody,
   TableCell,
@@ -18,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import { $api } from "@/lib/api"
 import { cn } from "@/lib/utils"
-import { createLazyFileRoute } from "@tanstack/react-router"
+import { createLazyFileRoute, Link } from "@tanstack/react-router"
 import {
   createColumnHelper,
   flexRender,
@@ -29,80 +21,59 @@ import {
 } from "@tanstack/react-table"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { components } from "openapi/schema"
-import { useMemo, useState } from "react"
 
 type Submission = components["schemas"]["Submission"]
 
 const columnHelper = createColumnHelper<Submission>()
 
-export default function SubmissionList() {
-  const [selectedSubmission, setSelectedSubmission] = useState<
-    Submission | undefined
-  >()
-  const submissions = $api.useSuspenseQuery("get", "/api/submissions")
+const columns = [
+  columnHelper.accessor("id", {
+    cell: (info) => info.getValue(),
+    header: "ID",
+  }),
+  columnHelper.accessor("student_id", {
+    cell: (info) => info.getValue(),
+    header: "Student ID",
+  }),
+  columnHelper.accessor("problem_id", {
+    cell: (info) => info.getValue(),
+    header: "Problem ID",
+  }),
+  columnHelper.accessor("language", {
+    cell: (info) => `${info.getValue().name} ${info.getValue().version}`,
+    header: "Language",
+  }),
+  columnHelper.accessor("submitted_at", {
+    cell: (info) => formatDate(info.getValue()),
+    header: "Submitted At",
+  }),
+  columnHelper.accessor("result.status", {
+    cell: (info) => (
+      <Badge
+        className={cn(
+          getStatusColor(info.getValue()),
+          "transition-colors duration-200",
+        )}
+      >
+        {info.getValue()}
+      </Badge>
+    ),
+    header: "Status",
+  }),
+  columnHelper.display({
+    cell: (info) => (
+      <Button asChild size="sm" variant="outline">
+        <Link to={`/admin/submissions/${info.row.original.id}`}>
+          View Details
+        </Link>
+      </Button>
+    ),
+    id: "actions",
+  }),
+]
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("id", {
-        cell: (info) => info.getValue(),
-        header: "ID",
-      }),
-      columnHelper.accessor("student_id", {
-        cell: (info) => info.getValue(),
-        header: "Student ID",
-      }),
-      columnHelper.accessor("problem_id", {
-        cell: (info) => info.getValue(),
-        header: "Problem ID",
-      }),
-      columnHelper.accessor("language", {
-        cell: (info) => `${info.getValue().name} ${info.getValue().version}`,
-        header: "Language",
-      }),
-      columnHelper.accessor("submitted_at", {
-        cell: (info) => formatDate(info.getValue()),
-        header: "Submitted At",
-      }),
-      columnHelper.accessor("result.status", {
-        cell: (info) => (
-          <Badge
-            className={cn(
-              getStatusColor(info.getValue()),
-              "transition-colors duration-200",
-            )}
-          >
-            {info.getValue()}
-          </Badge>
-        ),
-        header: "Status",
-      }),
-      columnHelper.display({
-        cell: (info) => (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => setSelectedSubmission(info.row.original)}
-                size="sm"
-                variant="outline"
-              >
-                View Details
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Submission Details</DialogTitle>
-              </DialogHeader>
-              {selectedSubmission && (
-                <SubmissionDetails submission={selectedSubmission} />
-              )}
-            </DialogContent>
-          </Dialog>
-        ),
-        id: "actions",
-      }),
-    ],
-    [selectedSubmission],
-  )
+export default function SubmissionList() {
+  const submissions = $api.useSuspenseQuery("get", "/api/submissions")
 
   const table = useReactTable({
     columns,
@@ -183,47 +154,6 @@ export default function SubmissionList() {
           Next
         </Button>
       </div>
-    </div>
-  )
-}
-
-function SubmissionDetails({ submission }: { submission: Submission }) {
-  return (
-    <div className="mt-4">
-      <h3 className="mb-2 text-lg font-semibold">Code</h3>
-      <ScrollArea className="h-40 rounded-md border p-4">
-        <pre className="text-sm">{submission.code}</pre>
-      </ScrollArea>
-      <h3 className="mb-2 mt-4 text-lg font-semibold">Test Results</h3>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Test Case ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Message</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {submission.test_results.map((result) => (
-            <TableRow key={result.test_case_id}>
-              <TableCell>{result.test_case_id}</TableCell>
-              <TableCell>
-                <Badge
-                  className={cn(
-                    result.status === "Passed"
-                      ? "bg-green-500 hover:bg-green-400"
-                      : "bg-red-500 hover:bg-red-400",
-                    "transition-colors duration-200",
-                  )}
-                >
-                  {result.status}
-                </Badge>
-              </TableCell>
-              <TableCell>{result.message || "-"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   )
 }
