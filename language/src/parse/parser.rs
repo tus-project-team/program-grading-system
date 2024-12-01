@@ -15,23 +15,34 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
-        Parser { tokens, current: 0 }
+        let tokens_without_comments: Vec<Token> = tokens
+            .into_iter()
+            .filter(|token| token.kind != TokenKind::Comment)
+            .collect();
+        Parser {
+            tokens: tokens_without_comments,
+            current: 0,
+        }
     }
 
+    /// Parse the tokens into an AST.
     pub fn parse(&mut self) -> Program {
         self.program()
     }
 
+    /// Peek at the token at the specified offset.
     fn peek_token(&self, offset: usize) -> Option<&Token> {
         self.tokens.get(self.current + offset)
     }
 
+    /// Advance the parser to the next token.
     fn advance_token(&mut self) -> Option<&Token> {
         let token = self.tokens.get(self.current);
         self.current += 1;
         token
     }
 
+    /// Consume a token with the specified kind.
     fn consume_token_kind(&mut self, token_kind: TokenKind) -> Option<&Token> {
         if let Some(token) = self.peek_token(0) {
             if token.kind == token_kind {
@@ -44,6 +55,7 @@ impl Parser {
         }
     }
 
+    /// Consume a token with the specified kind and value.
     fn consume_token(&mut self, token_kind: TokenKind, value: &str) -> Option<&Token> {
         if let Some(token) = self.peek_token(0) {
             if token.kind == token_kind && token.value == value {
@@ -278,6 +290,7 @@ impl Parser {
         })
     }
 
+    /// Consume an add operator.
     fn consume_add_operator(&mut self) -> Option<Operator> {
         let token = {
             let token = self.peek_token(0)?;
@@ -330,6 +343,7 @@ impl Parser {
         })
     }
 
+    /// Consume a mul operator.
     fn consume_mul_operator(&mut self) -> Option<Operator> {
         let token = {
             let token = self.peek_token(0)?;
@@ -2083,5 +2097,126 @@ mod tests {
                 ]
             }
         )
+    }
+
+    #[test]
+    fn parse_returns_function_when_comments() {
+        let source = indoc! {"
+            /// Main function
+            fn main(/* empty */) -> i32 /* 0 or 1 */ {
+                /* return */ 0 // return 0
+            }
+        "};
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).parse();
+        assert_eq!(
+            ast,
+            Program {
+                functions: vec![FunctionDefinition {
+                    name: Identifier {
+                        name: "main".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 21,
+                                line: 2,
+                                column: 4
+                            },
+                            end: Position {
+                                index: 25,
+                                line: 2,
+                                column: 8
+                            }
+                        }
+                    },
+                    parameters: Parameters {
+                        parameters: vec![],
+                        location: Location {
+                            start: Position {
+                                index: 25,
+                                line: 2,
+                                column: 8
+                            },
+                            end: Position {
+                                index: 38,
+                                line: 2,
+                                column: 21
+                            }
+                        }
+                    },
+                    return_type: Type {
+                        name: TypeKind::I32,
+                        location: Location {
+                            start: Position {
+                                index: 42,
+                                line: 2,
+                                column: 25
+                            },
+                            end: Position {
+                                index: 45,
+                                line: 2,
+                                column: 28
+                            }
+                        }
+                    },
+                    body: Block {
+                        statements: Statements {
+                            statements: vec![Statement::Expression(Expression::IntegerLiteral(
+                                IntegerLiteral {
+                                    value: "0".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 78,
+                                            line: 3,
+                                            column: 18
+                                        },
+                                        end: Position {
+                                            index: 79,
+                                            line: 3,
+                                            column: 19
+                                        }
+                                    }
+                                }
+                            ))],
+                            location: Location {
+                                start: Position {
+                                    index: 59,
+                                    line: 2,
+                                    column: 42
+                                },
+                                end: Position {
+                                    index: 93,
+                                    line: 4,
+                                    column: 2
+                                }
+                            }
+                        },
+                        location: Location {
+                            start: Position {
+                                index: 59,
+                                line: 2,
+                                column: 42
+                            },
+                            end: Position {
+                                index: 93,
+                                line: 4,
+                                column: 2
+                            }
+                        }
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 21,
+                            line: 2,
+                            column: 4
+                        },
+                        end: Position {
+                            index: 93,
+                            line: 4,
+                            column: 2
+                        }
+                    }
+                }]
+            }
+        );
     }
 }
