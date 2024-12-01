@@ -165,7 +165,7 @@ impl Tokenizer {
 
     fn tokenize_delimiter(&mut self) -> Option<Token> {
         match self.source.current_char()? {
-            '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' => {
+            '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' | ':' => {
                 Some(self.create_token(TokenKind::Delimiter, 1))
             }
             _ => None,
@@ -765,6 +765,20 @@ mod tests {
     }
 
     #[test]
+    fn tokenize_delimiter_returns_colon() {
+        let mut tokenizer = Tokenizer::new(":".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: ":".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
     fn tokenize_comment_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_comment(), None);
@@ -948,7 +962,7 @@ mod tests {
 
     #[test]
     fn tokenize_returns_delimiter() {
-        let delimiters = ["(", ")", "{", "}", "[", "]", ",", ";"];
+        let delimiters = ["(", ")", "{", "}", "[", "]", ",", ";", ":"];
         for delimiter in delimiters.iter() {
             let mut tokenizer = Tokenizer::new(delimiter.to_string());
             assert_eq!(
