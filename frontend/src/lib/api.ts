@@ -48,6 +48,54 @@ export class APIError extends Error {
   }
 }
 
+export const authApi = {
+  // 登録フロー
+  register: async (data: {
+    email: string;
+    name: string;
+    role: "admin" | "teacher" | "student";
+  }) => {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Registration failed");
+    return res.json();
+  },
+
+  verifyRegistration: async (credential: any) => {
+    const res = await fetch("/api/register/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credential),
+    });
+    if (!res.ok) throw new Error("Registration verification failed");
+    return res.json();
+  },
+
+  // 認証フロー
+  authenticate: async (email: string) => {
+    const res = await fetch("/api/authenticate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) throw new Error("Authentication failed");
+    return res.json();
+  },
+
+  verifyAuthentication: async (credential: any) => {
+    const res = await fetch("/api/authenticate/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credential),
+    });
+    if (!res.ok) throw new Error("Authentication verification failed");
+    return res.json();
+  },
+};
+
 /**
  * Middleware that throws an error if the response status is 404 or greater.
  *
