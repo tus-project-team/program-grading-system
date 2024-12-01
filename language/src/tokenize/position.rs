@@ -1,5 +1,5 @@
 /// Position of a character in the source
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Position {
     /// 0-based index of the character in the source
     pub index: usize,

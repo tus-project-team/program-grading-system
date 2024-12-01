@@ -3,20 +3,26 @@ program = function_definition*
 
 (* function *)
 
-function_definition = "fn" identifier "(" parameters ")" "->" type block
+function_definition = "fn" identifier parameters "->" type block
 
-parameters = parameter ("," parameter)*
+parameters = "(" parameter ("," parameter)* ")"
 
 parameter = identifier ":" type
 
 
 (* statement, expression *)
 
-block = "{" statements expression? "}"
+block = "{" statement* expression? "}"
 
-statements = statement*
+statement =
+    expression_statement
+  | variable_definition_statement
 
-statement = expression ";"
+variable_definition_statement =
+    "let" identifier ":" type "=" expression ";"     (* immutable *)
+  | "var" identifier ":" type ("=" expression)? ";"  (* mutable *)
+
+expression_statement = expression ";"
 
 expression = add_expression
 
@@ -30,8 +36,11 @@ unary_expression =
 
 primary_expression =
     literal
+  | assignment_expression
   | identifier
   | "(" expression ")"
+
+assignment_expression = identifier "=" expression
 
 
 (* tokens *)
