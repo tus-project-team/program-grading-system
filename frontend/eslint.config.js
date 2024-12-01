@@ -19,6 +19,9 @@ import tseslint from "typescript-eslint"
 export default tseslint.config(
   gitignore(),
   {
+    ignores: ["public/mockServiceWorker.js"],
+  },
+  {
     languageOptions: {
       globals: globals.browser,
     },
