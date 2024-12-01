@@ -262,7 +262,6 @@ impl Parser {
             let lhs = tx.mul_expression()?;
             let mut expression = lhs;
             while let Some(operator) = tx.consume_add_operator() {
-                tx.advance_token();
                 let rhs = tx.mul_expression()?;
                 let location = Location {
                     start: expression.location().start,
@@ -507,12 +506,996 @@ mod tests {
     };
 
     #[test]
-    fn parse_program_returns_function_definition() {
+    fn expression_returns_integer_literal() {
+        let source = "234849";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::IntegerLiteral(IntegerLiteral {
+                value: "234849".to_string(),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7,
+                    },
+                },
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_returns_identifier() {
+        let source = "abc";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::Identifier(Identifier {
+                name: "abc".to_string(),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 3,
+                        line: 1,
+                        column: 4,
+                    },
+                },
+            }))
+        )
+    }
+
+    #[test]
+    fn expression_returns_assignment_expression() {
+        let source = "x = 123";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::AssignmentExpression(AssignmentExpression {
+                name: Identifier {
+                    name: "x".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                },
+                value: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "123".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        },
+                        end: Position {
+                            index: 7,
+                            line: 1,
+                            column: 8
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 7,
+                        line: 1,
+                        column: 8
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_returns_binary_expression() {
+        let source = "1 + 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        dbg!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1,
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2,
+                        },
+                    },
+                },)),
+                operator: Operator {
+                    operator: OperatorKind::Add,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3,
+                        },
+                        end: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4,
+                        },
+                    },
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5,
+                        },
+                        end: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6,
+                        },
+                    },
+                },)),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 5,
+                        line: 1,
+                        column: 6,
+                    },
+                },
+            },),)
+        );
+    }
+
+    #[test]
+    fn expression_returns_binary_expression_with_unary_minus() {
+        let source = "-1 - -2 * 3";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "0".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 0,
+                                line: 1,
+                                column: 1
+                            },
+                            end: Position {
+                                index: 0,
+                                line: 1,
+                                column: 1
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Subtract,
+                        location: Location {
+                            start: Position {
+                                index: 0,
+                                line: 1,
+                                column: 1
+                            },
+                            end: Position {
+                                index: 1,
+                                line: 1,
+                                column: 2
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "1".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 1,
+                                line: 1,
+                                column: 2
+                            },
+                            end: Position {
+                                index: 2,
+                                line: 1,
+                                column: 3
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::Subtract,
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "0".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 5,
+                                    line: 1,
+                                    column: 6
+                                },
+                                end: Position {
+                                    index: 5,
+                                    line: 1,
+                                    column: 6
+                                }
+                            }
+                        })),
+                        operator: Operator {
+                            operator: OperatorKind::Subtract,
+                            location: Location {
+                                start: Position {
+                                    index: 5,
+                                    line: 1,
+                                    column: 6
+                                },
+                                end: Position {
+                                    index: 6,
+                                    line: 1,
+                                    column: 7
+                                }
+                            }
+                        },
+                        right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "2".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 6,
+                                    line: 1,
+                                    column: 7
+                                },
+                                end: Position {
+                                    index: 7,
+                                    line: 1,
+                                    column: 8
+                                }
+                            }
+                        })),
+                        location: Location {
+                            start: Position {
+                                index: 5,
+                                line: 1,
+                                column: 6
+                            },
+                            end: Position {
+                                index: 7,
+                                line: 1,
+                                column: 8
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Multiply,
+                        location: Location {
+                            start: Position {
+                                index: 8,
+                                line: 1,
+                                column: 9
+                            },
+                            end: Position {
+                                index: 9,
+                                line: 1,
+                                column: 10
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "3".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 10,
+                                line: 1,
+                                column: 11
+                            },
+                            end: Position {
+                                index: 11,
+                                line: 1,
+                                column: 12
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 11,
+                            line: 1,
+                            column: 12
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 11,
+                        line: 1,
+                        column: 12
+                    }
+                }
+            }))
+        )
+    }
+
+    #[test]
+    fn expression_returns_complicated_binary_expression() {
+        let source = "100 + 2 * x - (abc + 12 / 2)";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "100".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 0,
+                                line: 1,
+                                column: 1
+                            },
+                            end: Position {
+                                index: 3,
+                                line: 1,
+                                column: 4
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Add,
+                        location: Location {
+                            start: Position {
+                                index: 4,
+                                line: 1,
+                                column: 5
+                            },
+                            end: Position {
+                                index: 5,
+                                line: 1,
+                                column: 6
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "2".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 6,
+                                    line: 1,
+                                    column: 7
+                                },
+                                end: Position {
+                                    index: 7,
+                                    line: 1,
+                                    column: 8
+                                }
+                            }
+                        })),
+                        operator: Operator {
+                            operator: OperatorKind::Multiply,
+                            location: Location {
+                                start: Position {
+                                    index: 8,
+                                    line: 1,
+                                    column: 9
+                                },
+                                end: Position {
+                                    index: 9,
+                                    line: 1,
+                                    column: 10
+                                }
+                            }
+                        },
+                        right: Box::new(Expression::Identifier(Identifier {
+                            name: "x".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 10,
+                                    line: 1,
+                                    column: 11
+                                },
+                                end: Position {
+                                    index: 11,
+                                    line: 1,
+                                    column: 12
+                                }
+                            }
+                        })),
+                        location: Location {
+                            start: Position {
+                                index: 6,
+                                line: 1,
+                                column: 7
+                            },
+                            end: Position {
+                                index: 11,
+                                line: 1,
+                                column: 12
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 11,
+                            line: 1,
+                            column: 12
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::Subtract,
+                    location: Location {
+                        start: Position {
+                            index: 12,
+                            line: 1,
+                            column: 13
+                        },
+                        end: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14
+                        }
+                    }
+                },
+                right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::Identifier(Identifier {
+                        name: "abc".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 15,
+                                line: 1,
+                                column: 16
+                            },
+                            end: Position {
+                                index: 18,
+                                line: 1,
+                                column: 19
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Add,
+                        location: Location {
+                            start: Position {
+                                index: 19,
+                                line: 1,
+                                column: 20
+                            },
+                            end: Position {
+                                index: 20,
+                                line: 1,
+                                column: 21
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "12".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 21,
+                                    line: 1,
+                                    column: 22
+                                },
+                                end: Position {
+                                    index: 23,
+                                    line: 1,
+                                    column: 24
+                                }
+                            }
+                        })),
+                        operator: Operator {
+                            operator: OperatorKind::Divide,
+                            location: Location {
+                                start: Position {
+                                    index: 24,
+                                    line: 1,
+                                    column: 25
+                                },
+                                end: Position {
+                                    index: 25,
+                                    line: 1,
+                                    column: 26
+                                }
+                            }
+                        },
+                        right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "2".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 26,
+                                    line: 1,
+                                    column: 27
+                                },
+                                end: Position {
+                                    index: 27,
+                                    line: 1,
+                                    column: 28
+                                }
+                            }
+                        })),
+                        location: Location {
+                            start: Position {
+                                index: 21,
+                                line: 1,
+                                column: 22
+                            },
+                            end: Position {
+                                index: 27,
+                                line: 1,
+                                column: 28
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 15,
+                            line: 1,
+                            column: 16
+                        },
+                        end: Position {
+                            index: 27,
+                            line: 1,
+                            column: 28
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 27,
+                        line: 1,
+                        column: 28
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn statement_returns_expression_statement() {
+        let source = "x;";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(
+            ast,
+            Some(Statement::ExpressionStatement(ExpressionStatement {
+                expression: Expression::Identifier(Identifier {
+                    name: "x".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                }),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 2,
+                        line: 1,
+                        column: 3
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn statement_returns_none_when_expression() {
+        let source = "x";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(ast, None);
+    }
+
+    #[test]
+    fn statement_returns_mutable_variable_definition_statement() {
+        let source = "var x: i32 = 0;";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(
+            ast,
+            Some(Statement::VariableDefinition(VariableDefinition {
+                name: Identifier {
+                    name: "x".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        },
+                        end: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        }
+                    }
+                },
+                mutable: true,
+                variable_type: Type {
+                    name: TypeKind::I32,
+                    location: Location {
+                        start: Position {
+                            index: 7,
+                            line: 1,
+                            column: 8
+                        },
+                        end: Position {
+                            index: 10,
+                            line: 1,
+                            column: 11
+                        }
+                    }
+                },
+                value: Some(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "0".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14
+                        },
+                        end: Position {
+                            index: 14,
+                            line: 1,
+                            column: 15
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 15,
+                        line: 1,
+                        column: 16
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn statement_returns_immutable_variable_definition_statement() {
+        let source = "let x: i32 = 0;";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(
+            ast,
+            Some(Statement::VariableDefinition(VariableDefinition {
+                name: Identifier {
+                    name: "x".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        },
+                        end: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        }
+                    }
+                },
+                mutable: false,
+                variable_type: Type {
+                    name: TypeKind::I32,
+                    location: Location {
+                        start: Position {
+                            index: 7,
+                            line: 1,
+                            column: 8
+                        },
+                        end: Position {
+                            index: 10,
+                            line: 1,
+                            column: 11
+                        }
+                    }
+                },
+                value: Some(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "0".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14
+                        },
+                        end: Position {
+                            index: 14,
+                            line: 1,
+                            column: 15
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 15,
+                        line: 1,
+                        column: 16
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn block_returns_none_when_multiple_expressions() {
+        let source = indoc! {"
+            {
+                1
+                2
+            }
+        "};
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).block();
+        assert_eq!(ast, None);
+    }
+
+    #[test]
+    fn block_returns_statements() {
+        let source = indoc! {"
+            {
+                var x: i32;
+                x = 0;
+                x
+            }
+        "};
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).block();
+        assert_eq!(
+            ast,
+            Some(Block {
+                statements: Statements {
+                    statements: vec![
+                        Statement::VariableDefinition(VariableDefinition {
+                            name: Identifier {
+                                name: "x".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 10,
+                                        line: 2,
+                                        column: 9
+                                    },
+                                    end: Position {
+                                        index: 11,
+                                        line: 2,
+                                        column: 10
+                                    }
+                                }
+                            },
+                            mutable: true,
+                            variable_type: Type {
+                                name: TypeKind::I32,
+                                location: Location {
+                                    start: Position {
+                                        index: 13,
+                                        line: 2,
+                                        column: 12
+                                    },
+                                    end: Position {
+                                        index: 16,
+                                        line: 2,
+                                        column: 15
+                                    }
+                                }
+                            },
+                            value: None,
+                            location: Location {
+                                start: Position {
+                                    index: 6,
+                                    line: 2,
+                                    column: 5
+                                },
+                                end: Position {
+                                    index: 17,
+                                    line: 2,
+                                    column: 16
+                                }
+                            }
+                        }),
+                        Statement::ExpressionStatement(ExpressionStatement {
+                            expression: Expression::AssignmentExpression(AssignmentExpression {
+                                name: Identifier {
+                                    name: "x".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 22,
+                                            line: 3,
+                                            column: 5
+                                        },
+                                        end: Position {
+                                            index: 23,
+                                            line: 3,
+                                            column: 6
+                                        }
+                                    }
+                                },
+                                value: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                                    value: "0".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 26,
+                                            line: 3,
+                                            column: 9
+                                        },
+                                        end: Position {
+                                            index: 27,
+                                            line: 3,
+                                            column: 10
+                                        }
+                                    }
+                                })),
+                                location: Location {
+                                    start: Position {
+                                        index: 22,
+                                        line: 3,
+                                        column: 5
+                                    },
+                                    end: Position {
+                                        index: 27,
+                                        line: 3,
+                                        column: 10
+                                    }
+                                }
+                            }),
+                            location: Location {
+                                start: Position {
+                                    index: 22,
+                                    line: 3,
+                                    column: 5
+                                },
+                                end: Position {
+                                    index: 28,
+                                    line: 3,
+                                    column: 11
+                                }
+                            }
+                        }),
+                        Statement::Expression(Expression::Identifier(Identifier {
+                            name: "x".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 33,
+                                    line: 4,
+                                    column: 5
+                                },
+                                end: Position {
+                                    index: 34,
+                                    line: 4,
+                                    column: 6
+                                }
+                            }
+                        }))
+                    ],
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 36,
+                            line: 5,
+                            column: 2
+                        }
+                    }
+                },
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 36,
+                        line: 5,
+                        column: 2
+                    }
+                }
+            })
+        )
+    }
+
+    #[test]
+    fn parse_returns_function_definition_without_parameters() {
         let source = indoc! {"
             fn main() -> i32 { 0 }
         "};
         let tokens = Tokenizer::new(source.to_string()).tokenize();
-        let ast = Parser::new(tokens.clone()).parse();
+        let ast = Parser::new(tokens).parse();
         assert_eq!(
             ast,
             Program {
@@ -622,5 +1605,483 @@ mod tests {
                 },],
             }
         );
+    }
+
+    #[test]
+    fn parse_returns_function_definition_with_parameters() {
+        let source = indoc! {"
+            fn add(x: i64, y: i64) -> i64 {
+                x + y
+            }
+        "};
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).parse();
+        assert_eq!(
+            ast,
+            Program {
+                functions: vec![FunctionDefinition {
+                    name: Identifier {
+                        name: "add".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 3,
+                                line: 1,
+                                column: 4
+                            },
+                            end: Position {
+                                index: 6,
+                                line: 1,
+                                column: 7
+                            }
+                        }
+                    },
+                    parameters: Parameters {
+                        parameters: vec![
+                            Parameter {
+                                name: Identifier {
+                                    name: "x".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 7,
+                                            line: 1,
+                                            column: 8
+                                        },
+                                        end: Position {
+                                            index: 8,
+                                            line: 1,
+                                            column: 9
+                                        }
+                                    }
+                                },
+                                parameter_type: Type {
+                                    name: TypeKind::I64,
+                                    location: Location {
+                                        start: Position {
+                                            index: 10,
+                                            line: 1,
+                                            column: 11
+                                        },
+                                        end: Position {
+                                            index: 13,
+                                            line: 1,
+                                            column: 14
+                                        }
+                                    }
+                                },
+                                location: Location {
+                                    start: Position {
+                                        index: 7,
+                                        line: 1,
+                                        column: 8
+                                    },
+                                    end: Position {
+                                        index: 13,
+                                        line: 1,
+                                        column: 14
+                                    }
+                                }
+                            },
+                            Parameter {
+                                name: Identifier {
+                                    name: "y".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 15,
+                                            line: 1,
+                                            column: 16
+                                        },
+                                        end: Position {
+                                            index: 16,
+                                            line: 1,
+                                            column: 17
+                                        }
+                                    }
+                                },
+                                parameter_type: Type {
+                                    name: TypeKind::I64,
+                                    location: Location {
+                                        start: Position {
+                                            index: 18,
+                                            line: 1,
+                                            column: 19
+                                        },
+                                        end: Position {
+                                            index: 21,
+                                            line: 1,
+                                            column: 22
+                                        }
+                                    }
+                                },
+                                location: Location {
+                                    start: Position {
+                                        index: 15,
+                                        line: 1,
+                                        column: 16
+                                    },
+                                    end: Position {
+                                        index: 21,
+                                        line: 1,
+                                        column: 22
+                                    }
+                                }
+                            }
+                        ],
+                        location: Location {
+                            start: Position {
+                                index: 6,
+                                line: 1,
+                                column: 7
+                            },
+                            end: Position {
+                                index: 22,
+                                line: 1,
+                                column: 23
+                            }
+                        }
+                    },
+                    return_type: Type {
+                        name: TypeKind::I64,
+                        location: Location {
+                            start: Position {
+                                index: 26,
+                                line: 1,
+                                column: 27
+                            },
+                            end: Position {
+                                index: 29,
+                                line: 1,
+                                column: 30
+                            }
+                        }
+                    },
+                    body: Block {
+                        statements: Statements {
+                            statements: vec![Statement::Expression(Expression::BinaryExpression(
+                                BinaryExpression {
+                                    left: Box::new(Expression::Identifier(Identifier {
+                                        name: "x".to_string(),
+                                        location: Location {
+                                            start: Position {
+                                                index: 36,
+                                                line: 2,
+                                                column: 5
+                                            },
+                                            end: Position {
+                                                index: 37,
+                                                line: 2,
+                                                column: 6
+                                            }
+                                        }
+                                    })),
+                                    operator: Operator {
+                                        operator: OperatorKind::Add,
+                                        location: Location {
+                                            start: Position {
+                                                index: 38,
+                                                line: 2,
+                                                column: 7
+                                            },
+                                            end: Position {
+                                                index: 39,
+                                                line: 2,
+                                                column: 8
+                                            }
+                                        }
+                                    },
+                                    right: Box::new(Expression::Identifier(Identifier {
+                                        name: "y".to_string(),
+                                        location: Location {
+                                            start: Position {
+                                                index: 40,
+                                                line: 2,
+                                                column: 9
+                                            },
+                                            end: Position {
+                                                index: 41,
+                                                line: 2,
+                                                column: 10
+                                            }
+                                        }
+                                    })),
+                                    location: Location {
+                                        start: Position {
+                                            index: 36,
+                                            line: 2,
+                                            column: 5
+                                        },
+                                        end: Position {
+                                            index: 41,
+                                            line: 2,
+                                            column: 10
+                                        }
+                                    }
+                                }
+                            ))],
+                            location: Location {
+                                start: Position {
+                                    index: 30,
+                                    line: 1,
+                                    column: 31
+                                },
+                                end: Position {
+                                    index: 43,
+                                    line: 3,
+                                    column: 2
+                                }
+                            }
+                        },
+                        location: Location {
+                            start: Position {
+                                index: 30,
+                                line: 1,
+                                column: 31
+                            },
+                            end: Position {
+                                index: 43,
+                                line: 3,
+                                column: 2
+                            }
+                        }
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4
+                        },
+                        end: Position {
+                            index: 43,
+                            line: 3,
+                            column: 2
+                        }
+                    }
+                }]
+            }
+        )
+    }
+
+    #[test]
+    fn parse_returns_function_definitions() {
+        let source = indoc! {"
+            fn foo() -> i64 { 0 }
+            fn bar() -> i32 { 1 }
+        "};
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).parse();
+        assert_eq!(
+            ast,
+            Program {
+                functions: vec![
+                    FunctionDefinition {
+                        name: Identifier {
+                            name: "foo".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 3,
+                                    line: 1,
+                                    column: 4
+                                },
+                                end: Position {
+                                    index: 6,
+                                    line: 1,
+                                    column: 7
+                                }
+                            }
+                        },
+                        parameters: Parameters {
+                            parameters: vec![],
+                            location: Location {
+                                start: Position {
+                                    index: 6,
+                                    line: 1,
+                                    column: 7
+                                },
+                                end: Position {
+                                    index: 8,
+                                    line: 1,
+                                    column: 9
+                                }
+                            }
+                        },
+                        return_type: Type {
+                            name: TypeKind::I64,
+                            location: Location {
+                                start: Position {
+                                    index: 12,
+                                    line: 1,
+                                    column: 13
+                                },
+                                end: Position {
+                                    index: 15,
+                                    line: 1,
+                                    column: 16
+                                }
+                            }
+                        },
+                        body: Block {
+                            statements: Statements {
+                                statements: vec![Statement::Expression(
+                                    Expression::IntegerLiteral(IntegerLiteral {
+                                        value: "0".to_string(),
+                                        location: Location {
+                                            start: Position {
+                                                index: 18,
+                                                line: 1,
+                                                column: 19
+                                            },
+                                            end: Position {
+                                                index: 19,
+                                                line: 1,
+                                                column: 20
+                                            }
+                                        }
+                                    })
+                                )],
+                                location: Location {
+                                    start: Position {
+                                        index: 16,
+                                        line: 1,
+                                        column: 17
+                                    },
+                                    end: Position {
+                                        index: 21,
+                                        line: 1,
+                                        column: 22
+                                    }
+                                }
+                            },
+                            location: Location {
+                                start: Position {
+                                    index: 16,
+                                    line: 1,
+                                    column: 17
+                                },
+                                end: Position {
+                                    index: 21,
+                                    line: 1,
+                                    column: 22
+                                }
+                            }
+                        },
+                        location: Location {
+                            start: Position {
+                                index: 3,
+                                line: 1,
+                                column: 4
+                            },
+                            end: Position {
+                                index: 21,
+                                line: 1,
+                                column: 22
+                            }
+                        }
+                    },
+                    FunctionDefinition {
+                        name: Identifier {
+                            name: "bar".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 25,
+                                    line: 2,
+                                    column: 4
+                                },
+                                end: Position {
+                                    index: 28,
+                                    line: 2,
+                                    column: 7
+                                }
+                            }
+                        },
+                        parameters: Parameters {
+                            parameters: vec![],
+                            location: Location {
+                                start: Position {
+                                    index: 28,
+                                    line: 2,
+                                    column: 7
+                                },
+                                end: Position {
+                                    index: 30,
+                                    line: 2,
+                                    column: 9
+                                }
+                            }
+                        },
+                        return_type: Type {
+                            name: TypeKind::I32,
+                            location: Location {
+                                start: Position {
+                                    index: 34,
+                                    line: 2,
+                                    column: 13
+                                },
+                                end: Position {
+                                    index: 37,
+                                    line: 2,
+                                    column: 16
+                                }
+                            }
+                        },
+                        body: Block {
+                            statements: Statements {
+                                statements: vec![Statement::Expression(
+                                    Expression::IntegerLiteral(IntegerLiteral {
+                                        value: "1".to_string(),
+                                        location: Location {
+                                            start: Position {
+                                                index: 40,
+                                                line: 2,
+                                                column: 19
+                                            },
+                                            end: Position {
+                                                index: 41,
+                                                line: 2,
+                                                column: 20
+                                            }
+                                        }
+                                    })
+                                )],
+                                location: Location {
+                                    start: Position {
+                                        index: 38,
+                                        line: 2,
+                                        column: 17
+                                    },
+                                    end: Position {
+                                        index: 43,
+                                        line: 2,
+                                        column: 22
+                                    }
+                                }
+                            },
+                            location: Location {
+                                start: Position {
+                                    index: 38,
+                                    line: 2,
+                                    column: 17
+                                },
+                                end: Position {
+                                    index: 43,
+                                    line: 2,
+                                    column: 22
+                                }
+                            }
+                        },
+                        location: Location {
+                            start: Position {
+                                index: 25,
+                                line: 2,
+                                column: 4
+                            },
+                            end: Position {
+                                index: 43,
+                                line: 2,
+                                column: 22
+                            }
+                        }
+                    }
+                ]
+            }
+        )
     }
 }
