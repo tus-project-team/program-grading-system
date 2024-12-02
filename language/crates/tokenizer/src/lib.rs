@@ -1,7 +1,6 @@
 pub mod position;
 pub mod source;
 pub mod token;
-pub mod tokenizer;
 
 use crate::{source::Source, token::Token, token::TokenKind};
 

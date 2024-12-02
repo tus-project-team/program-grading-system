@@ -519,7 +519,7 @@ mod tests {
 
     use super::Parser;
     use ast::*;
-    use tokenizer::{position::Position, tokenizer::Tokenizer};
+    use tokenizer::{position::Position, Tokenizer};
 
     #[test]
     fn expression_returns_integer_literal() {
