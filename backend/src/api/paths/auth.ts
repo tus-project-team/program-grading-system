@@ -215,10 +215,6 @@ const app = new OpenAPIHono()
     })
 
     const options = await generateRegistrationOptions({
-      rpID: RP_ID,
-      rpName: RP_NAME,
-      userID: Buffer.from(user.id),
-      userName: user.email,
       attestationType: "none",
       authenticatorSelection: {
         authenticatorAttachment: "platform",
@@ -226,6 +222,10 @@ const app = new OpenAPIHono()
         residentKey: "required",
         userVerification: "required",
       },
+      rpID: RP_ID,
+      rpName: RP_NAME,
+      userID: Buffer.from(user.id),
+      userName: user.email,
     })
 
     console.log("Generated Registration Options:", options)
@@ -234,8 +234,8 @@ const app = new OpenAPIHono()
     const savedChallenge = await prisma.challenge.create({
       data: {
         challenge: options.challenge,
-        userId: user.id,
         expiresAt,
+        userId: user.id,
       },
     })
 
@@ -336,8 +336,8 @@ const app = new OpenAPIHono()
     const options = await generateAuthenticationOptions({
       allowCredentials: user.credentials.map((cred) => ({
         id: base64ToBase64URL(cred.id), // Base64をBase64URLに変換
-        type: "public-key",
         transports: [],
+        type: "public-key",
       })),
       rpID: RP_ID,
       userVerification: "required",
@@ -346,8 +346,8 @@ const app = new OpenAPIHono()
     await prisma.challenge.create({
       data: {
         challenge: options.challenge,
-        userId: user.id,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5分の有効期限
+        userId: user.id,
       },
     })
 
@@ -420,7 +420,7 @@ const app = new OpenAPIHono()
   })
 // Base64 を Base64URL に変換する関数を追加
 function base64ToBase64URL(base64: string): string {
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
+  return base64.replaceAll('+', "-").replaceAll('/', "_").replaceAll('=', "")
 }
 
 export default Object.assign(app, {
