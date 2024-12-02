@@ -181,71 +181,71 @@ const verifyAuthenticationRoute = createRoute({
 
 // OpenAPI Honoアプリケーションの定義
 const app = new OpenAPIHono()
-.openapi(registerRoute, async (c) => {
-  const { email, name, role } = c.req.valid("json")
-  console.log("Registration Request:", { email, name, role });
+  .openapi(registerRoute, async (c) => {
+    const { email, name, role } = c.req.valid("json")
+    console.log("Registration Request:", { email, name, role })
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  })
-  if (existingUser) {
-    return c.json({ error: "既に登録済みのメールアドレスです" }, 400)
-  }
-
-  const user = await prisma.$transaction(async (tx) => {
-    const createdUser = await tx.user.create({
-      data: { email, name, role },
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
     })
-
-    if (role === "student") {
-      await tx.student.create({
-        data: {
-          userId: createdUser.id,
-        },
-      })
-    } else if (role === "teacher") {
-      await tx.teacher.create({
-        data: {
-          userId: createdUser.id,
-        },
-      })
+    if (existingUser) {
+      return c.json({ error: "既に登録済みのメールアドレスです" }, 400)
     }
 
-    return createdUser
+    const user = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: { email, name, role },
+      })
+
+      if (role === "student") {
+        await tx.student.create({
+          data: {
+            userId: createdUser.id,
+          },
+        })
+      } else if (role === "teacher") {
+        await tx.teacher.create({
+          data: {
+            userId: createdUser.id,
+          },
+        })
+      }
+
+      return createdUser
+    })
+
+    const options = await generateRegistrationOptions({
+      rpID: RP_ID,
+      rpName: RP_NAME,
+      userID: Buffer.from(user.id),
+      userName: user.email,
+      attestationType: "none",
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        requireResidentKey: true,
+        residentKey: "required",
+        userVerification: "required",
+      },
+    })
+
+    console.log("Generated Registration Options:", options)
+
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5分後
+    const savedChallenge = await prisma.challenge.create({
+      data: {
+        challenge: options.challenge,
+        userId: user.id,
+        expiresAt,
+      },
+    })
+
+    console.log("Saved Challenge:", savedChallenge)
+
+    return c.json(options)
   })
-
-  const options = await generateRegistrationOptions({
-    rpID: RP_ID,
-    rpName: RP_NAME,
-    userID: Buffer.from(user.id),
-    userName: user.email,
-    attestationType: "none",
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      requireResidentKey: true,
-      residentKey: "required",
-      userVerification: "required"
-    },
-  })
-
-  console.log("Generated Registration Options:", options);
-
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5分後
-  const savedChallenge = await prisma.challenge.create({
-    data: {
-      challenge: options.challenge,
-      userId: user.id,
-      expiresAt,
-    },
-  })
-
-  console.log("Saved Challenge:", savedChallenge);
-
-  return c.json(options)
-})
   .openapi(verifyRegistrationRoute, async (c) => {
     const credentialData = c.req.valid("json")
-    console.log("Verification Request Data:", credentialData);
+    console.log("Verification Request Data:", credentialData)
 
     const challenge = await prisma.challenge.findFirst({
       include: { user: true },
@@ -255,18 +255,18 @@ const app = new OpenAPIHono()
         user: { credentials: { none: {} } },
       },
     })
-    console.log("Found Challenge:", challenge);
+    console.log("Found Challenge:", challenge)
 
     if (!challenge) {
-      console.log("No valid challenge found");
+      console.log("No valid challenge found")
       return c.json({ error: "無効なチャレンジです" }, 400)
     }
 
     if (challenge.expiresAt < new Date()) {
       console.log("Challenge expired:", {
         expiresAt: challenge.expiresAt,
-        now: new Date()
-      });
+        now: new Date(),
+      })
       return c.json({ error: "チャレンジの有効期限が切れています" }, 400)
     }
 
@@ -278,8 +278,8 @@ const app = new OpenAPIHono()
         responseData: {
           ...credentialData,
           clientExtensionResults: {},
-        }
-      });
+        },
+      })
 
       const verification = await verifyRegistrationResponse({
         expectedChallenge: challenge.challenge,
@@ -291,11 +291,11 @@ const app = new OpenAPIHono()
         },
       })
 
-      console.log("Verification Result:", verification);
+      console.log("Verification Result:", verification)
 
       if (verification.verified && verification.registrationInfo) {
         const { credential } = verification.registrationInfo
-        
+
         await prisma.credential.create({
           data: {
             counter: credential.counter,
@@ -336,7 +336,7 @@ const app = new OpenAPIHono()
     const options = await generateAuthenticationOptions({
       allowCredentials: user.credentials.map((cred) => ({
         id: base64ToBase64URL(cred.id), // Base64をBase64URLに変換
-        type: 'public-key',
+        type: "public-key",
         transports: [],
       })),
       rpID: RP_ID,
@@ -352,79 +352,75 @@ const app = new OpenAPIHono()
     })
 
     return c.json(options)
-})
-
-
-.openapi(verifyAuthenticationRoute, async (c) => {
-  const credentialData = c.req.valid("json")
-  console.log("Received authentication data:", credentialData);
-
-  const userCredential = await prisma.credential.findUnique({
-    include: { user: true },
-    where: { id: credentialData.id },
   })
-  console.log("Found user credential:", userCredential);
 
-  if (!userCredential) {
-    return c.json({ error: "認証情報が見つかりません" }, 401)
-  }
+  .openapi(verifyAuthenticationRoute, async (c) => {
+    const credentialData = c.req.valid("json")
+    console.log("Received authentication data:", credentialData)
 
-  const challenge = await prisma.challenge.findFirst({
-    orderBy: { createdAt: "desc" },
-    where: {
-      expiresAt: { gt: new Date() },
-      userId: userCredential.userId,
-    },
-  })
-  console.log("Found challenge:", challenge);
+    const userCredential = await prisma.credential.findUnique({
+      include: { user: true },
+      where: { id: credentialData.id },
+    })
+    console.log("Found user credential:", userCredential)
 
-  if (!challenge) {
-    return c.json({ error: "無効なチャレンジです" }, 401)
-  }
+    if (!userCredential) {
+      return c.json({ error: "認証情報が見つかりません" }, 401)
+    }
 
-  try {
-    const verification = await verifyAuthenticationResponse({
-      credential: {
-        counter: Number(userCredential.counter),
-        id: base64ToBase64URL(userCredential.id),
-        publicKey: new Uint8Array(userCredential.publicKey),
-        transports: [],
-      },
-      expectedChallenge: challenge.challenge,
-      expectedOrigin: RP_ORIGIN,
-      expectedRPID: RP_ID,
-      response: {
-        ...credentialData,
-        clientExtensionResults: {},
+    const challenge = await prisma.challenge.findFirst({
+      orderBy: { createdAt: "desc" },
+      where: {
+        expiresAt: { gt: new Date() },
+        userId: userCredential.userId,
       },
     })
-    console.log("Verification result:", verification);
+    console.log("Found challenge:", challenge)
 
-    if (verification.verified) {
-      await prisma.credential.update({
-        data: { counter: verification.authenticationInfo.newCounter },
-        where: { id: userCredential.id },
-      })
-
-      const token = await createToken({
-        role: userCredential.user.role,
-        sub: userCredential.userId,
-      })
-
-      return c.json({ token })
+    if (!challenge) {
+      return c.json({ error: "無効なチャレンジです" }, 401)
     }
-  } catch (error) {
-    console.error("Verification error:", error)
-  }
 
-  return c.json({ error: "認証に失敗しました" }, 401)
-})
+    try {
+      const verification = await verifyAuthenticationResponse({
+        credential: {
+          counter: Number(userCredential.counter),
+          id: base64ToBase64URL(userCredential.id),
+          publicKey: new Uint8Array(userCredential.publicKey),
+          transports: [],
+        },
+        expectedChallenge: challenge.challenge,
+        expectedOrigin: RP_ORIGIN,
+        expectedRPID: RP_ID,
+        response: {
+          ...credentialData,
+          clientExtensionResults: {},
+        },
+      })
+      console.log("Verification result:", verification)
+
+      if (verification.verified) {
+        await prisma.credential.update({
+          data: { counter: verification.authenticationInfo.newCounter },
+          where: { id: userCredential.id },
+        })
+
+        const token = await createToken({
+          role: userCredential.user.role,
+          sub: userCredential.userId,
+        })
+
+        return c.json({ token })
+      }
+    } catch (error) {
+      console.error("Verification error:", error)
+    }
+
+    return c.json({ error: "認証に失敗しました" }, 401)
+  })
 // Base64 を Base64URL に変換する関数を追加
 function base64ToBase64URL(base64: string): string {
-  return base64
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
 }
 
 export default Object.assign(app, {

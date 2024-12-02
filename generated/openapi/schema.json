@@ -590,6 +590,17 @@
         "tags": [
           "problems"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "example": "1"
+            },
+            "required": true,
+            "in": "path",
+            "name": "problemId"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {

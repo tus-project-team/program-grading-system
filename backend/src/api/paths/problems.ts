@@ -443,70 +443,92 @@ const app = new OpenAPIHono()
     const { problemId } = c.req.valid("param")
     const data = c.req.valid("json")
 
-    const updatedProblem: ProblemWithRelations = (await prisma.$transaction(
-      async (tx) => {
-        // 既存の関連データを削除
-        await tx.language.deleteMany({
-          where: { problemId },
-        })
-        await tx.testCase.deleteMany({
-          where: { problemId },
-        })
+    const problem = await prisma.problem.findUnique({
+      where: { id: problemId },
+    })
+    if (!problem) {
+      return c.body(null, 404)
+    }
 
-        // 問題を更新
-        return tx.problem.update({
-          data: {
-            body: data.body,
-            supportedLanguages: {
-              create: data.supported_languages.map((lang) => ({
-                language: {
-                  connect: {
-                    name_version: {
-                      name: lang.name,
-                      version: lang.version,
-                    },
-                  },
+    const updatedProblem = await prisma.$transaction(async (tx) => {
+      await tx.language.deleteMany({
+        where: { problemId },
+      })
+      await tx.testCase.deleteMany({
+        where: { problemId },
+      })
+      const updated = await tx.problem.update({
+        data: {
+          body: data.body,
+          supportedLanguages: {
+            create: data.supported_languages.map(({ name, version }) => ({
+              language: {
+                connect: {
+                  name_version: { name, version },
                 },
-                languageName: lang.name,
-                languageVersion: lang.version,
-              })),
-            },
-            testCases: {
-              create: data.test_cases.map((testCase) => ({
-                input: testCase.input,
-                output: testCase.output,
-              })),
-            },
-            title: data.title,
-          },
-          include: {
-            supportedLanguages: {
-              include: {
-                language: true,
+              },
+            })),
+            deleteMany: {
+              languageName: {
+                notIn: data.supported_languages.map(({ name }) => name),
+              },
+              languageVersion: {
+                notIn: data.supported_languages.map(({ version }) => version),
               },
             },
-            testCases: true,
           },
-          where: { id: problemId },
-        })
-      },
-    )) as ProblemWithRelations
+          testCases: {
+            create: data.test_cases.map(({ input, output }) => ({
+              input,
+              output,
+            })),
+            deleteMany: {
+              AND: {
+                input: {
+                  notIn: data.test_cases.map(({ input }) => input),
+                },
+                output: {
+                  notIn: data.test_cases.map(({ output }) => output),
+                },
+              },
+            },
+          },
+          title: data.title,
+        },
+        include: {
+          supportedLanguages: {
+            include: {
+              language: true,
+            },
+          },
+          testCases: true,
+        },
+        where: {
+          id: problemId,
+        },
+      })
+      return updated
+    })
 
-    const formattedProblem: z.infer<typeof schemas.Problem> = {
+    return c.json({
       body: updatedProblem.body,
       id: updatedProblem.id,
-      supported_languages: updatedProblem.supportedLanguages.map((lang) => ({
-        name: lang.language.name,
-        version: lang.language.version,
-      })),
+      supported_languages: updatedProblem.supportedLanguages
+        .map((lang) => ({
+          name: lang.language.name,
+          version: lang.language.version,
+        }))
+        .sort((a, b) =>
+          a.name === b.name
+            ? a.version.localeCompare(b.version)
+            : a.name.localeCompare(b.name),
+        ),
       test_cases: updatedProblem.testCases.map((testCase) => ({
         input: testCase.input,
         output: testCase.output,
       })),
       title: updatedProblem.title,
-    }
-
-    return c.json(formattedProblem)
+    })
   })
   .openapi(deleteProblemRoute, async (c) => {
     await authMiddleware(c, next)
@@ -514,43 +536,63 @@ const app = new OpenAPIHono()
 
     const { problemId } = c.req.valid("param")
 
-    await prisma.$transaction(async (tx) => {
-      // 関連するデータを削除
-      await tx.submissionResult.deleteMany({
-        where: {
-          submission: {
-            problemId,
-          },
-        },
-      })
-
-      await tx.testResult.deleteMany({
-        where: {
-          submission: {
-            problemId,
-          },
-        },
-      })
-
-      await tx.submission.deleteMany({
-        where: { problem: { id: problemId } },
-      })
-
-      await tx.language.deleteMany({
-        where: { problemId },
-      })
-
-      await tx.testCase.deleteMany({
-        where: { problemId },
-      })
-
-      // 問題を削除
-      await tx.problem.delete({
+    try {
+      const problem = await prisma.problem.findUnique({
         where: { id: problemId },
       })
-    })
 
-    return c.body(null, 204)
+      if (!problem) {
+        return c.body(null, 404)
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.testResult.deleteMany({
+          where: {
+            submission: {
+              problemId,
+            },
+          },
+        })
+
+        await tx.submissionResult.deleteMany({
+          where: {
+            submission: {
+              problemId,
+            },
+          },
+        })
+
+        await tx.submission.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.testCase.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.language.deleteMany({
+          where: { problemId },
+        })
+
+        await tx.problem.update({
+          data: {
+            teachers: {
+              set: [],
+            },
+          },
+          where: { id: problemId },
+        })
+
+        await tx.problem.delete({
+          where: { id: problemId },
+        })
+      })
+
+      return c.body(null, 204)
+    } catch (error) {
+      console.error("Problem deletion failed:", error)
+      return c.body(null, 500)
+    }
   })
   .openapi(submitProgramRoute, async (c) => {
     await authMiddleware(c, next)

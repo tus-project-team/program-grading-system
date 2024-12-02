@@ -606,7 +606,9 @@ export interface operations {
     parameters: {
       query?: never
       header?: never
-      path?: never
+      path: {
+        problemId: number
+      }
       cookie?: never
     }
     requestBody?: {
