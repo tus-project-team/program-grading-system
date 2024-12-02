@@ -4,7 +4,26 @@ version = "0.1.0"
 edition = "2021"
 
 [dev-dependencies]
-indoc = "2.0.5"
+indoc = { workspace = true }
 
 [dependencies]
+ast = { workspace = true }
+code-generator = { workspace = true }
+parser = { workspace = true }
+tokenizer = { workspace = true }
 clap = { version = "4.5.21", features = ["derive"] }
+
+[workspace]
+members = [
+  "crates/ast",
+  "crates/code-generator",
+  "crates/parser",
+  "crates/tokenizer",
+]
+
+[workspace.dependencies]
+ast = { path = "crates/ast" }
+code-generator = { path = "crates/code-generator" }
+parser = { path = "crates/parser" }
+tokenizer = { path = "crates/tokenizer" }
+indoc = "2.0.5"

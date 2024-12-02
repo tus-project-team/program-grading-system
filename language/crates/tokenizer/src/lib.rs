@@ -1,4 +1,13 @@
-use super::{source::Source, token::Token, token::TokenKind};
+pub mod position;
+pub mod source;
+pub mod token;
+pub mod tokenizer;
+
+use crate::{source::Source, token::Token, token::TokenKind};
+
+pub fn tokenize(source: String) -> Vec<Token> {
+    Tokenizer::new(source).tokenize()
+}
 
 pub struct Tokenizer {
     source: Source,
@@ -231,7 +240,7 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tokenize::position::Position;
+    use crate::position::Position;
     use indoc::indoc;
 
     #[test]

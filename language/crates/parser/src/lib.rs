@@ -1,9 +1,13 @@
-use super::ast::{
+use ast::{
     AssignmentExpression, BinaryExpression, Block, Expression, ExpressionStatement,
     FunctionDefinition, Identifier, IntegerLiteral, Location, Operator, OperatorKind, Parameter,
     Parameters, Program, Statement, Statements, Type, TypeKind, VariableDefinition,
 };
-use crate::tokenize::token::{Token, TokenKind};
+use tokenizer::token::{Token, TokenKind};
+
+pub fn parse(tokens: Vec<Token>) -> ast::Program {
+    Parser::new(tokens).parse()
+}
 
 pub struct Parser {
     /// The tokens to parse.
@@ -514,10 +518,8 @@ mod tests {
     use indoc::indoc;
 
     use super::Parser;
-    use crate::{
-        parse::ast::*,
-        tokenize::{position::Position, tokenizer::Tokenizer},
-    };
+    use ast::*;
+    use tokenizer::{position::Position, tokenizer::Tokenizer};
 
     #[test]
     fn expression_returns_integer_literal() {
