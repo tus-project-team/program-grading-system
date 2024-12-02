@@ -7,8 +7,6 @@ edition = "2021"
 indoc = { workspace = true }
 
 [dependencies]
-ast = { workspace = true }
-code-generator = { workspace = true }
 parser = { workspace = true }
 tokenizer = { workspace = true }
 clap = { version = "4.5.21", features = ["derive"] }
