@@ -420,7 +420,7 @@ const app = new OpenAPIHono()
   })
 // Base64 を Base64URL に変換する関数を追加
 function base64ToBase64URL(base64: string): string {
-  return base64.replaceAll('+', "-").replaceAll('/', "_").replaceAll('=', "")
+  return base64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")
 }
 
 export default Object.assign(app, {
