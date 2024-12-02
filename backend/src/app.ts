@@ -14,12 +14,12 @@ app.use(
       "Content-Type",
       "Authorization",
       "X-Requested-With",
-      "Accept"
+      "Accept",
     ],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     exposeHeaders: ["Content-Length", "X-Requested-With"],
-    maxAge: 86400,
+    maxAge: 86_400,
     origin: ["https://localhost:5173", "http://localhost:5173"], // HTTPSとHTTPの両方を許可
   }),
 )

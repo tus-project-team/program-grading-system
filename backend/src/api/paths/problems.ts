@@ -393,22 +393,26 @@ const app = new OpenAPIHono()
       },
     })
 
-    return c.json({
-      body: createdProblem.body,
-      id: createdProblem.id,
-      supported_languages: createdProblem.supportedLanguages.map((lang) => ({
-        name: lang.language.name,
-        version: lang.language.version,
-      })),
-      test_cases: createdProblem.testCases.map((testCase) => ({
-        input: testCase.input,
-        output: testCase.output,
-      })),
-      title: createdProblem.title,
-    }, 201)
+    return c.json(
+      {
+        body: createdProblem.body,
+        id: createdProblem.id,
+        supported_languages: createdProblem.supportedLanguages.map((lang) => ({
+          name: lang.language.name,
+          version: lang.language.version,
+        })),
+        test_cases: createdProblem.testCases.map((testCase) => ({
+          input: testCase.input,
+          output: testCase.output,
+        })),
+        title: createdProblem.title,
+      },
+      201,
+    )
   })
-  .openapi(getProblemsRoute, async (c, next) => {  // nextを引数として受け取る
-    await authMiddleware(c, next)    
+  .openapi(getProblemsRoute, async (c, next) => {
+    // nextを引数として受け取る
+    await authMiddleware(c, next)
     const problems = await prisma.problem.findMany({
       include: {
         supportedLanguages: {
@@ -785,38 +789,38 @@ const app = new OpenAPIHono()
     try {
       // 認証処理
       await authMiddleware(c, next)
-      console.log('Auth middleware passed')  // デバッグ用
-      
+      console.log("Auth middleware passed") // デバッグ用
+
       // ユーザー情報の取得を try-catch で囲む
-      let currentUser;
+      let currentUser
       try {
         currentUser = getCurrentUser(c)
-        console.log('Current user:', currentUser)  // デバッグ用
+        console.log("Current user:", currentUser) // デバッグ用
       } catch (error) {
-        console.error('Failed to get current user:', error)
+        console.error("Failed to get current user:", error)
         return c.json({ error: "認証エラー" }, 401)
       }
-      
+
       const { problemId } = c.req.valid("param")
-      console.log('Fetching submissions for problem:', problemId)
-  
+      console.log("Fetching submissions for problem:", problemId)
+
       // 問題の存在確認
       const problem = await prisma.problem.findUnique({
         where: { id: problemId },
       })
-  
+
       if (!problem) {
         return c.json({ error: "問題が見つかりません" }, 404)
       }
-  
+
       // 権限チェック
       const isTeacher = currentUser.role === ROLES.TEACHER
       const isAdmin = currentUser.role === ROLES.ADMIN
-  
+
       if (!isTeacher && !isAdmin) {
         return c.json({ error: "権限がありません" }, 403)
       }
-  
+
       // 提出一覧の取得
       const submissions = await prisma.submission.findMany({
         include: {
@@ -851,33 +855,35 @@ const app = new OpenAPIHono()
             : {}),
         },
       })
-  
+
       console.log(`Found ${submissions.length} submissions`)
-  
-      return c.json(submissions.map(submission => ({
-        code: submission.code,
-        id: submission.id,
-        language: {
-          name: submission.language.name,
-          version: submission.language.version,
-        },
-        problem_id: submission.problemId,
-        result: {
-          message: submission.result.message,
-          status: submission.result.status.status,
-        },
-        student_id: submission.studentId,
-        submitted_at: submission.createdAt.toISOString(),
-        test_results: submission.testResults.map(result => ({
-          message: result.message,
-          status: result.status.status === "Accepted" ? "Passed" : "Failed",
-          test_case_id: result.testCaseId,
+
+      return c.json(
+        submissions.map((submission) => ({
+          code: submission.code,
+          id: submission.id,
+          language: {
+            name: submission.language.name,
+            version: submission.language.version,
+          },
+          problem_id: submission.problemId,
+          result: {
+            message: submission.result.message,
+            status: submission.result.status.status,
+          },
+          student_id: submission.studentId,
+          submitted_at: submission.createdAt.toISOString(),
+          test_results: submission.testResults.map((result) => ({
+            message: result.message,
+            status: result.status.status === "Accepted" ? "Passed" : "Failed",
+            test_case_id: result.testCaseId,
+          })),
         })),
-      })))
-  
+      )
     } catch (error) {
-      console.error('Error in getSubmissionsByProblemId:', error)
-      const message = error instanceof Error ? error.message : "Internal server error"
+      console.error("Error in getSubmissionsByProblemId:", error)
+      const message =
+        error instanceof Error ? error.message : "Internal server error"
       return c.json({ error: message }, 500)
     }
   })
