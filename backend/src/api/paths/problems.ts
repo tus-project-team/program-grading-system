@@ -7,28 +7,6 @@ import { test } from "../../services/program"
 import * as schemas from "../components/schemas"
 import { authMiddleware, requireRole } from "./auth"
 
-type ProblemWithRelations = {
-  body: string
-  createdAt: Date
-  id: number
-  supportedLanguages: {
-    language: { name: string; version: string }
-  }[]
-  testCases: { input: string; output: string }[]
-  title: string
-  updatedAt: Date
-}
-
-type PrismaArgs = {
-  include: {
-    supportedLanguages: {
-      include: { language: true }
-    }
-    testCases: true
-  }
-  where: { id: number }
-}
-
 // パラメータスキーマの定義
 const IdParam = z.object({
   problemId: z
@@ -298,7 +276,8 @@ const getSubmissionsByProblemIdRoute = createRoute({
 
 // ルートの設定
 const app = new OpenAPIHono()
-  .openapi(getProblemsRoute, async (c) => {
+  // 問題一覧の取得
+  .openapi(getProblemsRoute, async (c, next) => {
     await authMiddleware(c, next)
     const problems = await prisma.problem.findMany({
       include: {
@@ -327,7 +306,44 @@ const app = new OpenAPIHono()
 
     return c.json(formattedProblems)
   })
-  .openapi(createProblemRoute, async (c) => {
+  // 個別の問題の取得
+  .openapi(getProblemRoute, async (c) => {
+    const { problemId } = c.req.valid("param")
+    const problem = await prisma.problem.findUnique({
+      include: {
+        supportedLanguages: {
+          include: { language: true },
+        },
+        testCases: true,
+      },
+      where: { id: problemId },
+    })
+
+    if (!problem) {
+      return c.json({ error: "問題が見つかりません" }, 404)
+    }
+
+    return c.json(
+      {
+        body: problem.body,
+        id: problem.id,
+        supported_languages: problem.supportedLanguages.map(
+          ({ language: { name: languageName, version: languageVersion } }) => ({
+            name: languageName,
+            version: languageVersion,
+          }),
+        ),
+        test_cases: problem.testCases.map(({ input, output }) => ({
+          input,
+          output,
+        })),
+        title: problem.title,
+      },
+      200,
+    )
+  })
+  // 問題の作成
+  .openapi(createProblemRoute, async (c, next) => {
     await authMiddleware(c, next)
     await requireRole([ROLES.TEACHER, ROLES.ADMIN])(c, next)
     const data = c.req.valid("json")
@@ -377,8 +393,7 @@ const app = new OpenAPIHono()
       },
     })
 
-    // スキーマに従った形式でレスポンスデータを整形
-    const formattedProblem: z.infer<typeof schemas.Problem> = {
+    return c.json({
       body: createdProblem.body,
       id: createdProblem.id,
       supported_languages: createdProblem.supportedLanguages.map((lang) => ({
@@ -390,50 +405,36 @@ const app = new OpenAPIHono()
         output: testCase.output,
       })),
       title: createdProblem.title,
-    }
-
-    return c.json(formattedProblem, 201)
+    }, 201)
   })
-  .openapi(getProblemRoute, async (c) => {
-    const { problemId } = c.req.valid("param")
-    const problem:
-      | null
-      | (typeof prisma.problem extends {
-          findUnique: (args: PrismaArgs) => Promise<infer T>
-        }
-          ? ProblemWithRelations & T
-          : never) = (await prisma.problem.findUnique({
+  .openapi(getProblemsRoute, async (c, next) => {  // nextを引数として受け取る
+    await authMiddleware(c, next)    
+    const problems = await prisma.problem.findMany({
       include: {
         supportedLanguages: {
           include: { language: true },
         },
         testCases: true,
       },
-      where: { id: problemId },
-    })) as ProblemWithRelations
+    })
 
-    if (problem == null) {
-      return c.body(null, 404)
-    }
-
-    return c.json(
-      {
+    const formattedProblems: z.infer<typeof schemas.Problem>[] = problems.map(
+      (problem) => ({
         body: problem.body,
         id: problem.id,
-        supported_languages: problem.supportedLanguages.map(
-          ({ language: { name: languageName, version: languageVersion } }) => ({
-            name: languageName,
-            version: languageVersion,
-          }),
-        ),
-        test_cases: problem.testCases.map(({ input, output }) => ({
-          input,
-          output,
+        supported_languages: problem.supportedLanguages.map((lang) => ({
+          name: lang.language.name,
+          version: lang.language.version,
+        })),
+        test_cases: problem.testCases.map((testCase) => ({
+          input: testCase.input,
+          output: testCase.output,
         })),
         title: problem.title,
-      },
-      200,
+      }),
     )
+
+    return c.json(formattedProblems)
   })
 
   .openapi(updateProblemRoute, async (c) => {
@@ -780,60 +781,80 @@ const app = new OpenAPIHono()
 
     return c.json(testResults, 200)
   })
-  .openapi(getSubmissionsByProblemIdRoute, async (c) => {
-    await authMiddleware(c, next)
-    await requireRole([ROLES.TEACHER, ROLES.ADMIN])(c, next)
-
-    const { problemId } = c.req.valid("param")
-    const currentUser = getCurrentUser(c)
-
-    const problem = await prisma.problem.findUnique({
-      include: {
-        testCases: true,
-      },
-      where: { id: problemId },
-    })
-
-    if (!problem) {
-      return c.json({ error: "問題が見つかりません" }, 404)
-    }
-
-    const submissions = await prisma.submission.findMany({
-      include: {
-        language: true,
-        result: {
-          include: {
-            status: true,
+  .openapi(getSubmissionsByProblemIdRoute, async (c, next) => {
+    try {
+      // 認証処理
+      await authMiddleware(c, next)
+      console.log('Auth middleware passed')  // デバッグ用
+      
+      // ユーザー情報の取得を try-catch で囲む
+      let currentUser;
+      try {
+        currentUser = getCurrentUser(c)
+        console.log('Current user:', currentUser)  // デバッグ用
+      } catch (error) {
+        console.error('Failed to get current user:', error)
+        return c.json({ error: "認証エラー" }, 401)
+      }
+      
+      const { problemId } = c.req.valid("param")
+      console.log('Fetching submissions for problem:', problemId)
+  
+      // 問題の存在確認
+      const problem = await prisma.problem.findUnique({
+        where: { id: problemId },
+      })
+  
+      if (!problem) {
+        return c.json({ error: "問題が見つかりません" }, 404)
+      }
+  
+      // 権限チェック
+      const isTeacher = currentUser.role === ROLES.TEACHER
+      const isAdmin = currentUser.role === ROLES.ADMIN
+  
+      if (!isTeacher && !isAdmin) {
+        return c.json({ error: "権限がありません" }, 403)
+      }
+  
+      // 提出一覧の取得
+      const submissions = await prisma.submission.findMany({
+        include: {
+          language: true,
+          result: {
+            include: {
+              status: true,
+            },
+          },
+          testResults: {
+            include: {
+              status: true,
+              testCase: true,
+            },
           },
         },
-        testResults: {
-          include: {
-            status: true,
-            testCase: true,
-          },
+        orderBy: {
+          createdAt: "desc",
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      where: {
-        problemId,
-        ...(currentUser.role === ROLES.TEACHER
-          ? {
-              problem: {
-                teachers: {
-                  some: {
-                    userId: currentUser.id,
+        where: {
+          problemId,
+          ...(isTeacher
+            ? {
+                problem: {
+                  teachers: {
+                    some: {
+                      userId: currentUser.id,
+                    },
                   },
                 },
-              },
-            }
-          : {}),
-      },
-    })
-
-    const formattedSubmissions: z.infer<typeof schemas.Submission>[] =
-      submissions.map((submission) => ({
+              }
+            : {}),
+        },
+      })
+  
+      console.log(`Found ${submissions.length} submissions`)
+  
+      return c.json(submissions.map(submission => ({
         code: submission.code,
         id: submission.id,
         language: {
@@ -843,24 +864,22 @@ const app = new OpenAPIHono()
         problem_id: submission.problemId,
         result: {
           message: submission.result.message,
-          status: submission.result.status.status as
-            | "Accepted"
-            | "CompileError"
-            | "RuntimeError"
-            | "WrongAnswer",
+          status: submission.result.status.status,
         },
         student_id: submission.studentId,
         submitted_at: submission.createdAt.toISOString(),
-        test_results: submission.testResults.map((result) => ({
+        test_results: submission.testResults.map(result => ({
           message: result.message,
-          status: (result.status.status === "Accepted"
-            ? "Passed"
-            : "Failed") as "Failed" | "Passed",
+          status: result.status.status === "Accepted" ? "Passed" : "Failed",
           test_case_id: result.testCaseId,
         })),
-      }))
-
-    return c.json(formattedSubmissions)
+      })))
+  
+    } catch (error) {
+      console.error('Error in getSubmissionsByProblemId:', error)
+      const message = error instanceof Error ? error.message : "Internal server error"
+      return c.json({ error: message }, 500)
+    }
   })
 
 export default app

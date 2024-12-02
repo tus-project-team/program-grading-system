@@ -20,6 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
 // JWT関連の関数
 const createToken = async (payload: { role: string; sub: string }) => {
+  console.log('Creating token with payload:', payload);
   return await sign(
     {
       ...payload,
@@ -30,11 +31,6 @@ const createToken = async (payload: { role: string; sub: string }) => {
 }
 
 // JWT認証ミドルウェア
-const jwtMiddleware = jwt({
-  secret: JWT_SECRET,
-})
-
-// 認証ミドルウェア
 export const authMiddleware = async (c: Context, next: Next) => {
   const auth = c.req.header("Authorization")
   if (!auth?.startsWith("Bearer ")) {
@@ -42,22 +38,69 @@ export const authMiddleware = async (c: Context, next: Next) => {
   }
 
   try {
-    await jwtMiddleware(c, next)
-  } catch {
+    // トークンの取り出し
+    const token = auth.split(" ")[1]
+    console.log('Received token:', token)  // デバッグ用
+
+    // JWTミドルウェアの作成と実行
+    const middleware = jwt({
+      secret: JWT_SECRET,
+    })
+    
+    // JWTミドルウェアを実行し、ペイロードを取得
+    await middleware(c, async () => {
+      const payload = c.get('jwtPayload')
+      console.log('JWT payload:', payload)  // デバッグ用
+      
+      if (!payload) {
+        throw new Error('JWT verification failed: No payload')
+      }
+    })
+    
+    // このポイントでペイロードが設定されているはず
+    const payload = c.get('jwtPayload')
+    if (!payload || !payload.sub || !payload.role) {
+      return c.json({ error: "Invalid token payload" }, 401)
+    }
+    
+    await next()
+  } catch (error) {
+    console.error('Auth middleware error:', error)
     return c.json({ error: "無効なトークンです" }, 401)
+  }
+}
+
+
+// 認証済みユーザー情報を取得するユーティリティ関数
+export const getCurrentUser = (c: Context) => {
+  const payload = c.get("jwtPayload")
+  console.log('Getting current user from payload:', payload)  // デバッグ用
+  
+  if (!payload || !payload.sub || !payload.role) {
+    throw new Error("認証情報が不正です")
+  }
+  
+  return {
+    id: payload.sub,
+    role: payload.role,
   }
 }
 
 // ロールベースの認可ミドルウェア
 export const requireRole = (allowedRoles: string[]) => {
   return async (c: Context, next: Next) => {
-    const payload = c.get("jwtPayload")
-    if (!allowedRoles.includes(payload.role)) {
-      return c.json({ error: "権限がありません" }, 403)
+    try {
+      const currentUser = getCurrentUser(c)
+      if (!allowedRoles.includes(currentUser.role)) {
+        return c.json({ error: "権限がありません" }, 403)
+      }
+      await next()
+    } catch (error) {
+      console.error('Role verification error:', error)
+      return c.json({ error: "認証エラー" }, 401)
     }
-    await next()
   }
-}
+} 
 
 // ルート定義
 const registerRoute = createRoute({

@@ -1,2 +1,2 @@
-export { usePasskeyRegistration } from './use-passkey-registration';
-export { usePasskeyAuthentication } from './use-passkey-authentication';
+export { usePasskeyAuthentication } from "./use-passkey-authentication"
+export { usePasskeyRegistration } from "./use-passkey-registration"

@@ -10,8 +10,17 @@ const app = new OpenAPIHono()
 app.use(
   "/api/*",
   cors({
-    allowHeaders: ["Content-Type"],
-    origin: "https://localhost:5173",
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept"
+    ],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    exposeHeaders: ["Content-Length", "X-Requested-With"],
+    maxAge: 86400,
+    origin: ["https://localhost:5173", "http://localhost:5173"], // HTTPSとHTTPの両方を許可
   }),
 )
 

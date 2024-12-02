@@ -1,57 +1,67 @@
-import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Fingerprint } from 'lucide-react';
-import { usePasskeyRegistration, usePasskeyAuthentication } from '@/features/auth/hooks';
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  usePasskeyAuthentication,
+  usePasskeyRegistration,
+} from "@/features/auth/hooks"
+import { Fingerprint } from "lucide-react"
+import { useState } from "react"
 
-type Role = 'student' | 'teacher' | 'admin';
+type Role = "admin" | "student" | "teacher"
 
-interface FormData {
-  email: string;
-  name: string;
-  role: Role;
+type FormData = {
+  email: string
+  name: string
+  role: Role
 }
 
 type PasskeyAuthProps = {
-  onAuthenticationSuccess: (token: string) => void;
-};
+  onAuthenticationSuccess: (token: string) => void
+}
 
 export const PasskeyAuth = ({ onAuthenticationSuccess }: PasskeyAuthProps) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<"login" | "register">("login")
 
-  return mode === 'login' ? (
-    <PasskeyLogin 
-      onRegister={() => setMode('register')} 
+  return mode === "login" ? (
+    <PasskeyLogin
+      onRegister={() => setMode("register")}
       onSuccess={onAuthenticationSuccess}
     />
   ) : (
-    <PasskeyRegistration 
-      onCancel={() => setMode('login')} 
+    <PasskeyRegistration
+      onCancel={() => setMode("login")}
       onSuccess={onAuthenticationSuccess}
     />
-  );
-};
+  )
+}
 
 type PasskeyLoginProps = {
-  onRegister: () => void;
-  onSuccess: (token: string) => void;
-};
+  onRegister: () => void
+  onSuccess: (token: string) => void
+}
 
 const PasskeyLogin = ({ onRegister, onSuccess }: PasskeyLoginProps) => {
-  const [email, setEmail] = useState('');
-  const { login, isLoading, error } = usePasskeyAuthentication();
+  const [email, setEmail] = useState("")
+  const { error, isLoading, login } = usePasskeyAuthentication()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const result = await login(email);
-      onSuccess(result.token);
-    } catch (err) {
-      console.error(err);
+      const result = await login(email)
+      onSuccess(result.token)
+    } catch (error_) {
+      console.error(error_)
     }
-  };
+  }
 
   return (
     <Card className="w-full">
@@ -62,71 +72,70 @@ const PasskeyLogin = ({ onRegister, onSuccess }: PasskeyLoginProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">メールアドレス</Label>
             <Input
               id="email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
               required
+              type="email"
+              value={email}
             />
           </div>
           {error && (
             <p className="text-sm text-red-500">
-              {error instanceof Error ? error.message : 'エラーが発生しました'}
+              {error instanceof Error ? error.message : "エラーが発生しました"}
             </p>
           )}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button className="w-full" disabled={isLoading} type="submit">
             <Fingerprint className="mr-2 h-4 w-4" />
-            {isLoading ? 'パスキーで認証中...' : 'パスキーでログイン'}
+            {isLoading ? "パスキーで認証中..." : "パスキーでログイン"}
           </Button>
         </form>
       </CardContent>
       <CardFooter>
         <Button
+          className="w-full"
+          disabled={isLoading}
+          onClick={onRegister}
           type="button"
           variant="outline"
-          className="w-full"
-          onClick={onRegister}
-          disabled={isLoading}
         >
           アカウントを作成
         </Button>
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
 
 type PasskeyRegistrationProps = {
-  onCancel: () => void;
-  onSuccess: (token: string) => void;
-};
+  onCancel: () => void
+  onSuccess: (token: string) => void
+}
 
-const PasskeyRegistration = ({ onCancel, onSuccess }: PasskeyRegistrationProps) => {
+const PasskeyRegistration = ({
+  onCancel,
+  onSuccess,
+}: PasskeyRegistrationProps) => {
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    name: '',
-    role: 'student',
-  });
-  
-  const { register, isLoading, error } = usePasskeyRegistration();
+    email: "",
+    name: "",
+    role: "student",
+  })
+
+  const { error, isLoading, register } = usePasskeyRegistration()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const result = await register(formData);
-      onSuccess(result.token);
-    } catch (err) {
-      console.error(err);
+      const result = await register(formData)
+      onSuccess(result.token)
+    } catch (error_) {
+      console.error(error_)
     }
-  };
+  }
 
   return (
     <Card className="w-full">
@@ -137,34 +146,43 @@ const PasskeyRegistration = ({ onCancel, onSuccess }: PasskeyRegistrationProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="reg-email">メールアドレス</Label>
             <Input
               id="reg-email"
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
+              required
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="name">名前</Label>
             <Input
               id="name"
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              required
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">ロール</Label>
             <select
+              className="w-full rounded border p-2"
               id="role"
-              className="w-full p-2 border rounded"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  role: e.target.value as Role,
+                }))
+              }
               value={formData.role}
-              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as Role }))}
             >
               <option value="student">学生</option>
               <option value="teacher">教師</option>
@@ -173,32 +191,28 @@ const PasskeyRegistration = ({ onCancel, onSuccess }: PasskeyRegistrationProps) 
           </div>
           {error && (
             <p className="text-sm text-red-500">
-              {error instanceof Error ? error.message : 'エラーが発生しました'}
+              {error instanceof Error ? error.message : "エラーが発生しました"}
             </p>
           )}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button className="w-full" disabled={isLoading} type="submit">
             <Fingerprint className="mr-2 h-4 w-4" />
-            {isLoading ? 'パスキーを登録中...' : 'パスキーを登録'}
+            {isLoading ? "パスキーを登録中..." : "パスキーを登録"}
           </Button>
         </form>
       </CardContent>
       <CardFooter>
         <Button
+          className="w-full"
+          disabled={isLoading}
+          onClick={onCancel}
           type="button"
           variant="outline"
-          className="w-full"
-          onClick={onCancel}
-          disabled={isLoading}
         >
           戻る
         </Button>
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
 
-export default PasskeyAuth;
+export default PasskeyAuth
