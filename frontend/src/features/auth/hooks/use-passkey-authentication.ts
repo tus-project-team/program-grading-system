@@ -120,15 +120,15 @@ function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
   const uint8Array =
     buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
   return btoa(String.fromCharCode(...uint8Array))
-    .replaceAll('+', "-")
-    .replaceAll('/', "_")
-    .replaceAll('=', "")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
 }
 
 function base64ToArrayBuffer(base64: string): Uint8Array {
   const standardBase64 = base64
-    .replaceAll('-', "+")
-    .replaceAll('_', "/")
+    .replaceAll("-", "+")
+    .replaceAll("_", "/")
     .padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=")
 
   const binaryString = atob(standardBase64)

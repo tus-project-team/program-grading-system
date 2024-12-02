@@ -6,14 +6,14 @@ import createQueryClient from "openapi-react-query"
 export const BACKEND_URL: string =
   import.meta.env.BACKEND_URL ?? "http://localhost:3000"
 
-  const authMiddleware: Middleware = {
-    onRequest: async ({ request }) => {
-      const token = localStorage.getItem("token")
-      if (token) {
-        request.headers.set("Authorization", `Bearer ${token}`)
-      }
-    },
-  }
+const authMiddleware: Middleware = {
+  onRequest: async ({ request }) => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      request.headers.set("Authorization", `Bearer ${token}`)
+    }
+  },
+}
 
 export class APIError extends Error {
   // todo: Refactor the following logic. Maybe changing the schema of the error response is necessary.

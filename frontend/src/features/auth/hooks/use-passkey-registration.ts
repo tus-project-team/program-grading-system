@@ -153,7 +153,10 @@ export function usePasskeyRegistration() {
 // Base64 URLセーフエンコーディング
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const binary = String.fromCharCode(...new Uint8Array(buffer))
-  return btoa(binary).replaceAll('+', "-").replaceAll('/', "_").replaceAll('=', "")
+  return btoa(binary)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
 }
 
 // Base64 URLセーフデコーディング
@@ -166,7 +169,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
         : base64.padEnd(base64.length + (4 - (base64.length % 4)), "=")
 
     // URLセーフなBase64文字列を標準のBase64形式に変換
-    const standardBase64 = padded.replaceAll('-', "+").replaceAll('_', "/")
+    const standardBase64 = padded.replaceAll("-", "+").replaceAll("_", "/")
 
     const binaryString = atob(standardBase64)
     const bytes = new Uint8Array(binaryString.length)
