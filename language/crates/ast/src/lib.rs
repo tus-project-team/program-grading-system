@@ -1,4 +1,4 @@
-use crate::tokenize::position::Position;
+use tokenizer::position::Position;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Program {

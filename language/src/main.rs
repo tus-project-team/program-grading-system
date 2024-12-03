@@ -1,7 +1,6 @@
 use clap::Parser;
-use language::{
-    parse::parser::Parser as ShuiroParser, tokenize::tokenizer::Tokenizer as ShuiroTokenizer,
-};
+use parser::parse;
+use tokenizer::tokenize;
 
 #[derive(clap::Parser)]
 #[command(author, version, about, long_about = None)]
@@ -55,7 +54,7 @@ fn main() {
     };
     match args.mode {
         Mode::Tokenize => {
-            let tokens = ShuiroTokenizer::new(source).tokenize();
+            let tokens = tokenize(source);
             if let Some(output) = args.output {
                 std::fs::write(output, format!("{:#?}", tokens)).expect("Failed to write output");
             } else {
@@ -63,8 +62,8 @@ fn main() {
             }
         }
         Mode::Parse => {
-            let tokens = ShuiroTokenizer::new(source).tokenize();
-            let ast = ShuiroParser::new(tokens).parse();
+            let tokens = tokenize(source);
+            let ast = parse(tokens);
             if let Some(output) = args.output {
                 std::fs::write(output, format!("{:#?}", ast)).expect("Failed to write output");
             } else {

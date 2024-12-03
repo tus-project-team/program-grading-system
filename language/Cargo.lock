@@ -52,6 +52,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast"
+version = "0.1.0"
+dependencies = [
+ "tokenizer",
+]
+
+[[package]]
 name = "clap"
 version = "4.5.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -92,6 +99,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afb84c814227b90d6895e01398aee0d8033c00e7466aca416fb6a8e0eb19d8a7"
 
 [[package]]
+name = "code-generator"
+version = "0.1.0"
+
+[[package]]
 name = "colorchoice"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -121,6 +132,17 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "indoc",
+ "parser",
+ "tokenizer",
+]
+
+[[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "indoc",
+ "tokenizer",
 ]
 
 [[package]]
@@ -156,6 +178,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "tokenizer"
+version = "0.1.0"
+dependencies = [
+ "indoc",
 ]
 
 [[package]]
