@@ -25,3 +25,4 @@ code-generator = { path = "crates/code-generator" }
 parser = { path = "crates/parser" }
 tokenizer = { path = "crates/tokenizer" }
 indoc = "2.0.5"
+wast = "221.0.2"
