@@ -8,6 +8,14 @@ use wast::{
 
 const TEMPLATE: &str = include_str!("template.wat");
 
+type CoreParameters<'a> = Box<
+    [(
+        Option<Id<'a>>,
+        Option<wast::token::NameAnnotation<'a>>,
+        core::ValType<'a>,
+    )],
+>;
+
 pub struct CodeGenerator<'a> {
     ast: ast::Program,
     buffer: ParseBuffer<'a>,
@@ -172,6 +180,16 @@ impl CodeGenerator<'_> {
                 )));
                 instuctions
             }
+            ast::Expression::FunctionCall(call) => {
+                let mut instructions = Vec::new();
+                for arg in &call.arguments {
+                    instructions.extend(self.generate_expression(arg));
+                }
+                instructions.push(core::Instruction::Call(wast::token::Index::Id(
+                    self.generate_identifier(&call.name),
+                )));
+                instructions
+            }
             ast::Expression::Identifier(identifier) => {
                 vec![core::Instruction::LocalGet(wast::token::Index::Id(
                     self.generate_identifier(identifier),
@@ -184,16 +202,7 @@ impl CodeGenerator<'_> {
         }
     }
 
-    fn generate_parameters<'a>(
-        &self,
-        parameters: &'a ast::Parameters,
-    ) -> Box<
-        [(
-            Option<Id<'a>>,
-            Option<wast::token::NameAnnotation<'a>>,
-            core::ValType<'a>,
-        )],
-    > {
+    fn generate_parameters<'a>(&self, parameters: &'a ast::Parameters) -> CoreParameters<'a> {
         parameters
             .parameters
             .iter()

@@ -1,5 +1,5 @@
 use ast::{
-    AssignmentExpression, BinaryExpression, Block, Expression, ExpressionStatement,
+    AssignmentExpression, BinaryExpression, Block, Expression, ExpressionStatement, FunctionCall,
     FunctionDefinition, Identifier, IntegerLiteral, Location, Operator, OperatorKind, Parameter,
     Parameters, Program, Statement, Statements, Type, TypeKind, VariableDefinition,
 };
@@ -418,12 +418,14 @@ impl Parser {
     /// primary_expression =
     ///     literal
     ///   | assignment_expression
+    ///   | function_call
     ///   | identifier
     ///   | "(" expression ")"
     /// ```
     fn primary_expression(&mut self) -> Option<Expression> {
         self.literal()
             .or_else(|| self.assignment_expression())
+            .or_else(|| self.function_call())
             .or_else(|| self.identifier().map(Expression::Identifier))
             .or_else(|| {
                 self.transaction(|tx| {
@@ -450,6 +452,32 @@ impl Parser {
                 },
                 name: identifier,
                 value: Box::new(expression),
+            }))
+        })
+    }
+
+    /// ```bnf
+    /// function_call = identifier "(" expression* ")"
+    /// ```
+    fn function_call(&mut self) -> Option<Expression> {
+        self.transaction(|tx| {
+            let identifier = tx.identifier()?;
+            tx.consume_token(TokenKind::Delimiter, "(")?;
+            let mut arguments: Vec<Expression> = Vec::new();
+            while let Some(expression) = tx.expression() {
+                arguments.push(expression);
+                if tx.consume_token(TokenKind::Delimiter, ",").is_none() {
+                    break;
+                }
+            }
+            let end_position = tx.consume_token(TokenKind::Delimiter, ")")?.end_position;
+            Some(Expression::FunctionCall(FunctionCall {
+                location: Location {
+                    start: identifier.location.start,
+                    end: end_position,
+                },
+                name: identifier,
+                arguments,
             }))
         })
     }

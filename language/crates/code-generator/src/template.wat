@@ -151,7 +151,7 @@
     ;;; ```wat
     ;;; (call $print_char (i32.const 33)) ;; print_char('!');
     ;;; ```
-    (func $print_char (export "print_char") (param $value i32)
+    (func $print_char (export "print_char") (param $value i32) (result i32)
       (local $stdout i32)
       (local $offset i32)
       (local $result_ptr i32)
@@ -196,6 +196,7 @@
         (i32.const 0)
         (i32.sub (i32.add (local.get $result_ptr) (i32.const 3)) (local.get $offset))
       )
+      (i32.const 0)
     )
 
     ;;; Prints an integer to stdout.
@@ -207,7 +208,7 @@
     ;;; ```wat
     ;;; (call $print_int (i32.const 123)) ;; print_int(123);
     ;;; ```
-    (func $print_int (export "print_int") (param $value i32)
+    (func $print_int (export "print_int") (param $value i32) (result i32)
       (local $stdout i32)
       (local $offset i32)
       (local $length i32)
@@ -251,6 +252,7 @@
         (i32.const 0)
         (i32.sub (i32.add (local.get $result_ptr) (i32.const 3)) (local.get $offset))
       )
+      (i32.const 0)
     )
   )
   (core instance $core|std (instantiate $Std
@@ -265,10 +267,10 @@
     (import "env" "memory" (memory $memory 0))
 
     (import "shuiro:std@0.0.0" "print_int"
-      (func $print_int (param i32))
+      (func $print_int (param i32) (result i32))
     )
     (import "shuiro:std@0.0.0" "print_char"
-      (func $print_char (param i32))
+      (func $print_char (param i32) (result i32))
     )
   )
   (core instance $core|main (instantiate $Main
