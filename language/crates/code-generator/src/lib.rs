@@ -50,7 +50,6 @@ impl CodeGenerator<'_> {
                                     .map(core::ModuleField::Func)
                                     .collect::<Vec<_>>(),
                             );
-                            dbg!(&fields);
                         } else {
                             unreachable!("expected the main module to be inline")
                         }
