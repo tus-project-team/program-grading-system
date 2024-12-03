@@ -174,8 +174,13 @@ impl CodeGenerator<'_> {
                 instructions
             }
             ast::Expression::AssignmentExpression(expr) => {
-                let mut instuctions = self.generate_expression(&expr.value);
+                let value = self.generate_expression(&expr.value);
+                let mut instuctions = Vec::with_capacity(value.len() + 2);
+                instuctions.extend_from_slice(&value);
                 instuctions.push(core::Instruction::LocalSet(wast::token::Index::Id(
+                    self.generate_identifier(&expr.name),
+                )));
+                instuctions.push(core::Instruction::LocalGet(wast::token::Index::Id(
                     self.generate_identifier(&expr.name),
                 )));
                 instuctions
@@ -230,18 +235,232 @@ impl CodeGenerator<'_> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use ::core::str;
 
-    #[test]
-    fn test_generate() {
-        let source = "fn main() -> i32 { let i: i32 = 1; i - 1 }";
+    use super::*;
+    use indoc::indoc;
+    use wasmtime::{
+        component::{Component, Linker, Val},
+        Config, Engine, Store,
+    };
+    use wasmtime_wasi::{pipe::MemoryOutputPipe, ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
+
+    struct State {
+        ctx: WasiCtx,
+        table: ResourceTable,
+    }
+
+    impl WasiView for State {
+        fn ctx(&mut self) -> &mut WasiCtx {
+            &mut self.ctx
+        }
+
+        fn table(&mut self) -> &mut ResourceTable {
+            &mut self.table
+        }
+    }
+
+    fn compile(source: &str) -> wast::parser::Result<Vec<u8>> {
         let tokens = tokenizer::tokenize(source.to_string());
         let ast = parser::parse(tokens);
-        let mut generator = CodeGenerator::new(ast).unwrap();
-        let mut wat = generator.generate().unwrap();
-        let wat_str = format!("{:#?}", wat);
-        let wasm = wat.encode().unwrap();
-        std::fs::write("test.wat", &wat_str).unwrap();
-        std::fs::write("test.wasm", &wasm).unwrap();
+        let mut generator = CodeGenerator::new(ast)?;
+        let mut wat = generator.generate()?;
+        let wasm = wat.encode()?;
+        Ok(wasm)
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct RunResult {
+        stdout: String,
+        stderr: String,
+    }
+
+    fn run(source: &str) -> wasmtime::Result<RunResult> {
+        let mut config = Config::new();
+        config.wasm_component_model(true);
+
+        let engine = Engine::new(&config)?;
+
+        let mut linker = Linker::<State>::new(&engine);
+        wasmtime_wasi::add_to_linker_sync(&mut linker)?;
+
+        let stdout_steram = MemoryOutputPipe::new(1024);
+        let stderr_stream = MemoryOutputPipe::new(1024);
+
+        let mut builder = WasiCtxBuilder::new();
+        builder.stdout(stdout_steram.clone());
+        builder.stderr(stderr_stream.clone());
+        let wasi_ctx = builder.build();
+
+        let mut store = Store::new(
+            &engine,
+            State {
+                ctx: wasi_ctx,
+                table: ResourceTable::new(),
+            },
+        );
+
+        let wasm = compile(source)?;
+        let component = Component::from_binary(&engine, &wasm)?;
+
+        let instance = linker.instantiate(&mut store, &component)?;
+
+        let main_index = instance
+            .get_export(&mut store, None, "wasi:cli/run@0.2.2")
+            .unwrap();
+        let run_index = instance
+            .get_export(&mut store, Some(&main_index), "run")
+            .unwrap();
+        let run = instance.get_func(&mut store, run_index).unwrap();
+
+        let mut results = [Val::Result(Ok(None))];
+        run.call(&mut store, &[], &mut results)?;
+
+        let stdout_bytes = stdout_steram.contents();
+        let stdout_str = str::from_utf8(&stdout_bytes)?;
+
+        let stderr_bytes = stderr_stream.contents();
+        let stderr_str = str::from_utf8(&stderr_bytes)?;
+
+        Ok(RunResult {
+            stdout: stdout_str.to_string(),
+            stderr: stderr_str.to_string(),
+        })
+    }
+
+    #[test]
+    fn return_zero() {
+        let source = "fn main() -> i32 { 0 }";
+        run(source).unwrap();
+    }
+
+    #[test]
+    fn print_int() {
+        let source = "fn main() -> i32 { print_int(1234); 0 }";
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "1234");
+    }
+
+    #[test]
+    fn print_char() {
+        let source = "fn main() -> i32 { print_char(65); 0 }";
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "A");
+    }
+
+    #[test]
+    fn hello_world() {
+        let source = indoc! {"
+            fn main() -> i32 {
+                print_char(72);  // 'H'
+                print_char(101); // 'e'
+                print_char(108); // 'l'
+                print_char(108); // 'l'
+                print_char(111); // 'o'
+                print_char(44);  // ','
+                print_char(32);  // ' '
+                print_char(87);  // 'W'
+                print_char(111); // 'o'
+                print_char(114); // 'r'
+                print_char(108); // 'l'
+                print_char(100); // 'd'
+                print_char(33);  // '!'
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "Hello, World!");
+    }
+
+    #[test]
+    fn immutable_variables() {
+        let source = indoc! {"
+            fn main() -> i32 {
+                let a: i32 = 1234;
+                let b: i32 = 5678;
+                print_int(a);
+                print_char(32); // ' '
+                print_int(b);
+                print_char(32); // ' '
+                print_int(a + b);
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "1234 5678 6912");
+    }
+
+    #[test]
+    fn mutable_variables() {
+        let source = indoc! {"
+            fn main() -> i32 {
+                var a: i32 = 1234;
+                var b: i32;
+                b = 5678;
+                a = a + b;
+                print_int(a);
+                print_char(32); // ' '
+                print_int(b);
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "6912 5678");
+    }
+
+    #[test]
+    fn functions() {
+        let source = indoc! {"
+            fn print_space() -> i32 {
+                print_char(32); // ' '
+                0
+            }
+
+            fn add(a: i32, b: i32) -> i32 {
+                a + b
+            }
+
+            fn sub(a: i32, b: i32) -> i32 {
+                a - b
+            }
+
+            fn mul(a: i32, b: i32) -> i32 {
+                a * b
+            }
+
+            fn div(a: i32, b: i32) -> i32 {
+                a / b
+            }
+
+            fn main() -> i32 {
+                print_int(add(1234, 5678));
+                print_space();
+                print_int(sub(5678, 1234));
+                print_space();
+                print_int(mul(1234, 5678));
+                print_space();
+                print_int(div(5678, 1234));
+                print_space();
+                print_int(1234 + 5678 - 5678 * 1234 / 5678);
+                print_space();
+                print_int(sub(add(1234, 5678), div(mul(5678, 1234), 5678)));
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "6912 4444 7006652 4 5678 5678");
+    }
+
+    #[test]
+    fn calculate() {
+        let source = indoc! {"
+            fn main() -> i32 {
+                let result: i32 = (1 + 2) + 3 * 4 / 5 - -2 + (-2);
+                print_int(result);
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "5");
     }
 }
