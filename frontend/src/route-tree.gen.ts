@@ -25,6 +25,7 @@ import { Route as AdminProblemsProblemIdIndexImport } from "./routes/admin/probl
 
 const IndexLazyImport = createFileRoute("/")()
 const ProblemsIndexLazyImport = createFileRoute("/problems/")()
+const AuthIndexLazyImport = createFileRoute("/auth/")()
 const AdminSubmissionsIndexLazyImport = createFileRoute("/admin/submissions/")()
 
 // Create/Update Routes
@@ -42,6 +43,12 @@ const ProblemsIndexLazyRoute = ProblemsIndexLazyImport.update({
 } as any).lazy(() =>
   import("./routes/problems/index.lazy").then((d) => d.Route),
 )
+
+const AuthIndexLazyRoute = AuthIndexLazyImport.update({
+  id: "/auth/",
+  path: "/auth/",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import("./routes/auth/index.lazy").then((d) => d.Route))
 
 const ProblemsProblemIdRouteRoute = ProblemsProblemIdRouteImport.update({
   id: "/problems/$problemId",
@@ -99,6 +106,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProblemsProblemIdRouteImport
       parentRoute: typeof rootRoute
     }
+    "/auth/": {
+      id: "/auth/"
+      path: "/auth"
+      fullPath: "/auth"
+      preLoaderRoute: typeof AuthIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     "/problems/": {
       id: "/problems/"
       path: "/problems"
@@ -135,6 +149,7 @@ declare module "@tanstack/react-router" {
 export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
+  "/auth": typeof AuthIndexLazyRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
   "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
@@ -144,6 +159,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
+  "/auth": typeof AuthIndexLazyRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
   "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
@@ -154,6 +170,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
+  "/auth/": typeof AuthIndexLazyRoute
   "/problems/": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
   "/admin/submissions/": typeof AdminSubmissionsIndexLazyRoute
@@ -165,6 +182,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/problems/$problemId"
+    | "/auth"
     | "/problems"
     | "/admin/submissions/$submissionId"
     | "/admin/submissions"
@@ -173,6 +191,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/problems/$problemId"
+    | "/auth"
     | "/problems"
     | "/admin/submissions/$submissionId"
     | "/admin/submissions"
@@ -181,6 +200,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/problems/$problemId"
+    | "/auth/"
     | "/problems/"
     | "/admin/submissions/$submissionId"
     | "/admin/submissions/"
@@ -191,6 +211,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
+  AuthIndexLazyRoute: typeof AuthIndexLazyRoute
   ProblemsIndexLazyRoute: typeof ProblemsIndexLazyRoute
   AdminSubmissionsSubmissionIdRouteRoute: typeof AdminSubmissionsSubmissionIdRouteRoute
   AdminSubmissionsIndexLazyRoute: typeof AdminSubmissionsIndexLazyRoute
@@ -200,6 +221,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   ProblemsProblemIdRouteRoute: ProblemsProblemIdRouteRoute,
+  AuthIndexLazyRoute: AuthIndexLazyRoute,
   ProblemsIndexLazyRoute: ProblemsIndexLazyRoute,
   AdminSubmissionsSubmissionIdRouteRoute:
     AdminSubmissionsSubmissionIdRouteRoute,
@@ -219,6 +241,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/problems/$problemId",
+        "/auth/",
         "/problems/",
         "/admin/submissions/$submissionId",
         "/admin/submissions/",
@@ -230,6 +253,9 @@ export const routeTree = rootRoute
     },
     "/problems/$problemId": {
       "filePath": "problems/$problemId/route.tsx"
+    },
+    "/auth/": {
+      "filePath": "auth/index.lazy.tsx"
     },
     "/problems/": {
       "filePath": "problems/index.lazy.tsx"
