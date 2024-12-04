@@ -6,9 +6,9 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'Docs with Tailwind',
+			title: 'Shuiro Language',
 			social: {
-				github: 'https://github.com/withastro/starlight',
+				github: 'https://github.com/shuiro-dev/shuiro',
 			},
 			sidebar: [
 				{
