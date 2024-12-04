@@ -67,6 +67,7 @@ pub enum Expression {
     AssignmentExpression(AssignmentExpression),
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
+    FunctionCall(FunctionCall),
 }
 
 impl Expression {
@@ -78,6 +79,7 @@ impl Expression {
             }
             Expression::Identifier(identifier) => &identifier.location,
             Expression::IntegerLiteral(integer_literal) => &integer_literal.location,
+            Expression::FunctionCall(function_call) => &function_call.location,
         }
     }
 }
@@ -145,6 +147,13 @@ pub struct Identifier {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IntegerLiteral {
     pub value: String,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FunctionCall {
+    pub name: Identifier,
+    pub arguments: Vec<Expression>,
     pub location: Location,
 }
 
