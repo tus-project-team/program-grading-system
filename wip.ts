@@ -18,12 +18,18 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { Route as rootRoute } from "./routes/__root"
 import { Route as ProblemsProblemIdRouteImport } from "./routes/problems/$problemId/route"
+<<<<<<< HEAD:wip.ts
 import { Route as AdminProblemsKannriImport } from "./routes/admin/problems/kannri"
+=======
+import { Route as AdminSubmissionsSubmissionIdRouteImport } from "./routes/admin/submissions/$submissionId/route"
+import { Route as AdminProblemsProblemIdIndexImport } from "./routes/admin/problems/$problemId/index"
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute("/")()
 const ProblemsIndexLazyImport = createFileRoute("/problems/")()
+const AdminSubmissionsIndexLazyImport = createFileRoute("/admin/submissions/")()
 
 // Create/Update Routes
 
@@ -49,11 +55,43 @@ const ProblemsProblemIdRouteRoute = ProblemsProblemIdRouteImport.update({
   import("./routes/problems/$problemId/route.lazy").then((d) => d.Route),
 )
 
+<<<<<<< HEAD:wip.ts
 const AdminProblemsKannriRoute = AdminProblemsKannriImport.update({
   id: "/admin/problems/kannri",
   path: "/admin/problems/kannri",
   getParentRoute: () => rootRoute,
 } as any)
+=======
+const AdminSubmissionsIndexLazyRoute = AdminSubmissionsIndexLazyImport.update({
+  id: "/admin/submissions/",
+  path: "/admin/submissions/",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import("./routes/admin/submissions/index.lazy").then((d) => d.Route),
+)
+
+const AdminSubmissionsSubmissionIdRouteRoute =
+  AdminSubmissionsSubmissionIdRouteImport.update({
+    id: "/admin/submissions/$submissionId",
+    path: "/admin/submissions/$submissionId",
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import("./routes/admin/submissions/$submissionId/route.lazy").then(
+      (d) => d.Route,
+    ),
+  )
+
+const AdminProblemsProblemIdIndexRoute =
+  AdminProblemsProblemIdIndexImport.update({
+    id: "/admin/problems/$problemId/",
+    path: "/admin/problems/$problemId/",
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import("./routes/admin/problems/$problemId/index.lazy").then(
+      (d) => d.Route,
+    ),
+  )
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 
 // Populate the FileRoutesByPath interface
 
@@ -80,11 +118,33 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProblemsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+<<<<<<< HEAD:wip.ts
     "/admin/problems/kannri": {
       id: "/admin/problems/kannri"
       path: "/admin/problems/kannri"
       fullPath: "/admin/problems/kannri"
       preLoaderRoute: typeof AdminProblemsKannriImport
+=======
+    "/admin/submissions/$submissionId": {
+      id: "/admin/submissions/$submissionId"
+      path: "/admin/submissions/$submissionId"
+      fullPath: "/admin/submissions/$submissionId"
+      preLoaderRoute: typeof AdminSubmissionsSubmissionIdRouteImport
+      parentRoute: typeof rootRoute
+    }
+    "/admin/submissions/": {
+      id: "/admin/submissions/"
+      path: "/admin/submissions"
+      fullPath: "/admin/submissions"
+      preLoaderRoute: typeof AdminSubmissionsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    "/admin/problems/$problemId/": {
+      id: "/admin/problems/$problemId/"
+      path: "/admin/problems/$problemId"
+      fullPath: "/admin/problems/$problemId"
+      preLoaderRoute: typeof AdminProblemsProblemIdIndexImport
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
       parentRoute: typeof rootRoute
     }
   }
@@ -96,14 +156,26 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
+<<<<<<< HEAD:wip.ts
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+=======
+  "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
+  "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
+<<<<<<< HEAD:wip.ts
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+=======
+  "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
+  "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 }
 
 export interface FileRoutesById {
@@ -111,7 +183,13 @@ export interface FileRoutesById {
   "/": typeof IndexLazyRoute
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems/": typeof ProblemsIndexLazyRoute
+<<<<<<< HEAD:wip.ts
   "/admin/problems/kannri": typeof AdminProblemsKannriRoute
+=======
+  "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/submissions/": typeof AdminSubmissionsIndexLazyRoute
+  "/admin/problems/$problemId/": typeof AdminProblemsProblemIdIndexRoute
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 }
 
 export interface FileRouteTypes {
@@ -120,15 +198,35 @@ export interface FileRouteTypes {
     | "/"
     | "/problems/$problemId"
     | "/problems"
+<<<<<<< HEAD:wip.ts
     | "/admin/problems/kannri"
   fileRoutesByTo: FileRoutesByTo
   to: "/" | "/problems/$problemId" | "/problems" | "/admin/problems/kannri"
+=======
+    | "/admin/submissions/$submissionId"
+    | "/admin/submissions"
+    | "/admin/problems/$problemId"
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | "/"
+    | "/problems/$problemId"
+    | "/problems"
+    | "/admin/submissions/$submissionId"
+    | "/admin/submissions"
+    | "/admin/problems/$problemId"
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
   id:
     | "__root__"
     | "/"
     | "/problems/$problemId"
     | "/problems/"
+<<<<<<< HEAD:wip.ts
     | "/admin/problems/kannri"
+=======
+    | "/admin/submissions/$submissionId"
+    | "/admin/submissions/"
+    | "/admin/problems/$problemId/"
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
   fileRoutesById: FileRoutesById
 }
 
@@ -136,14 +234,27 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
   ProblemsIndexLazyRoute: typeof ProblemsIndexLazyRoute
+<<<<<<< HEAD:wip.ts
   AdminProblemsKannriRoute: typeof AdminProblemsKannriRoute
+=======
+  AdminSubmissionsSubmissionIdRouteRoute: typeof AdminSubmissionsSubmissionIdRouteRoute
+  AdminSubmissionsIndexLazyRoute: typeof AdminSubmissionsIndexLazyRoute
+  AdminProblemsProblemIdIndexRoute: typeof AdminProblemsProblemIdIndexRoute
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   ProblemsProblemIdRouteRoute: ProblemsProblemIdRouteRoute,
   ProblemsIndexLazyRoute: ProblemsIndexLazyRoute,
+<<<<<<< HEAD:wip.ts
   AdminProblemsKannriRoute: AdminProblemsKannriRoute,
+=======
+  AdminSubmissionsSubmissionIdRouteRoute:
+    AdminSubmissionsSubmissionIdRouteRoute,
+  AdminSubmissionsIndexLazyRoute: AdminSubmissionsIndexLazyRoute,
+  AdminProblemsProblemIdIndexRoute: AdminProblemsProblemIdIndexRoute,
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
 }
 
 export const routeTree = rootRoute
@@ -159,7 +270,13 @@ export const routeTree = rootRoute
         "/",
         "/problems/$problemId",
         "/problems/",
+<<<<<<< HEAD:wip.ts
         "/admin/problems/kannri"
+=======
+        "/admin/submissions/$submissionId",
+        "/admin/submissions/",
+        "/admin/problems/$problemId/"
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
       ]
     },
     "/": {
@@ -171,8 +288,19 @@ export const routeTree = rootRoute
     "/problems/": {
       "filePath": "problems/index.lazy.tsx"
     },
+<<<<<<< HEAD:wip.ts
     "/admin/problems/kannri": {
       "filePath": "admin/problems/kannri.tsx"
+=======
+    "/admin/submissions/$submissionId": {
+      "filePath": "admin/submissions/$submissionId/route.tsx"
+    },
+    "/admin/submissions/": {
+      "filePath": "admin/submissions/index.lazy.tsx"
+    },
+    "/admin/problems/$problemId/": {
+      "filePath": "admin/problems/$problemId/index.tsx"
+>>>>>>> ef2fac43b837d6020f28478ab3ec5812a8a39438:frontend/src/route-tree.gen.ts
     }
   }
 }

@@ -1,3 +1,5 @@
+use core::fmt;
+
 use super::position::Position;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -8,6 +10,19 @@ pub enum TokenKind {
     Keyword,
     Delimiter, // Parentheses, brackets, braces, etc.
     Comment,   // Single-line or multi-line comments
+}
+
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TokenKind::Integer => write!(f, "integer"),
+            TokenKind::Identifier => write!(f, "identifier"),
+            TokenKind::Operator => write!(f, "operator"),
+            TokenKind::Keyword => write!(f, "keyword"),
+            TokenKind::Delimiter => write!(f, "delimiter"),
+            TokenKind::Comment => write!(f, "comment"),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

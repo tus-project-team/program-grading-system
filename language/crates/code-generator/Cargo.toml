@@ -1,0 +1,17 @@
+[package]
+name = "code-generator"
+version = "0.1.0"
+edition = "2021"
+
+[dev-dependencies]
+parser = { workspace = true }
+tokenizer = { workspace = true }
+wasmtime = "27.0.0"
+wasmtime-wasi = "27.0.0"
+indoc = { workspace = true }
+
+[dependencies]
+ast = { workspace = true }
+parser = { workspace = true }
+tokenizer = { workspace = true }
+wast = { workspace = true }

@@ -1,0 +1,12 @@
+[package]
+name = "tokenizer"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.release]
+release = false
+
+[dependencies]
+
+[dev-dependencies]
+indoc = { workspace = true }

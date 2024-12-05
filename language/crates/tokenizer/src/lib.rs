@@ -1,4 +1,12 @@
-use super::{source::Source, token::Token, token::TokenKind};
+pub mod position;
+pub mod source;
+pub mod token;
+
+use crate::{source::Source, token::Token, token::TokenKind};
+
+pub fn tokenize(source: String) -> Vec<Token> {
+    Tokenizer::new(source).tokenize()
+}
 
 pub struct Tokenizer {
     source: Source,
@@ -118,7 +126,11 @@ impl Tokenizer {
                 Some('=') => Some(self.create_token(TokenKind::Operator, 2)),
                 _ => Some(self.create_token(TokenKind::Operator, 1)),
             },
-            '+' | '-' | '*' | '/' => Some(self.create_token(TokenKind::Operator, 1)),
+            '+' | '*' | '/' => Some(self.create_token(TokenKind::Operator, 1)),
+            '-' => match self.source.peek_char(1) {
+                Some('>') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => Some(self.create_token(TokenKind::Operator, 1)),
+            },
             _ => None,
         }
     }
@@ -152,7 +164,7 @@ impl Tokenizer {
         };
 
         match keyword.as_str() {
-            "if" | "else" | "while" | "for" | "return" => {
+            "fn" | "let" | "var" | "if" | "else" | "while" | "for" | "return" => {
                 Some(self.create_token(TokenKind::Keyword, length))
             }
             _ => None,
@@ -161,7 +173,7 @@ impl Tokenizer {
 
     fn tokenize_delimiter(&mut self) -> Option<Token> {
         match self.source.current_char()? {
-            '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' => {
+            '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' | ':' => {
                 Some(self.create_token(TokenKind::Delimiter, 1))
             }
             _ => None,
@@ -227,7 +239,7 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tokenize::position::Position;
+    use crate::position::Position;
     use indoc::indoc;
 
     #[test]
@@ -455,6 +467,20 @@ mod tests {
     }
 
     #[test]
+    fn tokenize_operator_returns_return_operator() {
+        let mut tokenizer = Tokenizer::new("->".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "->".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
     fn tokenize_keyword_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_keyword(), None);
@@ -486,6 +512,48 @@ mod tests {
             let mut tokenizer = Tokenizer::new("=".to_string());
             assert_eq!(tokenizer.tokenize_keyword(), None);
         }
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_fn_keyword() {
+        let mut tokenizer = Tokenizer::new("fn".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "fn".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_let_keyword() {
+        let mut tokenizer = Tokenizer::new("let".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "let".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(3, 1, 4),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_keyword_returns_var_keyword() {
+        let mut tokenizer = Tokenizer::new("var".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "var".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(3, 1, 4),
+            })
+        );
     }
 
     #[test]
@@ -705,6 +773,20 @@ mod tests {
     }
 
     #[test]
+    fn tokenize_delimiter_returns_colon() {
+        let mut tokenizer = Tokenizer::new(":".to_string());
+        assert_eq!(
+            tokenizer.tokenize_delimiter(),
+            Some(Token {
+                kind: TokenKind::Delimiter,
+                value: ":".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
     fn tokenize_comment_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_comment(), None);
@@ -850,7 +932,7 @@ mod tests {
 
     #[test]
     fn tokenize_returns_operator() {
-        let operators = ["==", "!=", "=", "!", "+", "-", "*", "/"];
+        let operators = ["==", "!=", "=", "!", "+", "-", "*", "/", "->"];
         for operator in operators.iter() {
             let mut tokenizer = Tokenizer::new(operator.to_string());
             assert_eq!(
@@ -869,7 +951,7 @@ mod tests {
 
     #[test]
     fn tokenize_returns_keyword() {
-        let keywords = ["if", "else", "while", "for", "return"];
+        let keywords = ["fn", "let", "var", "if", "else", "while", "for", "return"];
         for keyword in keywords.iter() {
             let mut tokenizer = Tokenizer::new(keyword.to_string());
             assert_eq!(
@@ -888,7 +970,7 @@ mod tests {
 
     #[test]
     fn tokenize_returns_delimiter() {
-        let delimiters = ["(", ")", "{", "}", "[", "]", ",", ";"];
+        let delimiters = ["(", ")", "{", "}", "[", "]", ",", ";", ":"];
         for delimiter in delimiters.iter() {
             let mut tokenizer = Tokenizer::new(delimiter.to_string());
             assert_eq!(
@@ -960,13 +1042,13 @@ mod tests {
                     start_position: Position {
                         index: 0,
                         line: 1,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 23,
                         line: 2,
-                        column: 1,
-                    },
+                        column: 1
+                    }
                 },
                 Token {
                     kind: TokenKind::Comment,
@@ -974,27 +1056,27 @@ mod tests {
                     start_position: Position {
                         index: 23,
                         line: 2,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 47,
                         line: 2,
-                        column: 25,
-                    },
+                        column: 25
+                    }
                 },
                 Token {
-                    kind: TokenKind::Identifier,
+                    kind: TokenKind::Keyword,
                     value: "let".to_string(),
                     start_position: Position {
                         index: 48,
                         line: 3,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 51,
                         line: 3,
-                        column: 4,
-                    },
+                        column: 4
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1002,13 +1084,13 @@ mod tests {
                     start_position: Position {
                         index: 52,
                         line: 3,
-                        column: 5,
+                        column: 5
                     },
                     end_position: Position {
                         index: 53,
                         line: 3,
-                        column: 6,
-                    },
+                        column: 6
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1016,13 +1098,13 @@ mod tests {
                     start_position: Position {
                         index: 54,
                         line: 3,
-                        column: 7,
+                        column: 7
                     },
                     end_position: Position {
                         index: 55,
                         line: 3,
-                        column: 8,
-                    },
+                        column: 8
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1030,13 +1112,13 @@ mod tests {
                     start_position: Position {
                         index: 56,
                         line: 3,
-                        column: 9,
+                        column: 9
                     },
                     end_position: Position {
                         index: 57,
                         line: 3,
-                        column: 10,
-                    },
+                        column: 10
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1044,27 +1126,27 @@ mod tests {
                     start_position: Position {
                         index: 57,
                         line: 3,
-                        column: 10,
+                        column: 10
                     },
                     end_position: Position {
                         index: 58,
                         line: 3,
-                        column: 11,
-                    },
+                        column: 11
+                    }
                 },
                 Token {
-                    kind: TokenKind::Identifier,
+                    kind: TokenKind::Keyword,
                     value: "let".to_string(),
                     start_position: Position {
                         index: 59,
                         line: 4,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 62,
                         line: 4,
-                        column: 4,
-                    },
+                        column: 4
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1072,13 +1154,13 @@ mod tests {
                     start_position: Position {
                         index: 63,
                         line: 4,
-                        column: 5,
+                        column: 5
                     },
                     end_position: Position {
                         index: 64,
                         line: 4,
-                        column: 6,
-                    },
+                        column: 6
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1086,13 +1168,13 @@ mod tests {
                     start_position: Position {
                         index: 65,
                         line: 4,
-                        column: 7,
+                        column: 7
                     },
                     end_position: Position {
                         index: 66,
                         line: 4,
-                        column: 8,
-                    },
+                        column: 8
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1100,13 +1182,13 @@ mod tests {
                     start_position: Position {
                         index: 67,
                         line: 4,
-                        column: 9,
+                        column: 9
                     },
                     end_position: Position {
                         index: 68,
                         line: 4,
-                        column: 10,
-                    },
+                        column: 10
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1114,13 +1196,13 @@ mod tests {
                     start_position: Position {
                         index: 69,
                         line: 4,
-                        column: 11,
+                        column: 11
                     },
                     end_position: Position {
                         index: 70,
                         line: 4,
-                        column: 12,
-                    },
+                        column: 12
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1128,13 +1210,13 @@ mod tests {
                     start_position: Position {
                         index: 71,
                         line: 4,
-                        column: 13,
+                        column: 13
                     },
                     end_position: Position {
                         index: 72,
                         line: 4,
-                        column: 14,
-                    },
+                        column: 14
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1142,13 +1224,13 @@ mod tests {
                     start_position: Position {
                         index: 73,
                         line: 4,
-                        column: 15,
+                        column: 15
                     },
                     end_position: Position {
                         index: 74,
                         line: 4,
-                        column: 16,
-                    },
+                        column: 16
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1156,13 +1238,13 @@ mod tests {
                     start_position: Position {
                         index: 75,
                         line: 4,
-                        column: 17,
+                        column: 17
                     },
                     end_position: Position {
                         index: 76,
                         line: 4,
-                        column: 18,
-                    },
+                        column: 18
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1170,13 +1252,13 @@ mod tests {
                     start_position: Position {
                         index: 77,
                         line: 4,
-                        column: 19,
+                        column: 19
                     },
                     end_position: Position {
                         index: 78,
                         line: 4,
-                        column: 20,
-                    },
+                        column: 20
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1184,13 +1266,13 @@ mod tests {
                     start_position: Position {
                         index: 79,
                         line: 4,
-                        column: 21,
+                        column: 21
                     },
                     end_position: Position {
                         index: 80,
                         line: 4,
-                        column: 22,
-                    },
+                        column: 22
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1198,13 +1280,13 @@ mod tests {
                     start_position: Position {
                         index: 81,
                         line: 4,
-                        column: 23,
+                        column: 23
                     },
                     end_position: Position {
                         index: 82,
                         line: 4,
-                        column: 24,
-                    },
+                        column: 24
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1212,13 +1294,13 @@ mod tests {
                     start_position: Position {
                         index: 83,
                         line: 4,
-                        column: 25,
+                        column: 25
                     },
                     end_position: Position {
                         index: 87,
                         line: 4,
-                        column: 29,
-                    },
+                        column: 29
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1226,13 +1308,13 @@ mod tests {
                     start_position: Position {
                         index: 87,
                         line: 4,
-                        column: 29,
+                        column: 29
                     },
                     end_position: Position {
                         index: 88,
                         line: 4,
-                        column: 30,
-                    },
+                        column: 30
+                    }
                 },
                 Token {
                     kind: TokenKind::Keyword,
@@ -1240,13 +1322,13 @@ mod tests {
                     start_position: Position {
                         index: 89,
                         line: 5,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 91,
                         line: 5,
-                        column: 3,
-                    },
+                        column: 3
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1254,13 +1336,13 @@ mod tests {
                     start_position: Position {
                         index: 92,
                         line: 5,
-                        column: 4,
+                        column: 4
                     },
                     end_position: Position {
                         index: 93,
                         line: 5,
-                        column: 5,
-                    },
+                        column: 5
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1268,13 +1350,13 @@ mod tests {
                     start_position: Position {
                         index: 93,
                         line: 5,
-                        column: 5,
+                        column: 5
                     },
                     end_position: Position {
                         index: 94,
                         line: 5,
-                        column: 6,
-                    },
+                        column: 6
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1282,13 +1364,13 @@ mod tests {
                     start_position: Position {
                         index: 95,
                         line: 5,
-                        column: 7,
+                        column: 7
                     },
                     end_position: Position {
                         index: 97,
                         line: 5,
-                        column: 9,
-                    },
+                        column: 9
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1296,13 +1378,13 @@ mod tests {
                     start_position: Position {
                         index: 98,
                         line: 5,
-                        column: 10,
+                        column: 10
                     },
                     end_position: Position {
                         index: 99,
                         line: 5,
-                        column: 11,
-                    },
+                        column: 11
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1310,13 +1392,13 @@ mod tests {
                     start_position: Position {
                         index: 99,
                         line: 5,
-                        column: 11,
+                        column: 11
                     },
                     end_position: Position {
                         index: 100,
                         line: 5,
-                        column: 12,
-                    },
+                        column: 12
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1324,13 +1406,13 @@ mod tests {
                     start_position: Position {
                         index: 101,
                         line: 5,
-                        column: 13,
+                        column: 13
                     },
                     end_position: Position {
                         index: 102,
                         line: 5,
-                        column: 14,
-                    },
+                        column: 14
+                    }
                 },
                 Token {
                     kind: TokenKind::Keyword,
@@ -1338,13 +1420,13 @@ mod tests {
                     start_position: Position {
                         index: 107,
                         line: 6,
-                        column: 5,
+                        column: 5
                     },
                     end_position: Position {
                         index: 113,
                         line: 6,
-                        column: 11,
-                    },
+                        column: 11
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1352,13 +1434,13 @@ mod tests {
                     start_position: Position {
                         index: 114,
                         line: 6,
-                        column: 12,
+                        column: 12
                     },
                     end_position: Position {
                         index: 115,
                         line: 6,
-                        column: 13,
-                    },
+                        column: 13
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1366,13 +1448,13 @@ mod tests {
                     start_position: Position {
                         index: 115,
                         line: 6,
-                        column: 13,
+                        column: 13
                     },
                     end_position: Position {
                         index: 116,
                         line: 6,
-                        column: 14,
-                    },
+                        column: 14
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1380,13 +1462,13 @@ mod tests {
                     start_position: Position {
                         index: 117,
                         line: 7,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 118,
                         line: 7,
-                        column: 2,
-                    },
+                        column: 2
+                    }
                 },
                 Token {
                     kind: TokenKind::Keyword,
@@ -1394,13 +1476,13 @@ mod tests {
                     start_position: Position {
                         index: 119,
                         line: 8,
-                        column: 1,
+                        column: 1
                     },
                     end_position: Position {
                         index: 122,
                         line: 8,
-                        column: 4,
-                    },
+                        column: 4
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1408,27 +1490,27 @@ mod tests {
                     start_position: Position {
                         index: 123,
                         line: 8,
-                        column: 5,
+                        column: 5
                     },
                     end_position: Position {
                         index: 124,
                         line: 8,
-                        column: 6,
-                    },
+                        column: 6
+                    }
                 },
                 Token {
-                    kind: TokenKind::Identifier,
+                    kind: TokenKind::Keyword,
                     value: "let".to_string(),
                     start_position: Position {
                         index: 124,
                         line: 8,
-                        column: 6,
+                        column: 6
                     },
                     end_position: Position {
                         index: 127,
                         line: 8,
-                        column: 9,
-                    },
+                        column: 9
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1436,13 +1518,13 @@ mod tests {
                     start_position: Position {
                         index: 128,
                         line: 8,
-                        column: 10,
+                        column: 10
                     },
                     end_position: Position {
                         index: 129,
                         line: 8,
-                        column: 11,
-                    },
+                        column: 11
+                    }
                 },
                 Token {
                     kind: TokenKind::Operator,
@@ -1450,13 +1532,13 @@ mod tests {
                     start_position: Position {
                         index: 130,
                         line: 8,
-                        column: 12,
+                        column: 12
                     },
                     end_position: Position {
                         index: 131,
                         line: 8,
-                        column: 13,
-                    },
+                        column: 13
+                    }
                 },
                 Token {
                     kind: TokenKind::Integer,
@@ -1464,13 +1546,13 @@ mod tests {
                     start_position: Position {
                         index: 132,
                         line: 8,
-                        column: 14,
+                        column: 14
                     },
                     end_position: Position {
                         index: 133,
                         line: 8,
-                        column: 15,
-                    },
+                        column: 15
+                    }
                 },
                 Token {
                     kind: TokenKind::Delimiter,
@@ -1478,13 +1560,13 @@ mod tests {
                     start_position: Position {
                         index: 133,
                         line: 8,
-                        column: 15,
+                        column: 15
                     },
                     end_position: Position {
                         index: 134,
                         line: 8,
-                        column: 16,
-                    },
+                        column: 16
+                    }
                 },
                 Token {
                     kind: TokenKind::Identifier,
@@ -1492,14 +1574,14 @@ mod tests {
                     start_position: Position {
                         index: 135,
                         line: 8,
-                        column: 17,
+                        column: 17
                     },
                     end_position: Position {
                         index: 136,
                         line: 8,
-                        column: 18,
-                    },
-                },
+                        column: 18
+                    }
+                }
             ]
         )
     }
