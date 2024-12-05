@@ -11,7 +11,7 @@ export const Editor: FC<EditorProps> = ({ className }) => {
   const { code, setCode } = usePlayground();
 
   return (
-    <div className={cn("h-full", className)}>
+    <div className={cn("h-full flex-1", className)}>
       <MonacoEditor
         height="100%"
         language="plaintext"

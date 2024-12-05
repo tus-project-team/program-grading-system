@@ -9,9 +9,15 @@ export const PlaygroundProvider: FC<PlaygroundProviderProps> = ({
   children,
 }) => {
   const [code, setCode] = useState("");
+  const [output, setOutput] = useState("");
+
+  const run = () => {
+    // todo: run
+    setOutput("Hello, World!");
+  };
 
   return (
-    <PlaygroundContext.Provider value={{ code, setCode }}>
+    <PlaygroundContext.Provider value={{ code, setCode, output, run }}>
       {children}
     </PlaygroundContext.Provider>
   );
