@@ -1,66 +1,31 @@
 import { $api } from "@/lib/api"
 import { UseSuspenseQueryResult } from "@tanstack/react-query"
 import { components } from "openapi/schema"
-import {
-  createContext,
-  Dispatch,
-  FC,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react"
+import { createContext } from "react"
 
 export type Problem = components["schemas"]["Problem"]
-export type Language = components["schemas"]["Language"]
-export type Submission = components["schemas"]["Submission"]
 
-export type ProblemContext = {
-  code: string
-  language: Language
-  problem: UseSuspenseQueryResult<Problem, undefined>
-  setCode: Dispatch<SetStateAction<string>>
-  setLanguage: Dispatch<SetStateAction<Language>>
-  submissions: UseSuspenseQueryResult<Submission[], undefined>
+export type ProblemsContextType = {
+  problems: UseSuspenseQueryResult<Problem[], undefined>
 }
 
-export type ProblemProviderProps = {
-  children?: ReactNode
-  problemId: number
+// ProblemsProvider の Props 型
+export type ProblemsProviderProps = {
+  children?: React.ReactNode
 }
 
-export const ProblemProvider: FC<ProblemProviderProps> = ({
-  children,
-  problemId,
-}) => {
-  const problem = $api.useSuspenseQuery("get", "/api/problems/{problemId}", {
-    params: {
-      path: { problemId },
-    },
-  })
-  const submissions = $api.useSuspenseQuery(
-    "get",
-    "/api/problems/{problemId}/submissions",
-    {
-      params: {
-        path: { problemId: problem.data.id },
-      },
-    },
-  )
-
-  const [language, setLanguage] = useState<Language>(
-    problem.data.supported_languages[0],
-  )
-  const [code, setCode] = useState("")
-
-  return (
-    <ProblemContext.Provider
-      value={{ code, language, problem, setCode, setLanguage, submissions }}
-    >
-      {children}
-    </ProblemContext.Provider>
-  )
-}
-
-export const ProblemContext = createContext<ProblemContext | undefined>(
+export const ProblemsContext = createContext<ProblemsContextType | undefined>(
   undefined,
 )
+
+export const ProblemsProvider: React.FC<ProblemsProviderProps> = ({
+  children,
+}) => {
+  const problems = $api.useSuspenseQuery("get", "/api/problems")
+
+  return (
+    <ProblemsContext.Provider value={{ problems }}>
+      {children}
+    </ProblemsContext.Provider>
+  )
+}
