@@ -28,60 +28,56 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { components } from "openapi/schema"
 import { useMemo, useState } from "react"
 
-type Submission = components["schemas"]["Submission"]
+// 問題の型定義（API仕様に基づく）
+type Problem = {
+  id: number
+  body: string
+  title: string
+  supported_languages: { name: string; version: string }[]
+  test_cases: { test_case_id: string; input: string; expected_output: string }[]
+}
 
-const columnHelper = createColumnHelper<Submission>()
+const columnHelper = createColumnHelper<Problem>()
 
 export default function ProblemList() {
-  const [selectedProblems, setSelectedProblems] = useState<
-    Submission | undefined
-  >()
+  const [selectedProblem, setSelectedProblem] = useState<Problem | undefined>()
   const problems = $api.useSuspenseQuery("get", "/api/problems")
 
+  // テーブルの列定義
   const columns = useMemo(
     () => [
       columnHelper.accessor("id", {
         cell: (info) => info.getValue(),
         header: "ID",
       }),
-      columnHelper.accessor("student_id", {
+      columnHelper.accessor("title", {
         cell: (info) => info.getValue(),
-        header: "Student ID",
+        header: "Title",
       }),
-      columnHelper.accessor("problem_id", {
-        cell: (info) => info.getValue(),
-        header: "Problem ID",
-      }),
-      columnHelper.accessor("language", {
-        cell: (info) => `${info.getValue().name} ${info.getValue().version}`,
-        header: "Language",
-      }),
-      columnHelper.accessor("submitted_at", {
-        cell: (info) => formatDate(info.getValue()),
-        header: "Submitted At",
-      }),
-      columnHelper.accessor("result.status", {
+      columnHelper.accessor("body", {
         cell: (info) => (
-          <Badge
-            className={cn(
-              getStatusColor(info.getValue()),
-              "transition-colors duration-200",
-            )}
-          >
+          <div className="truncate w-40" title={info.getValue()}>
             {info.getValue()}
-          </Badge>
+          </div>
         ),
-        header: "Status",
+        header: "Description",
+      }),
+      columnHelper.accessor("supported_languages", {
+        cell: (info) =>
+          info
+            .getValue()
+            .map((lang) => `${lang.name} ${lang.version}`)
+            .join(", "),
+        header: "Supported Languages",
       }),
       columnHelper.display({
         cell: (info) => (
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                onClick={() => setSelectedProblems(info.row.original)}
+                onClick={() => setSelectedProblem(info.row.original)}
                 size="sm"
                 variant="outline"
               >
@@ -90,10 +86,10 @@ export default function ProblemList() {
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
-                <DialogTitle>Submission Details</DialogTitle>
+                <DialogTitle>Problem Details</DialogTitle>
               </DialogHeader>
-              {selectedProblems && (
-                <SubmissionDetails submission={selectedProblems} />
+              {selectedProblem && (
+                <ProblemDetails problem={selectedProblem} />
               )}
             </DialogContent>
           </Dialog>
@@ -101,7 +97,7 @@ export default function ProblemList() {
         id: "actions",
       }),
     ],
-    [selectedProblems],
+    [selectedProblem]
   )
 
   const table = useReactTable({
@@ -119,7 +115,7 @@ export default function ProblemList() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-4 text-2xl font-bold">Submission List</h1>
+      <h1 className="mb-4 text-2xl font-bold">Problem List</h1>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -133,13 +129,13 @@ export default function ProblemList() {
                           "flex flex-row items-center gap-1",
                           header.column.getCanSort()
                             ? "cursor-pointer select-none"
-                            : "",
+                            : ""
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                         {{
                           asc: <ChevronUp className="ml-2 inline h-4 w-4" />,
@@ -187,39 +183,27 @@ export default function ProblemList() {
   )
 }
 
-function SubmissionDetails({ submission }: { submission: Submission }) {
+// 詳細表示用コンポーネント
+function ProblemDetails({ problem }: { problem: Problem }) {
   return (
     <div className="mt-4">
-      <h3 className="mb-2 text-lg font-semibold">Code</h3>
-      <ScrollArea className="h-40 rounded-md border p-4">
-        <pre className="text-sm">{submission.code}</pre>
-      </ScrollArea>
-      <h3 className="mb-2 mt-4 text-lg font-semibold">Test Results</h3>
+      <h3 className="mb-2 text-lg font-semibold">Description</h3>
+      <p>{problem.body}</p>
+      <h3 className="mb-2 mt-4 text-lg font-semibold">Test Cases</h3>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Test Case ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Message</TableHead>
+            <TableHead>Input</TableHead>
+            <TableHead>Expected Output</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {submission.test_results.map((result) => (
-            <TableRow key={result.test_case_id}>
-              <TableCell>{result.test_case_id}</TableCell>
-              <TableCell>
-                <Badge
-                  className={cn(
-                    result.status === "Passed"
-                      ? "bg-green-500 hover:bg-green-400"
-                      : "bg-red-500 hover:bg-red-400",
-                    "transition-colors duration-200",
-                  )}
-                >
-                  {result.status}
-                </Badge>
-              </TableCell>
-              <TableCell>{result.message || "-"}</TableCell>
+          {problem.test_cases.map((testCase) => (
+            <TableRow key={testCase.test_case_id}>
+              <TableCell>{testCase.test_case_id}</TableCell>
+              <TableCell>{testCase.input}</TableCell>
+              <TableCell>{testCase.expected_output}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -227,29 +211,3 @@ function SubmissionDetails({ submission }: { submission: Submission }) {
     </div>
   )
 }
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleString()
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case "Accepted": {
-      return "bg-green-500 hover:bg-green-400"
-    }
-    case "CompileError":
-    case "RuntimeError": {
-      return "bg-red-500 hover:bg-red-400"
-    }
-    case "WrongAnswer": {
-      return "bg-yellow-500 hover:bg-yellow-400"
-    }
-    default: {
-      return "bg-gray-500 hover:bg-gray-400"
-    }
-  }
-}
-
-export const Route = createLazyFileRoute("/admin/problems/")({
-  component: ProblemList,
-})
