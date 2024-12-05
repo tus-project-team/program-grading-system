@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table"
 import { $api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { createLazyFileRoute, Link } from "@tanstack/react-router"
 import {
   createColumnHelper,
   flexRender,
@@ -19,7 +20,6 @@ import {
 } from "@tanstack/react-table"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { components } from "openapi/schema"
-import { createLazyFileRoute, Link } from "@tanstack/react-router"
 
 type Problem = components["schemas"]["Problem"]
 
@@ -36,7 +36,7 @@ const columns = [
   }),
   columnHelper.accessor("body", {
     cell: (info) => (
-      <div className="truncate w-40" title={info.getValue()}>
+      <div className="w-40 truncate" title={info.getValue()}>
         {info.getValue()}
       </div>
     ),
@@ -53,9 +53,7 @@ const columns = [
   columnHelper.display({
     cell: (info) => (
       <Button asChild size="sm" variant="outline">
-        <Link to={`/admin/problems/${info.row.original.id}`}>
-         View Details
-        </Link>
+        <Link to={`/admin/problems/${info.row.original.id}`}>View Details</Link>
       </Button>
     ),
     id: "actions",
@@ -149,5 +147,5 @@ const ProblemList = () => {
 }
 
 export const Route = createLazyFileRoute("/admin/problems/")({
-  component: ProblemList
+  component: ProblemList,
 })
