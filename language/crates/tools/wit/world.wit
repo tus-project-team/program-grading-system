@@ -1,0 +1,8 @@
+package component:tools;
+
+/// An example world for the component to target.
+world example {
+    export get-tokens: func(source: string) -> string;
+    export get-ast: func(source: string) -> string;
+    export hello-world: func() -> string;
+}

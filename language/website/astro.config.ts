@@ -1,8 +1,8 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import tailwind from "@astrojs/tailwind";
-
 import react from "@astrojs/react";
+import arraybuffer from "vite-plugin-arraybuffer";
 
 // https://astro.build/config
 export default defineConfig({
@@ -30,4 +30,10 @@ export default defineConfig({
     react(),
     tailwind({ applyBaseStyles: false }),
   ],
+  vite: {
+    optimizeDeps: {
+      exclude: ["@bytecodealliance/jco/component", "@rollup/browser"],
+    },
+    plugins: [arraybuffer()],
+  },
 });

@@ -3,7 +3,7 @@ import { createContext } from "react";
 export type PlaygroundContext = {
   code: string;
   setCode: (code: string) => void;
-  run: () => void;
+  run: () => Promise<void>;
   output: string;
 };
 

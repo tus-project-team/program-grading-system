@@ -17,7 +17,7 @@ members = [
   "crates/ast",
   "crates/code-generator",
   "crates/parser",
-  "crates/tokenizer",
+  "crates/tokenizer", "crates/tools",
 ]
 
 [workspace.dependencies]
