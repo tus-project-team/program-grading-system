@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "bun run build:wasm && bun run astro dev",
     "start": "astro dev",
     "build": "bun run build:astro && bun run build:wasm",
     "build:astro": "astro build",
-    "build:wasm": "cargo component build --release --package tools && cp ../target/wasm32-wasip1/release/tools.wasm generated/tools/tools.wasm",
+    "build:wasm": "cargo component build --release --package tools && cp ../target/wasm32-wasip1/release/tools.wasm generated/tools/tools.wasm && bun run jco transpile generated/tools/tools.wasm -o generated/tools",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -17,6 +17,7 @@
     "@astrojs/starlight-tailwind": "^2.0.3",
     "@astrojs/tailwind": "^5.1.0",
     "@bytecodealliance/jco": "1.8.1",
+    "@bytecodealliance/preview2-shim": "^0.17.1",
     "@monaco-editor/react": "^4.6.0",
     "@rollup/browser": "^4.28.0",
     "astro": "^4.16.10",

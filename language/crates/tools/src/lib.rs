@@ -2,6 +2,7 @@
 mod bindings;
 
 use bindings::Guest;
+use code_generator::CodeGenerator;
 use parser::parse;
 use tokenizer::tokenize;
 
@@ -24,8 +25,21 @@ impl Guest for Component {
         format!("{:?}", ast)
     }
 
-    fn hello_world() -> String {
-        "Hello, World!".to_string()
+    fn compile(source: String) -> bindings::Output {
+        let tokens = tokenize(source);
+        let ast = parse(tokens.clone());
+        let mut generator = CodeGenerator::new(ast.clone()).unwrap();
+        let mut wat = generator.generate().unwrap();
+        let wasm = wat.encode().unwrap();
+        bindings::Output {
+            tokens: tokens
+                .iter()
+                .map(|token| format!("{:?}", token))
+                .collect::<Vec<String>>()
+                .join(", "),
+            ast: format!("{:?}", ast),
+            wasm,
+        }
     }
 }
 

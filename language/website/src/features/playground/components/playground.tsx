@@ -1,13 +1,13 @@
-import type { FC } from "react";
-import { Editor } from "./editor";
-import { PlaygroundProvider } from "../contexts/playground-context-provider";
-import { Output } from "./output";
-import { ActionBar } from "./action-bar";
+import type { FC } from "react"
+import { Editor } from "./editor"
+import { PlaygroundProvider } from "../contexts/playground-context-provider"
+import { Output } from "./output"
+import { ActionBar } from "./action-bar"
 
 export const Playground: FC = () => {
   return (
     <PlaygroundProvider>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full gap-4">
         <ActionBar />
         <div className="h-full flex flex-row">
           <Editor />
@@ -15,5 +15,5 @@ export const Playground: FC = () => {
         </div>
       </div>
     </PlaygroundProvider>
-  );
-};
+  )
+}
