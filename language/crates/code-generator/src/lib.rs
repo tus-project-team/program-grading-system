@@ -1,3 +1,4 @@
+use anyhow::Result;
 use wast::{
     component,
     core::{self},
@@ -7,6 +8,15 @@ use wast::{
 };
 
 const TEMPLATE: &str = include_str!("template.wat");
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error(transparent)]
+    Wast(#[from] wast::Error),
+
+    #[error(transparent)]
+    Anyhow(#[from] anyhow::Error),
+}
 
 type CoreParameters<'a> = Box<
     [(
@@ -23,7 +33,7 @@ pub struct CodeGenerator<'a> {
 }
 
 impl CodeGenerator<'_> {
-    pub fn new(ast: ast::Program) -> wast::parser::Result<Self> {
+    pub fn new(ast: ast::Program) -> Result<Self> {
         let buffer = ParseBuffer::new(TEMPLATE)?;
         Ok(Self {
             ast,
@@ -32,7 +42,7 @@ impl CodeGenerator<'_> {
         })
     }
 
-    pub fn generate(&mut self) -> wast::parser::Result<Wat<'_>> {
+    pub fn generate(&mut self) -> Result<Wat<'_>> {
         let mut wat = wast::parser::parse::<Wat>(&self.buffer).unwrap();
         match wat {
             Wat::Component(ref mut component) => match component.kind {
@@ -238,6 +248,7 @@ mod tests {
     use ::core::str;
 
     use super::*;
+    use anyhow::Context;
     use indoc::indoc;
     use wasmtime::{
         component::{Component, Linker, Val},
@@ -260,7 +271,7 @@ mod tests {
         }
     }
 
-    fn compile(source: &str) -> wast::parser::Result<Vec<u8>> {
+    fn compile(source: &str) -> Result<Vec<u8>> {
         let tokens = tokenizer::tokenize(source.to_string());
         let ast = parser::parse(tokens);
         let mut generator = CodeGenerator::new(ast)?;
@@ -270,12 +281,12 @@ mod tests {
     }
 
     #[derive(Debug, Clone, PartialEq, Eq)]
-    struct RunResult {
+    struct Output {
         stdout: String,
         stderr: String,
     }
 
-    fn run(source: &str) -> wasmtime::Result<RunResult> {
+    fn run(source: &str) -> Result<Output> {
         let mut config = Config::new();
         config.wasm_component_model(true);
 
@@ -307,11 +318,17 @@ mod tests {
 
         let main_index = instance
             .get_export(&mut store, None, "wasi:cli/run@0.2.2")
-            .unwrap();
+            .context(
+                "failed to find the index of the exported instance named 'wasi:cli/run@0.2.2'",
+            )?;
         let run_index = instance
             .get_export(&mut store, Some(&main_index), "run")
-            .unwrap();
-        let run = instance.get_func(&mut store, run_index).unwrap();
+            .context(
+            "failed to find the index of the exported function named 'run' in the 'wasi:cli/run@0.2.2' instance",
+        )?;
+        let run = instance.get_func(&mut store, run_index).context(
+            "failed to find the exported function named 'run' in the 'wasi:cli/run@0.2.2' instance",
+        )?;
 
         let mut results = [Val::Result(Ok(None))];
         run.call(&mut store, &[], &mut results)?;
@@ -322,7 +339,7 @@ mod tests {
         let stderr_bytes = stderr_stream.contents();
         let stderr_str = str::from_utf8(&stderr_bytes)?;
 
-        Ok(RunResult {
+        Ok(Output {
             stdout: stdout_str.to_string(),
             stderr: stderr_str.to_string(),
         })

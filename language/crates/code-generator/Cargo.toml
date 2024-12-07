@@ -11,7 +11,9 @@ wasmtime-wasi = "27.0.0"
 indoc = { workspace = true }
 
 [dependencies]
+anyhow = { workspace = true }
 ast = { workspace = true }
 parser = { workspace = true }
+thiserror = { workspace = true }
 tokenizer = { workspace = true }
 wast = { workspace = true }

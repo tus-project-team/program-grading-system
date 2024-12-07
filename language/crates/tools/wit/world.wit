@@ -8,7 +8,9 @@ world example {
         wasm: list<u8>,
     }
 
-    export get-tokens: func(source: string) -> string;
-    export get-ast: func(source: string) -> string;
-    export compile: func(source: string) -> output;
+    record error {
+        error: string,
+    }
+
+    export compile: func(source: string) -> result<output, error>;
 }
