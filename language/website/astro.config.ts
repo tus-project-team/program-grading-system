@@ -11,9 +11,7 @@ export default defineConfig({
       customCss: ["./src/tailwind.css"],
       sidebar: [
         {
-          items: [
-            { label: "Introduction", slug: "guides/introduction" },
-          ],
+          items: [{ label: "Introduction", slug: "guides/introduction" }],
           label: "Guides",
         },
       ],

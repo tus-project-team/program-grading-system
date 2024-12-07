@@ -65,7 +65,7 @@ const List = <T extends object>(props: TabListProps<T>) => {
 
 const tabStyles = tv({
   base: [
-    "relative flex whitespace-nowrap cursor-default items-center rounded-full text-sm font-medium outline-none transition hover:text-fg [&>[data-slot=icon]]:size-4 [&>[data-slot=icon]]:mr-2",
+    "relative flex cursor-default items-center whitespace-nowrap rounded-full text-sm font-medium outline-none transition hover:text-fg [&>[data-slot=icon]]:mr-2 [&>[data-slot=icon]]:size-4",
     // hor
     "group-orientation-vertical:w-full group-orientation-vertical:py-0 group-orientation-vertical:pl-4 group-orientation-vertical:pr-2",
     // ver
@@ -100,7 +100,7 @@ const Tab = ({ children, ...props }: TabProps) => {
           {isSelected && (
             <motion.span
               className={cn(
-                "bg-fg absolute rounded",
+                "absolute rounded bg-fg",
                 // horizontal
                 "group-orientation-horizontal:inset-x-0 group-orientation-horizontal:-bottom-px group-orientation-horizontal:h-0.5 group-orientation-horizontal:w-full",
                 // vertical

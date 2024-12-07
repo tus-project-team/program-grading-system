@@ -10,8 +10,8 @@ import { cr, focusButtonStyles } from "./primitive"
 const buttonStyles = tv(
   {
     base: [
-      "kbt32x before:absolute after:absolute box-border relative no-underline isolate inline-flex items-center justify-center gap-x-2 border font-medium",
-      "forced-colors:[--button-icon:ButtonText] forced-colors:hover:[--button-icon:ButtonText] hover:cursor-pointer",
+      "kbt32x relative isolate box-border inline-flex items-center justify-center gap-x-2 border font-medium no-underline before:absolute after:absolute",
+      "hover:cursor-pointer forced-colors:[--button-icon:ButtonText] forced-colors:hover:[--button-icon:ButtonText]",
       "[&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-1 [&>[data-slot=icon]]:size-4 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--button-icon]",
     ],
     defaultVariants: {
@@ -25,20 +25,20 @@ const buttonStyles = tv(
       appearance: {
         outline: [
           "border-border text-fg [--button-icon:theme(colors.muted.fg)]",
-          "hover:[--button-icon:theme(colors.fg)] hover:bg-secondary/90",
+          "hover:bg-secondary/90 hover:[--button-icon:theme(colors.fg)]",
           "active:bg-secondary/90 active:[--button-icon:theme(colors.fg)]",
         ],
         plain: [
           "border-transparent text-fg [--button-icon:theme(colors.muted.fg)]",
           "pressed:bg-secondary/90",
-          "active:[--button-icon:theme(colors.fg)] active:bg-secondary/90",
-          "hover:[--button-icon:theme(colors.fg)] hover:bg-secondary/90",
+          "active:bg-secondary/90 active:[--button-icon:theme(colors.fg)]",
+          "hover:bg-secondary/90 hover:[--button-icon:theme(colors.fg)]",
         ],
         solid: [
           "border-transparent bg-[--button-border]",
           "before:inset-0 before:-z-10 before:bg-[--button-bg] before:shadow before:data-[disabled]:shadow-none",
-          "after:shadow-[shadow:inset_0_1px_theme(colors.white/15%)] after:active:bg-[--button-hover-overlay] after:hover:bg-[--button-hover-overlay] after:data-[disabled]:shadow-none after:inset-0 after:-z-10",
-          "dark:after:-inset-px dark:before:hidden dark:border-white/5 dark:bg-[--button-bg]",
+          "after:inset-0 after:-z-10 after:shadow-[shadow:inset_0_1px_theme(colors.white/15%)] after:active:bg-[--button-hover-overlay] after:data-[disabled]:shadow-none after:hover:bg-[--button-hover-overlay]",
+          "dark:border-white/5 dark:bg-[--button-bg] dark:before:hidden dark:after:-inset-px",
         ],
       },
       intent: {
@@ -51,7 +51,7 @@ const buttonStyles = tv(
           "[--button-icon:theme(colors.primary.fg/60%)] active:[--button-icon:theme(colors.primary.fg/80%)] hover:[--button-icon:theme(colors.primary.fg/80%)]",
         ],
         secondary: [
-          "text-secondary-fg [--button-bg:theme(colors.secondary.DEFAULT)] dark:[--button-bg:theme(colors.secondary.DEFAULT)] [--button-border:theme(colors.secondary.fg/10%)] [--button-hover-overlay:theme(colors.secondary.fg/2.5%)] data-[active]:[--button-border:theme(colors.secondary.fg/15%)] hover:[--button-border:theme(colors.secondary.fg/15%)]",
+          "text-secondary-fg [--button-bg:theme(colors.secondary.DEFAULT)] [--button-border:theme(colors.secondary.fg/10%)] [--button-hover-overlay:theme(colors.secondary.fg/2.5%)] data-[active]:[--button-border:theme(colors.secondary.fg/15%)] hover:[--button-border:theme(colors.secondary.fg/15%)] dark:[--button-bg:theme(colors.secondary.DEFAULT)]",
           "[--button-icon:theme(colors.muted.fg)] active:[--button-icon:theme(colors.fg)] hover:[--button-icon:theme(colors.fg)]",
         ],
         warning: [
@@ -76,7 +76,7 @@ const buttonStyles = tv(
         "extra-small":
           "h-8 px-[calc(theme(spacing.3)-1px)] py-[calc(theme(spacing.1)-1px)] text-xs/4 lg:text-[0.800rem]/4",
         large:
-          "h-10 [&>[data-slot=icon]]:mx-[-3px] sm:h-11 px-[calc(theme(spacing.4)-1px)] sm:px-[calc(theme(spacing.5)-1px)] py-[calc(theme(spacing[2.5])-1px)] text-base lg:text-base/7 sm:[&>[data-slot=icon]]:size-5",
+          "h-10 px-[calc(theme(spacing.4)-1px)] py-[calc(theme(spacing[2.5])-1px)] text-base sm:h-11 sm:px-[calc(theme(spacing.5)-1px)] lg:text-base/7 [&>[data-slot=icon]]:mx-[-3px] sm:[&>[data-slot=icon]]:size-5",
         medium:
           "h-10 px-[calc(theme(spacing.4)-1px)] py-[calc(theme(spacing.2)-1px)] text-base lg:text-sm/6",
         small:
