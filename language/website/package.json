@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "bun run build:wasm && bun run astro dev",
     "start": "astro dev",
-    "build": "bun run build:astro && bun run build:wasm",
+    "build": "bun run build:wasm && bun run build:astro",
     "build:astro": "astro build",
     "build:wasm": "cargo component build --release --package tools && cp ../target/wasm32-wasip1/release/tools.wasm generated/tools/tools.wasm && bun run jco transpile generated/tools/tools.wasm -o generated/tools",
     "preview": "astro preview",
@@ -31,7 +31,7 @@
     "react": "^18.3.1",
     "react-aria-components": "^1.5.0",
     "react-dom": "^18.3.1",
-    "sharp": "^0.32.5",
+    "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.5",
     "tailwind-variants": "^0.3.0",
     "tailwindcss-animate": "^1.0.7",
