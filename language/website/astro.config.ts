@@ -12,14 +12,9 @@ export default defineConfig({
       sidebar: [
         {
           items: [
-            // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", slug: "guides/example" },
+            { label: "Introduction", slug: "guides/introduction" },
           ],
           label: "Guides",
-        },
-        {
-          autogenerate: { directory: "reference" },
-          label: "Reference",
         },
       ],
       social: {
