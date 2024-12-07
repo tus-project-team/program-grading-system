@@ -1,4 +1,5 @@
 import type { FC } from "react"
+
 import { usePlayground } from "../hooks/use-playground"
 
 export const Output: FC = () => {

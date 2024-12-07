@@ -1,31 +1,30 @@
-import { defineConfig } from "astro/config";
-import starlight from "@astrojs/starlight";
-import tailwind from "@astrojs/tailwind";
-import react from "@astrojs/react";
-import arraybuffer from "vite-plugin-arraybuffer";
+import react from "@astrojs/react"
+import starlight from "@astrojs/starlight"
+import tailwind from "@astrojs/tailwind"
+import { defineConfig } from "astro/config"
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
     starlight({
-      title: "Shuiro Language",
-      social: {
-        github: "https://github.com/shuiro-dev/shuiro",
-      },
+      customCss: ["./src/tailwind.css"],
       sidebar: [
         {
-          label: "Guides",
           items: [
             // Each item here is one entry in the navigation menu.
             { label: "Example Guide", slug: "guides/example" },
           ],
+          label: "Guides",
         },
         {
-          label: "Reference",
           autogenerate: { directory: "reference" },
+          label: "Reference",
         },
       ],
-      customCss: ["./src/tailwind.css"],
+      social: {
+        github: "https://github.com/shuiro-dev/shuiro",
+      },
+      title: "Shuiro Language",
     }),
     react(),
     tailwind({ applyBaseStyles: false }),
@@ -34,6 +33,5 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["@bytecodealliance/jco/component", "@rollup/browser"],
     },
-    plugins: [arraybuffer()],
   },
-});
+})

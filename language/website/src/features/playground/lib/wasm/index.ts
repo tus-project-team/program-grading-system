@@ -1,3 +1,6 @@
+import { generate } from "@bytecodealliance/jco/component"
+import { rollup } from "@rollup/browser"
+
 import preview2_shim_cli from "./preview2-shim/cli.js?raw"
 import preview2_shim_clocks from "./preview2-shim/clocks.js?raw"
 import preview2_shim_filesystem from "./preview2-shim/filesystem.js?raw"
@@ -6,17 +9,11 @@ import preview2_shim_io from "./preview2-shim/io.js?raw"
 import preview2_shim_random from "./preview2-shim/random.js?raw"
 import preview2_shim_sockets from "./preview2-shim/sockets.js?raw"
 
-import { generate } from "@bytecodealliance/jco/component"
-import { rollup } from "@rollup/browser"
-
 export const transpile = async <T = unknown>(
   buffer: Uint8Array,
-  name: string
+  name: string,
 ) => {
   const transpiled = await generate(buffer, {
-    name,
-    noTypescript: true,
-    noNodejsCompat: true,
     map: Object.entries(
       // @see https://github.com/bytecodealliance/jco/blob/7b6e3867b02e2546dcd179238f2f1694c981a20c/src/cmd/transpile.js#L156-L166
       {
@@ -27,14 +24,17 @@ export const transpile = async <T = unknown>(
         "wasi:io/*": "@bytecodealliance/preview2-shim/io#*",
         "wasi:random/*": "@bytecodealliance/preview2-shim/random#*",
         "wasi:sockets/*": "@bytecodealliance/preview2-shim/sockets#*",
-      }
+      },
     ),
+    name,
+    noNodejsCompat: true,
+    noTypescript: true,
   })
   console.log(transpiled)
 
   const decoder = new TextDecoder()
-  const modules: Record<string, Uint8Array | string> = Object.fromEntries(
-    transpiled.files.map(([name, buffer]) => [name, buffer])
+  const modules: Record<string, string | Uint8Array> = Object.fromEntries(
+    transpiled.files.map(([name, buffer]) => [name, buffer]),
   )
   modules["@bytecodealliance/preview2-shim/cli"] = preview2_shim_cli
   modules["@bytecodealliance/preview2-shim/clocks"] = preview2_shim_clocks
@@ -49,6 +49,16 @@ export const transpile = async <T = unknown>(
     input: `${name}.js`,
     plugins: [
       {
+        load(id) {
+          console.log("load", id)
+          if (id in modules) {
+            const buffer = modules[id]
+            if (typeof buffer === "string") return buffer
+            if (id.endsWith(".wasm")) return buffer as unknown as string
+            return decoder.decode(buffer)
+          }
+          console.error("failed to load", id)
+        },
         name: "virtual",
         resolveId(source, importer) {
           console.log("resolveId", source)
@@ -66,36 +76,26 @@ export const transpile = async <T = unknown>(
 
           console.error("failed to resolveId", source, "from", importer)
         },
-        load(id) {
-          console.log("load", id)
-          if (id in modules) {
-            const buffer = modules[id]
-            if (typeof buffer === "string") return buffer
-            if (id.endsWith(".wasm")) return buffer as unknown as string
-            return decoder.decode(buffer)
-          }
-          console.error("failed to load", id)
-        },
         transform(code, id) {
           if (!id.endsWith(".js")) return
 
           const urls = code.matchAll(
-            /new\s+URL\(([^)]+),\s+import\.meta\.url\)/g
+            /new\s+URL\(([^)]+),\s+import\.meta\.url\)/g,
           )
           for (const url of urls) {
             const [_, src] = url
             if (!src) continue
-            const urlStr = src.replaceAll(/['"]/g, "").replace(/^\.\//, "")
+            const urlStr = src.replaceAll(/["']/g, "").replace(/^\.\//, "")
             console.log("transform", urlStr)
             const mod = modules[urlStr]
             if (mod) {
               const url = URL.createObjectURL(
-                new Blob([mod], { type: "application/wasm" })
+                new Blob([mod], { type: "application/wasm" }),
               )
               if (!url) continue
               code = code.replace(
                 new RegExp(`new\\s+URL\\(${src},\\s+import\\.meta\\.url\\)`),
-                `"${url}"`
+                `"${url}"`,
               )
             }
           }

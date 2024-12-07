@@ -1,14 +1,16 @@
-import MonacoEditor from "@monaco-editor/react";
-import type { FC } from "react";
-import { cn } from "../../../lib/utils";
-import { usePlayground } from "../hooks/use-playground";
+import type { FC } from "react"
+
+import { cn } from "@/lib/utils/classes"
+import MonacoEditor from "@monaco-editor/react"
+
+import { usePlayground } from "../hooks/use-playground"
 
 export type EditorProps = {
-  className?: string;
-};
+  className?: string
+}
 
 export const Editor: FC<EditorProps> = ({ className }) => {
-  const { code, setCode } = usePlayground();
+  const { code, setCode } = usePlayground()
 
   return (
     <div className={cn("h-full flex-1", className)}>
@@ -19,5 +21,5 @@ export const Editor: FC<EditorProps> = ({ className }) => {
         value={code}
       />
     </div>
-  );
-};
+  )
+}

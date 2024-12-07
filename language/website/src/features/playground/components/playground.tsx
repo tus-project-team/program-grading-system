@@ -1,15 +1,16 @@
 import type { FC } from "react"
-import { Editor } from "./editor"
+
 import { PlaygroundProvider } from "../contexts/playground-context-provider"
-import { Output } from "./output"
 import { ActionBar } from "./action-bar"
+import { Editor } from "./editor"
+import { Output } from "./output"
 
 export const Playground: FC = () => {
   return (
     <PlaygroundProvider>
-      <div className="flex flex-col h-full gap-4">
+      <div className="flex h-full flex-col gap-4">
         <ActionBar />
-        <div className="h-full flex flex-row">
+        <div className="flex h-full flex-row">
           <Editor />
           <Output />
         </div>

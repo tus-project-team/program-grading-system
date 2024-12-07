@@ -1,7 +1,12 @@
-import { useState, type FC, type ReactNode } from "react"
-import { PlaygroundContext, type Output } from "./playground-context"
-import { runCli, transpile } from "../lib/wasm"
+import { type FC, type ReactNode, useState } from "react"
+
 import { compile } from "../../../../generated/tools/tools"
+import { runCli, transpile } from "../lib/wasm"
+import { type Output, PlaygroundContext } from "./playground-context"
+
+export type PlaygroundProviderProps = {
+  children?: ReactNode
+}
 
 type WasiCliRun = {
   "wasi:cli/run@0.2.2": {
@@ -9,32 +14,29 @@ type WasiCliRun = {
   }
 }
 
-export type PlaygroundProviderProps = {
-  children?: ReactNode
-}
-
 export const PlaygroundProvider: FC<PlaygroundProviderProps> = ({
   children,
 }) => {
   const [code, setCode] = useState("fn main () -> i32 { 0 }")
-  const [output, setOutput] = useState<Output | undefined>(undefined)
+  const [output, setOutput] = useState<Output | undefined>()
 
   const run = async () => {
     const { ast, tokens, wasm } = compile(code)
     const { "wasi:cli/run@0.2.2": entrypoint } = await transpile<WasiCliRun>(
       wasm,
-      "main"
+      "main",
     )
     const output = runCli(entrypoint.run)
+    console.log({ ast: JSON.parse(ast), output, tokens: JSON.parse(tokens) })
     setOutput({
       ast,
-      tokens,
       output,
+      tokens,
     })
   }
 
   return (
-    <PlaygroundContext.Provider value={{ code, setCode, output, run }}>
+    <PlaygroundContext.Provider value={{ code, output, run, setCode }}>
       {children}
     </PlaygroundContext.Provider>
   )

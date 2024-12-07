@@ -1,18 +1,18 @@
-import { createContext } from "react";
+import { createContext } from "react"
 
 export type Output = {
-  tokens: string
   ast: string
   output: string
+  tokens: string
 }
 
 export type PlaygroundContext = {
-  code: string;
-  setCode: (code: string) => void;
-  run: () => Promise<void>;
-  output: Output | undefined;
-};
+  code: string
+  output: Output | undefined
+  run: () => Promise<void>
+  setCode: (code: string) => void
+}
 
 export const PlaygroundContext = createContext<PlaygroundContext | undefined>(
-  undefined
-);
+  undefined,
+)
