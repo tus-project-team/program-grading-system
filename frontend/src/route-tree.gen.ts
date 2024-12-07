@@ -26,6 +26,7 @@ import { Route as AdminProblemsProblemIdIndexImport } from "./routes/admin/probl
 const IndexLazyImport = createFileRoute("/")()
 const ProblemsIndexLazyImport = createFileRoute("/problems/")()
 const AdminSubmissionsIndexLazyImport = createFileRoute("/admin/submissions/")()
+const AdminProblemsIndexLazyImport = createFileRoute("/admin/problems/")()
 
 // Create/Update Routes
 
@@ -57,6 +58,14 @@ const AdminSubmissionsIndexLazyRoute = AdminSubmissionsIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import("./routes/admin/submissions/index.lazy").then((d) => d.Route),
+)
+
+const AdminProblemsIndexLazyRoute = AdminProblemsIndexLazyImport.update({
+  id: "/admin/problems/",
+  path: "/admin/problems/",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import("./routes/admin/problems/index.lazy").then((d) => d.Route),
 )
 
 const AdminSubmissionsSubmissionIdRouteRoute =
@@ -113,6 +122,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AdminSubmissionsSubmissionIdRouteImport
       parentRoute: typeof rootRoute
     }
+    "/admin/problems/": {
+      id: "/admin/problems/"
+      path: "/admin/problems"
+      fullPath: "/admin/problems"
+      preLoaderRoute: typeof AdminProblemsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     "/admin/submissions/": {
       id: "/admin/submissions/"
       path: "/admin/submissions"
@@ -137,6 +153,7 @@ export interface FileRoutesByFullPath {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/problems": typeof AdminProblemsIndexLazyRoute
   "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
   "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
@@ -146,6 +163,7 @@ export interface FileRoutesByTo {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/problems": typeof AdminProblemsIndexLazyRoute
   "/admin/submissions": typeof AdminSubmissionsIndexLazyRoute
   "/admin/problems/$problemId": typeof AdminProblemsProblemIdIndexRoute
 }
@@ -156,6 +174,7 @@ export interface FileRoutesById {
   "/problems/$problemId": typeof ProblemsProblemIdRouteRoute
   "/problems/": typeof ProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof AdminSubmissionsSubmissionIdRouteRoute
+  "/admin/problems/": typeof AdminProblemsIndexLazyRoute
   "/admin/submissions/": typeof AdminSubmissionsIndexLazyRoute
   "/admin/problems/$problemId/": typeof AdminProblemsProblemIdIndexRoute
 }
@@ -167,6 +186,7 @@ export interface FileRouteTypes {
     | "/problems/$problemId"
     | "/problems"
     | "/admin/submissions/$submissionId"
+    | "/admin/problems"
     | "/admin/submissions"
     | "/admin/problems/$problemId"
   fileRoutesByTo: FileRoutesByTo
@@ -175,6 +195,7 @@ export interface FileRouteTypes {
     | "/problems/$problemId"
     | "/problems"
     | "/admin/submissions/$submissionId"
+    | "/admin/problems"
     | "/admin/submissions"
     | "/admin/problems/$problemId"
   id:
@@ -183,6 +204,7 @@ export interface FileRouteTypes {
     | "/problems/$problemId"
     | "/problems/"
     | "/admin/submissions/$submissionId"
+    | "/admin/problems/"
     | "/admin/submissions/"
     | "/admin/problems/$problemId/"
   fileRoutesById: FileRoutesById
@@ -193,6 +215,7 @@ export interface RootRouteChildren {
   ProblemsProblemIdRouteRoute: typeof ProblemsProblemIdRouteRoute
   ProblemsIndexLazyRoute: typeof ProblemsIndexLazyRoute
   AdminSubmissionsSubmissionIdRouteRoute: typeof AdminSubmissionsSubmissionIdRouteRoute
+  AdminProblemsIndexLazyRoute: typeof AdminProblemsIndexLazyRoute
   AdminSubmissionsIndexLazyRoute: typeof AdminSubmissionsIndexLazyRoute
   AdminProblemsProblemIdIndexRoute: typeof AdminProblemsProblemIdIndexRoute
 }
@@ -203,6 +226,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProblemsIndexLazyRoute: ProblemsIndexLazyRoute,
   AdminSubmissionsSubmissionIdRouteRoute:
     AdminSubmissionsSubmissionIdRouteRoute,
+  AdminProblemsIndexLazyRoute: AdminProblemsIndexLazyRoute,
   AdminSubmissionsIndexLazyRoute: AdminSubmissionsIndexLazyRoute,
   AdminProblemsProblemIdIndexRoute: AdminProblemsProblemIdIndexRoute,
 }
@@ -221,6 +245,7 @@ export const routeTree = rootRoute
         "/problems/$problemId",
         "/problems/",
         "/admin/submissions/$submissionId",
+        "/admin/problems/",
         "/admin/submissions/",
         "/admin/problems/$problemId/"
       ]
@@ -236,6 +261,9 @@ export const routeTree = rootRoute
     },
     "/admin/submissions/$submissionId": {
       "filePath": "admin/submissions/$submissionId/route.tsx"
+    },
+    "/admin/problems/": {
+      "filePath": "admin/problems/index.lazy.tsx"
     },
     "/admin/submissions/": {
       "filePath": "admin/submissions/index.lazy.tsx"
