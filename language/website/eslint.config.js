@@ -45,6 +45,7 @@ export default tseslint.config(
         },
       ],
       "unicorn/no-array-reduce": "off",
+      "unicorn/no-null": "off",
       "unicorn/prevent-abbreviations": "off",
     },
   },
