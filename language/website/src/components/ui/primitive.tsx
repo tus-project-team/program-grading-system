@@ -1,5 +1,3 @@
-"use client"
-
 import { type ClassValue, clsx } from "clsx"
 import * as React from "react"
 import { composeRenderProps } from "react-aria-components"

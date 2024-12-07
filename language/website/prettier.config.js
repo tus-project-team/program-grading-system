@@ -4,4 +4,5 @@
 export default {
   plugins: ["prettier-plugin-tailwindcss"],
   semi: false,
+  tailwindFunctions: ["tv"],
 }

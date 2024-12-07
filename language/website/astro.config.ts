@@ -2,6 +2,7 @@ import react from "@astrojs/react"
 import starlight from "@astrojs/starlight"
 import tailwind from "@astrojs/tailwind"
 import { defineConfig } from "astro/config"
+import tsconfigPaths from "vite-tsconfig-paths"
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,5 +34,6 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["@bytecodealliance/jco/component", "@rollup/browser"],
     },
+    plugins: [tsconfigPaths()],
   },
 })

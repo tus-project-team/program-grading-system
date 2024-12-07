@@ -1,20 +1,15 @@
 import type { FC } from "react"
 
-import { PlaygroundProvider } from "../contexts/playground-context-provider"
-import { ActionBar } from "./action-bar"
+import { usePlayground } from "../hooks/use-playground"
 import { Editor } from "./editor"
 import { Output } from "./output"
 
 export const Playground: FC = () => {
+  const { code, output, run, setCode } = usePlayground()
   return (
-    <PlaygroundProvider>
-      <div className="flex h-full flex-col gap-4">
-        <ActionBar />
-        <div className="flex h-full flex-row">
-          <Editor />
-          <Output />
-        </div>
-      </div>
-    </PlaygroundProvider>
+    <div className="bg-bg text-fg dark flex h-full flex-row divide-x">
+      <Editor code={code} run={run} setCode={setCode} />
+      <Output output={output} />
+    </div>
   )
 }

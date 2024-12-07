@@ -11,7 +11,7 @@ const buttonStyles = tv(
   {
     base: [
       "kbt32x before:absolute after:absolute box-border relative no-underline isolate inline-flex items-center justify-center gap-x-2 border font-medium",
-      "forced-colors:[--button-icon:ButtonText] forced-colors:hover:[--button-icon:ButtonText]",
+      "forced-colors:[--button-icon:ButtonText] forced-colors:hover:[--button-icon:ButtonText] hover:cursor-pointer",
       "[&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-1 [&>[data-slot=icon]]:size-4 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--button-icon]",
     ],
     defaultVariants: {
