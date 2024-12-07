@@ -31,7 +31,8 @@ impl std::error::Error for Error {}
 #[doc(hidden)]
 #[allow(non_snake_case)]
 pub unsafe fn _export_compile_cabi<T: Guest>(arg0: *mut u8, arg1: usize) -> *mut u8 {
-    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+    #[cfg(target_arch = "wasm32")]
+    _rt::run_ctors_once();
     let len0 = arg1;
     let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
     let result1 = T::compile(_rt::string_lift(bytes0));
@@ -39,7 +40,11 @@ pub unsafe fn _export_compile_cabi<T: Guest>(arg0: *mut u8, arg1: usize) -> *mut
     match result1 {
         Ok(e) => {
             *ptr2.add(0).cast::<u8>() = (0i32) as u8;
-            let Output { tokens: tokens3, ast: ast3, wasm: wasm3 } = e;
+            let Output {
+                tokens: tokens3,
+                ast: ast3,
+                wasm: wasm3,
+            } = e;
             let vec4 = (tokens3.into_bytes()).into_boxed_slice();
             let ptr4 = vec4.as_ptr().cast::<u8>();
             let len4 = vec4.len();

@@ -1692,10 +1692,8 @@ name = "tools"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "ast",
  "code-generator",
  "parser",
- "serde",
  "serde_json",
  "thiserror 2.0.4",
  "tokenizer",
