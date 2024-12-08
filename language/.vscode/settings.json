@@ -1,0 +1,13 @@
+{
+  "tailwindCSS.experimental.classRegex": [
+    ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "rust-analyzer.check.overrideCommand": [
+    "cargo",
+    "component",
+    "check",
+    "--workspace",
+    "--all-targets",
+    "--message-format=json"
+  ]
+}
