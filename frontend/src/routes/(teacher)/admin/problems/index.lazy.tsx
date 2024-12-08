@@ -146,6 +146,6 @@ const ProblemList = () => {
   )
 }
 
-export const Route = createLazyFileRoute("/admin/problems/")({
+export const Route = createLazyFileRoute("/(teacher)/admin/problems/")({
   component: ProblemList,
 })

@@ -180,6 +180,6 @@ const getStatusColor = (status: string) => {
   }
 }
 
-export const Route = createLazyFileRoute("/admin/submissions/")({
+export const Route = createLazyFileRoute("/(teacher)/admin/submissions/")({
   component: SubmissionList,
 })

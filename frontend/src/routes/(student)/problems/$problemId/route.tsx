@@ -1,7 +1,7 @@
 import { $api, APIError } from "@/lib/api"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 
-export const Route = createFileRoute("/problems/$problemId")({
+export const Route = createFileRoute("/(student)/problems/$problemId")({
   loader: async ({ context: { queryClient }, params }) => {
     try {
       await queryClient.ensureQueryData(
