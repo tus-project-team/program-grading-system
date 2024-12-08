@@ -10,10 +10,8 @@ import {
   useState,
 } from "react"
 
-export type Problem = components["schemas"]["Problem"]
 export type Language = components["schemas"]["Language"]
-export type Submission = components["schemas"]["Submission"]
-
+export type Problem = components["schemas"]["Problem"]
 export type ProblemContext = {
   code: string
   language: Language
@@ -27,6 +25,8 @@ export type ProblemProviderProps = {
   children?: ReactNode
   problemId: number
 }
+
+export type Submission = components["schemas"]["Submission"]
 
 export const ProblemProvider: FC<ProblemProviderProps> = ({
   children,

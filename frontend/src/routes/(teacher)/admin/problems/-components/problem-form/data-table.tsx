@@ -15,10 +15,10 @@ import {
 } from "@tanstack/react-table"
 import { ComponentPropsWithoutRef, memo } from "react"
 
-type DataTableProps<TData, TValue> = {
+type DataTableProps<TData, TValue> = ComponentPropsWithoutRef<"div"> & {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-} & ComponentPropsWithoutRef<"div">
+}
 
 export const DataTable = memo(
   <TData, TValue>({

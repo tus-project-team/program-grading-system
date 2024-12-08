@@ -55,14 +55,14 @@ const problemSchema = v.object({
   title: v.pipe(v.string(), v.nonEmpty("Title is required")),
 })
 
-type Problem = v.InferInput<typeof problemSchema>
-
 export type ProblemFormProps = {
   onSubmit: (values: Problem) => void
   problem: Problem
   submitButtonLabel: string
   submitButtonSubmittingLabel: string
 }
+
+type Problem = v.InferInput<typeof problemSchema>
 
 export const ProblemForm: FC<ProblemFormProps> = ({
   onSubmit,

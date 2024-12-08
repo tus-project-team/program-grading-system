@@ -10,9 +10,9 @@ import { useState } from "react"
 
 import { useProblem } from "../../-hooks/use-problem"
 
-type Submission = components["schemas"]["Submission"]
-
 export type SubmissionsProps = ComponentPropsWithoutRef<"div">
+
+type Submission = components["schemas"]["Submission"]
 
 export const Submissions: FC<SubmissionsProps> = ({ className, ...props }) => {
   const { submissions } = useProblem()

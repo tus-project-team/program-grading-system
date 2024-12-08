@@ -20,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
+export type Item = ItemGroup | ItemLink
+
 export type ItemGroup = {
   children: ItemLink[]
   href: string
@@ -34,8 +36,6 @@ export type ItemLink = {
   title: string
   type: "link"
 }
-
-export type Item = ItemGroup | ItemLink
 
 const linkVariants = cva("", {
   defaultVariants: {
