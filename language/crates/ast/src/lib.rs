@@ -1,11 +1,12 @@
+use serde::{Deserialize, Serialize};
 use tokenizer::position::Position;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Program {
     pub functions: Vec<FunctionDefinition>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FunctionDefinition {
     pub name: Identifier,
     pub parameters: Parameters,
@@ -14,45 +15,45 @@ pub struct FunctionDefinition {
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Parameters {
     pub parameters: Vec<Parameter>,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Parameter {
     pub name: Identifier,
     pub parameter_type: Type,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Block {
     pub statements: Statements,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Statements {
     pub statements: Vec<Statement>,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Statement {
     ExpressionStatement(ExpressionStatement),
     VariableDefinition(VariableDefinition),
     Expression(Expression),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ExpressionStatement {
     pub expression: Expression,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VariableDefinition {
     pub name: Identifier,
     pub mutable: bool,
@@ -61,7 +62,7 @@ pub struct VariableDefinition {
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
     AssignmentExpression(AssignmentExpression),
@@ -84,7 +85,7 @@ impl Expression {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OperatorKind {
     Add,
     Subtract,
@@ -117,13 +118,13 @@ impl std::str::FromStr for OperatorKind {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Operator {
     pub operator: OperatorKind,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BinaryExpression {
     pub left: Box<Expression>,
     pub operator: Operator,
@@ -131,33 +132,33 @@ pub struct BinaryExpression {
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AssignmentExpression {
     pub name: Identifier,
     pub value: Box<Expression>,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Identifier {
     pub name: String,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct IntegerLiteral {
     pub value: String,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FunctionCall {
     pub name: Identifier,
     pub arguments: Vec<Expression>,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TypeKind {
     I32,
     I64,
@@ -184,13 +185,13 @@ impl std::str::FromStr for TypeKind {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Type {
     pub name: TypeKind,
     pub location: Location,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {
     pub start: Position,
     pub end: Position,

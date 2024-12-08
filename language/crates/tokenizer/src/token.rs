@@ -1,8 +1,10 @@
 use core::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use super::position::Position;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TokenKind {
     Integer,
     Identifier,
@@ -25,7 +27,7 @@ impl fmt::Display for TokenKind {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Token {
     /// Kind of the token
     pub kind: TokenKind,
