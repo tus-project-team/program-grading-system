@@ -5,14 +5,15 @@ import { NavBar } from "./nav-bar"
 import { Item, Sidebar } from "./sidebar"
 
 export type BaseLayoutProps = {
+  base: string
   children?: ReactNode
   items: Item[]
 }
 
-export const BaseLayout: FC<BaseLayoutProps> = ({ children, items }) => {
+export const BaseLayout: FC<BaseLayoutProps> = ({ base, children, items }) => {
   return (
     <UI.SidebarProvider>
-      <Sidebar items={items} />
+      <Sidebar base={base} items={items} />
       <div className="flex w-full flex-col">
         <NavBar />
         {children}

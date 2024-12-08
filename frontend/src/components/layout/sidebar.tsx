@@ -50,11 +50,12 @@ const linkVariants = cva("", {
 })
 
 type MenuItemProps = {
+  base: string
   item: Item
   pathname: string
 }
 
-const SidebarMenuItem: FC<MenuItemProps> = ({ item, pathname }) => {
+const SidebarMenuItem: FC<MenuItemProps> = ({ base, item, pathname }) => {
   return (
     <UI.SidebarMenu key={item.href}>
       {item.type === "group" ? (
@@ -62,7 +63,9 @@ const SidebarMenuItem: FC<MenuItemProps> = ({ item, pathname }) => {
           <UI.SidebarMenuItem>
             <CollapsibleTrigger asChild>
               <UI.SidebarMenuButton
-                className={linkVariants({ active: pathname === item.href })}
+                className={linkVariants({
+                  active: pathname === base + item.href,
+                })}
               >
                 <item.icon />
                 <span>{item.title}</span>
@@ -74,9 +77,9 @@ const SidebarMenuItem: FC<MenuItemProps> = ({ item, pathname }) => {
                   <UI.SidebarMenuSubItem>
                     <Link
                       className={linkVariants({
-                        active: pathname === item.href,
+                        active: pathname === base + item.href,
                       })}
-                      to={child.href}
+                      to={base + item.href}
                     >
                       <child.icon />
                       <span>{child.title}</span>
@@ -91,8 +94,10 @@ const SidebarMenuItem: FC<MenuItemProps> = ({ item, pathname }) => {
         <UI.SidebarMenuItem>
           <UI.SidebarMenuButton asChild>
             <Link
-              className={linkVariants({ active: pathname === item.href })}
-              to={item.href}
+              className={linkVariants({
+                active: pathname === base + item.href,
+              })}
+              to={base + item.href}
             >
               <item.icon />
               <span>{item.title}</span>
@@ -104,13 +109,17 @@ const SidebarMenuItem: FC<MenuItemProps> = ({ item, pathname }) => {
   )
 }
 
-const SidebarHeader = () => {
+type SidebarHeaderProps = {
+  base: string
+}
+
+const SidebarHeader: FC<SidebarHeaderProps> = ({ base }) => {
   return (
     <UI.SidebarHeader>
       <UI.SidebarMenu>
         <UI.SidebarMenuItem>
           <UI.SidebarMenuButton asChild size="lg">
-            <Link className="space-x-1" to="/">
+            <Link className="space-x-1" to={base}>
               <Avatar className="flex aspect-square size-8 items-center justify-center rounded-lg">
                 <AvatarImage src={logoUrl} />
                 <AvatarFallback>SH</AvatarFallback>
@@ -188,10 +197,11 @@ const SidebarFooter = () => {
 }
 
 export type SidebarProps = {
+  base: string
   items: Item[]
 }
 
-export const Sidebar: FC<SidebarProps> = ({ items }) => {
+export const Sidebar: FC<SidebarProps> = ({ base, items }) => {
   const pathname = useLocation({
     select: (location) => {
       const pathname = location.pathname
@@ -203,12 +213,13 @@ export const Sidebar: FC<SidebarProps> = ({ items }) => {
 
   return (
     <UI.Sidebar>
-      <SidebarHeader />
+      <SidebarHeader base={base} />
       <UI.SidebarContent>
         <UI.SidebarGroup>
           <UI.SidebarGroupContent>
             {items.map((item) => (
               <SidebarMenuItem
+                base={base}
                 item={item}
                 key={item.href}
                 pathname={pathname}

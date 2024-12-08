@@ -8,6 +8,6 @@ const Index = () => {
   )
 }
 
-export const Route = createLazyFileRoute("/(student)/(dashbord)/")({
+export const Route = createLazyFileRoute("/(student)/(dashboard)/")({
   component: Index,
 })

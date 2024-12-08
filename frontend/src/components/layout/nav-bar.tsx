@@ -1,7 +1,6 @@
-import type { FC } from "react"
-
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Link, useLocation } from "@tanstack/react-router"
+import { type FC, Fragment } from "react"
 
 import {
   Breadcrumb,
@@ -28,19 +27,20 @@ export const NavBar: FC = () => {
   })
 
   return (
-    <div className="flex flex-row items-center gap-2 border-b p-2">
+    <div className="sticky top-0 z-50 flex flex-row items-center gap-2 border-b bg-background/60 p-2 backdrop-blur">
       <SidebarTrigger />
       <div className="h-[calc(100%-0.5rem)] w-[1px] bg-muted-foreground" />
       <Breadcrumb className="px-2">
         <BreadcrumbList>
           {pathname.map((name, index) => (
-            <>
-              <BreadcrumbItem key={name}>
+            <Fragment key={name}>
+              <BreadcrumbItem>
                 {index < pathname.length - 1 ? (
                   <BreadcrumbLink asChild>
                     <Link
-                      from={pathname.slice(0, Math.max(0, index - 1)).join("/")}
-                      to={name}
+                      to={[...pathname.slice(0, Math.max(0, index)), name]
+                        .join("/")
+                        .replace(/^\/+/, "")}
                     >
                       {pascalCase(name)}
                     </Link>
@@ -49,10 +49,8 @@ export const NavBar: FC = () => {
                   <BreadcrumbPage>{pascalCase(name)}</BreadcrumbPage>
                 )}
               </BreadcrumbItem>
-              {index < pathname.length - 1 && (
-                <BreadcrumbSeparator key={name + "separator"} />
-              )}
-            </>
+              {index < pathname.length - 1 && <BreadcrumbSeparator />}
+            </Fragment>
           ))}
         </BreadcrumbList>
       </Breadcrumb>
