@@ -44,6 +44,7 @@ pub struct Statements {
 pub enum Statement {
     ExpressionStatement(ExpressionStatement),
     VariableDefinition(VariableDefinition),
+    IfStatement(IfStatement),
     Expression(Expression),
 }
 
@@ -63,9 +64,18 @@ pub struct VariableDefinition {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IfStatement {
+    pub condition: Expression,
+    pub then_block: Block,
+    pub else_block: Option<Block>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
     AssignmentExpression(AssignmentExpression),
+    IfElseExpression(IfElseExpression),
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
     FunctionCall(FunctionCall),
@@ -78,6 +88,7 @@ impl Expression {
             Expression::AssignmentExpression(assignment_expression) => {
                 &assignment_expression.location
             }
+            Expression::IfElseExpression(if_else_expression) => &if_else_expression.location,
             Expression::Identifier(identifier) => &identifier.location,
             Expression::IntegerLiteral(integer_literal) => &integer_literal.location,
             Expression::FunctionCall(function_call) => &function_call.location,
@@ -136,6 +147,15 @@ pub struct BinaryExpression {
 pub struct AssignmentExpression {
     pub name: Identifier,
     pub value: Box<Expression>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IfElseExpression {
+    pub condition: Box<Expression>,
+    pub then_block: Block,
+    pub else_block: Block,
+    pub return_type: Type,
     pub location: Location,
 }
 
