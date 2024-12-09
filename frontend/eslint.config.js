@@ -10,7 +10,6 @@ import perfectionist from "eslint-plugin-perfectionist"
 import react from "eslint-plugin-react"
 // @ts-expect-error missing types
 import reactHooks from "eslint-plugin-react-hooks"
-// @ts-expect-error missing types
 import reactRefresh from "eslint-plugin-react-refresh"
 import unicorn from "eslint-plugin-unicorn"
 import globals from "globals"
