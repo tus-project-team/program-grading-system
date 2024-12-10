@@ -366,10 +366,63 @@ impl Parser {
     }
 
     /// ```bnf
-    /// expression = comparison_expression
+    /// expression = logical_expression
     /// ```
     fn expression(&mut self) -> Option<Expression> {
-        self.comparison_expression()
+        self.logical_expression()
+    }
+
+    /// ```bnf
+    /// logical_expression = comparison_expression (("&&" | "||") comparison_expression)*
+    /// ```
+    fn logical_expression(&mut self) -> Option<Expression> {
+        self.transaction(|tx| {
+            let lhs = tx.comparison_expression()?;
+            let mut expression = lhs;
+            while let Some(operator) = tx.consume_logical_operator() {
+                let rhs = tx.comparison_expression()?;
+                let location = Location {
+                    start: expression.location().start,
+                    end: rhs.location().end,
+                };
+                expression = Expression::BinaryExpression(BinaryExpression {
+                    location,
+                    left: Box::new(expression),
+                    operator,
+                    right: Box::new(rhs),
+                });
+            }
+            Some(expression)
+        })
+    }
+
+    /// Consume a logical operator.
+    fn consume_logical_operator(&mut self) -> Option<Operator> {
+        let token = {
+            let token = self.peek_token(0)?;
+            if token.kind != TokenKind::Operator {
+                return None;
+            }
+            let location = Location {
+                start: token.start_position,
+                end: token.end_position,
+            };
+            match token.value.as_str() {
+                "&&" => Some(Operator {
+                    operator: OperatorKind::LogicalAnd,
+                    location,
+                }),
+                "||" => Some(Operator {
+                    operator: OperatorKind::LogicalOr,
+                    location,
+                }),
+                _ => None,
+            }
+        };
+        if token.is_some() {
+            self.advance_token();
+        }
+        token
     }
 
     /// ```bnf
@@ -549,39 +602,67 @@ impl Parser {
 
     /// ```bnf
     /// unary_expression =
-    ///     primary_expression
-    ///   | "-" primary_expression
+    ///     "-" primary_expression
+    ///   | "!" primary_expression
+    ///   | primary_expression
     /// ```
     fn unary_expression(&mut self) -> Option<Expression> {
-        self.primary_expression().or_else(|| {
-            self.transaction(|tx| {
-                let (minus_start_position, minus_end_position) = {
-                    let token = tx.consume_token(TokenKind::Operator, "-")?;
-                    (token.start_position, token.end_position)
-                };
+        self.transaction(|tx| {
+            if let Some(minus_location) =
+                tx.consume_token(TokenKind::Operator, "-")
+                    .map(|token| Location {
+                        start: token.start_position,
+                        end: token.end_position,
+                    })
+            {
                 let expression = tx.primary_expression()?;
                 Some(Expression::BinaryExpression(BinaryExpression {
                     location: Location {
-                        start: minus_start_position,
+                        start: minus_location.start,
                         end: expression.location().end,
                     },
                     left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
-                        location: Location {
-                            start: minus_start_position,
-                            end: minus_start_position,
-                        },
                         value: "0".to_string(),
+                        location: Location {
+                            start: minus_location.start,
+                            end: minus_location.start,
+                        },
                     })),
                     operator: Operator {
                         operator: OperatorKind::Subtract,
-                        location: Location {
-                            start: minus_start_position,
-                            end: minus_end_position,
-                        },
+                        location: minus_location,
                     },
                     right: Box::new(expression),
                 }))
-            })
+            } else if let Some(not_location) =
+                tx.consume_token(TokenKind::Operator, "!")
+                    .map(|token| Location {
+                        start: token.start_position,
+                        end: token.end_position,
+                    })
+            {
+                let expression = tx.primary_expression()?;
+                Some(Expression::BinaryExpression(BinaryExpression {
+                    location: Location {
+                        start: not_location.start,
+                        end: expression.location().end,
+                    },
+                    left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "1".to_string(),
+                        location: Location {
+                            start: not_location.start,
+                            end: not_location.start,
+                        },
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::NotEqual,
+                        location: not_location,
+                    },
+                    right: Box::new(expression),
+                }))
+            } else {
+                tx.primary_expression()
+            }
         })
     }
 
@@ -807,10 +888,10 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use indoc::indoc;
-
     use super::Parser;
     use ast::*;
+    use indoc::indoc;
+    use pretty_assertions::assert_eq;
     use tokenizer::{position::Position, Tokenizer};
 
     #[test]
@@ -1329,7 +1410,7 @@ mod tests {
         let source = "1 + 2";
         let tokens = Tokenizer::new(source.to_string()).tokenize();
         let ast = Parser::new(tokens).expression();
-        dbg!(
+        assert_eq!(
             ast,
             Some(Expression::BinaryExpression(BinaryExpression {
                 left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
@@ -2496,6 +2577,213 @@ mod tests {
                 }
             }))
         )
+    }
+
+    #[test]
+    fn expression_return_logical_and_expression() {
+        let source = "a && b";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::Identifier(Identifier {
+                    name: "a".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::LogicalAnd,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::Identifier(Identifier {
+                    name: "b".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        )
+    }
+
+    #[test]
+    fn expression_return_logical_or_expression() {
+        let source = "a || b";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::Identifier(Identifier {
+                    name: "a".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::LogicalOr,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::Identifier(Identifier {
+                    name: "b".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        )
+    }
+
+    #[test]
+    fn expression_return_logical_not_expression() {
+        let source = "!a";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1,
+                        },
+                        end: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1,
+                        },
+                    },
+                },)),
+                operator: Operator {
+                    operator: OperatorKind::NotEqual,
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1,
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2,
+                        },
+                    },
+                },
+                right: Box::new(Expression::Identifier(Identifier {
+                    name: "a".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2,
+                        },
+                        end: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3,
+                        },
+                    },
+                },)),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 2,
+                        line: 1,
+                        column: 3,
+                    },
+                },
+            },),)
+        );
     }
 
     #[test]
