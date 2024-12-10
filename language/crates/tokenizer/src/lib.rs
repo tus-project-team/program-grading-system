@@ -164,7 +164,7 @@ impl Tokenizer {
         };
 
         match keyword.as_str() {
-            "fn" | "let" | "var" | "if" | "else" | "while" | "for" | "return" => {
+            "fn" | "let" | "var" | "if" | "else" | "while" | "for" | "return" | "as" => {
                 Some(self.create_token(TokenKind::Keyword, length))
             }
             _ => None,
@@ -627,6 +627,20 @@ mod tests {
     }
 
     #[test]
+    fn tokenize_keyword_returns_as_keyword() {
+        let mut tokenizer = Tokenizer::new("as".to_string());
+        assert_eq!(
+            tokenizer.tokenize_keyword(),
+            Some(Token {
+                kind: TokenKind::Keyword,
+                value: "as".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
     fn tokenize_delimiter_returns_none_for_empty_source() {
         let mut tokenizer = Tokenizer::new("".to_string());
         assert_eq!(tokenizer.tokenize_delimiter(), None);
@@ -951,7 +965,9 @@ mod tests {
 
     #[test]
     fn tokenize_returns_keyword() {
-        let keywords = ["fn", "let", "var", "if", "else", "while", "for", "return"];
+        let keywords = [
+            "fn", "let", "var", "if", "else", "while", "for", "return", "as",
+        ];
         for keyword in keywords.iter() {
             let mut tokenizer = Tokenizer::new(keyword.to_string());
             assert_eq!(

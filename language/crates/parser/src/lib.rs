@@ -1,9 +1,13 @@
 use ast::{
     AssignmentExpression, BinaryExpression, Block, Expression, ExpressionStatement, FunctionCall,
-    FunctionDefinition, Identifier, IntegerLiteral, Location, Operator, OperatorKind, Parameter,
-    Parameters, Program, Statement, Statements, Type, TypeKind, VariableDefinition,
+    FunctionDefinition, Identifier, IfElseExpression, IfStatement, IntegerLiteral, Location,
+    Operator, OperatorKind, Parameter, Parameters, Program, Statement, Statements, Type, TypeKind,
+    VariableDefinition,
 };
-use tokenizer::token::{Token, TokenKind};
+use tokenizer::{
+    position::Position,
+    token::{Token, TokenKind},
+};
 
 pub fn parse(tokens: Vec<Token>) -> ast::Program {
     Parser::new(tokens).parse()
@@ -194,18 +198,76 @@ impl Parser {
     }
 
     /// ```bnf
+    /// block_without_expression = "{" statement* "}"
+    /// ```
+    fn block_without_expression(&mut self) -> Option<Block> {
+        self.transaction(|tx| {
+            let start_position = tx.consume_token(TokenKind::Delimiter, "{")?.start_position;
+            let mut statements: Vec<Statement> = Vec::new();
+            while let Some(statement) = tx.statement() {
+                statements.push(statement);
+            }
+            let end_position = tx.consume_token(TokenKind::Delimiter, "}")?.end_position;
+            Some(Block {
+                location: Location {
+                    start: start_position,
+                    end: end_position,
+                },
+                statements: Statements {
+                    location: Location {
+                        start: start_position,
+                        end: end_position,
+                    },
+                    statements,
+                },
+            })
+        })
+    }
+
+    /// ```bnf
+    /// block_with_expression = "{" statement* expression "}"
+    /// ```
+    fn block_with_expression(&mut self) -> Option<Block> {
+        self.transaction(|tx| {
+            let start_position = tx.consume_token(TokenKind::Delimiter, "{")?.start_position;
+            let mut statements: Vec<Statement> = Vec::new();
+            while let Some(statement) = tx.statement() {
+                statements.push(statement);
+            }
+            let expression = tx.expression()?;
+            statements.push(Statement::Expression(expression));
+            let end_position = tx.consume_token(TokenKind::Delimiter, "}")?.end_position;
+            Some(Block {
+                location: Location {
+                    start: start_position,
+                    end: end_position,
+                },
+                statements: Statements {
+                    location: Location {
+                        start: start_position,
+                        end: end_position,
+                    },
+                    statements,
+                },
+            })
+        })
+    }
+
+    /// ```bnf
     /// statement =
     ///     variable_definition_statement
+    ///   | if_statement
     ///   | expression_statement
     /// ```
     fn statement(&mut self) -> Option<Statement> {
         self.transaction(|tx| {
-            if let Some(statement) = tx.variable_definition_statement() {
-                Some(Statement::VariableDefinition(statement))
-            } else {
-                tx.expression_statement()
-                    .map(Statement::ExpressionStatement)
-            }
+            tx.variable_definition_statement()
+                .map(Statement::VariableDefinition)
+                .or_else(|| tx.if_statement().map(Statement::IfStatement))
+                .or_else(|| {
+                    tx.expression_statement()
+                        .map(Statement::ExpressionStatement)
+                })
         })
     }
 
@@ -242,6 +304,46 @@ impl Parser {
                 mutable,
                 variable_type,
                 value,
+            })
+        })
+    }
+
+    /// ```bnf
+    /// if_statement = "if" expression block_without_expression ("else" if_statement | block_without_expression)?
+    /// ```
+    fn if_statement(&mut self) -> Option<IfStatement> {
+        self.transaction(|tx| {
+            let start_position = tx.consume_token(TokenKind::Keyword, "if")?.start_position;
+            let condition = tx.expression()?;
+            let then_block = tx.block_without_expression()?;
+            let else_block = if tx.consume_token(TokenKind::Keyword, "else").is_some() {
+                if let Some(if_statement) = tx.if_statement() {
+                    let location = if_statement.location.clone();
+                    Some(Block {
+                        statements: Statements {
+                            statements: vec![Statement::IfStatement(if_statement)],
+                            location: location.clone(),
+                        },
+                        location,
+                    })
+                } else {
+                    Some(tx.block_without_expression()?)
+                }
+            } else {
+                None
+            };
+            let end_position = else_block
+                .as_ref()
+                .map(|block| block.location.end)
+                .unwrap_or(then_block.location.end);
+            Some(IfStatement {
+                location: Location {
+                    start: start_position,
+                    end: end_position,
+                },
+                condition,
+                then_block,
+                else_block,
             })
         })
     }
@@ -418,6 +520,7 @@ impl Parser {
     /// primary_expression =
     ///     literal
     ///   | assignment_expression
+    ///   | if_else_expression
     ///   | function_call
     ///   | identifier
     ///   | "(" expression ")"
@@ -425,6 +528,7 @@ impl Parser {
     fn primary_expression(&mut self) -> Option<Expression> {
         self.literal()
             .or_else(|| self.assignment_expression())
+            .or_else(|| self.if_else_expression())
             .or_else(|| self.function_call())
             .or_else(|| self.identifier().map(Expression::Identifier))
             .or_else(|| {
@@ -453,6 +557,97 @@ impl Parser {
                 name: identifier,
                 value: Box::new(expression),
             }))
+        })
+    }
+
+    /// ```bnf
+    /// // TODO: remove `"as" type` and instead use a type inference algorithm
+    /// if_else_expression = "if" expression block_with_expression "else" else_if_expression "as" type
+    /// ```
+    fn if_else_expression(&mut self) -> Option<Expression> {
+        self.transaction(|tx| {
+            let start_position = tx.consume_token(TokenKind::Keyword, "if")?.start_position;
+            let condition = tx.expression()?;
+            let then_block = tx.block_with_expression()?;
+            tx.consume_token(TokenKind::Keyword, "else")?;
+            let mut else_block = tx.else_if_expression(Type {
+                name: TypeKind::I32,
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 0,
+                        column: 0,
+                    },
+                    end: Position {
+                        index: 0,
+                        line: 0,
+                        column: 0,
+                    },
+                },
+            })?;
+            tx.consume_token(TokenKind::Keyword, "as")?;
+            let return_type = tx.r#type()?;
+            else_block
+                .statements
+                .statements
+                .iter_mut()
+                .for_each(|statement| {
+                    if let Statement::Expression(Expression::IfElseExpression(if_else_expression)) =
+                        statement
+                    {
+                        if_else_expression.return_type = return_type.clone();
+                    }
+                });
+            let end_position = return_type.location.end;
+            Some(Expression::IfElseExpression(IfElseExpression {
+                location: Location {
+                    start: start_position,
+                    end: end_position,
+                },
+                condition: Box::new(condition),
+                then_block,
+                else_block,
+                return_type,
+            }))
+        })
+    }
+
+    /// ```bnf
+    /// else_if_expression =
+    ///     "if" expression block_with_expression "else" else_if_expression
+    ///   | block_with_expression
+    /// ```
+    fn else_if_expression(&mut self, return_type: Type) -> Option<Block> {
+        self.transaction(|tx| {
+            if let Some(start_position) = tx
+                .consume_token(TokenKind::Keyword, "if")
+                .map(|token| token.start_position)
+            {
+                let condition = tx.expression()?;
+                let then_block = tx.block_with_expression()?;
+                tx.consume_token(TokenKind::Keyword, "else")?;
+                let else_block = tx.else_if_expression(return_type.clone())?;
+                let location = Location {
+                    start: start_position,
+                    end: else_block.location.end,
+                };
+                let expression = Expression::IfElseExpression(IfElseExpression {
+                    location: location.clone(),
+                    condition: Box::new(condition),
+                    then_block,
+                    else_block,
+                    return_type,
+                });
+                Some(Block {
+                    statements: Statements {
+                        statements: vec![Statement::Expression(expression)],
+                        location: location.clone(),
+                    },
+                    location,
+                })
+            } else {
+                Some(tx.block_with_expression()?)
+            }
         })
     }
 
@@ -650,6 +845,413 @@ mod tests {
                     }
                 }
             }))
+        );
+    }
+
+    #[test]
+    fn expression_returns_if_else_expression() {
+        let source = "if condition { 1 } else { 0 } as i32";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::IfElseExpression(IfElseExpression {
+                condition: Box::new(Expression::Identifier(Identifier {
+                    name: "condition".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4,
+                        },
+                        end: Position {
+                            index: 12,
+                            line: 1,
+                            column: 13,
+                        },
+                    },
+                },)),
+                then_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::Expression(Expression::IntegerLiteral(
+                            IntegerLiteral {
+                                value: "1".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 15,
+                                        line: 1,
+                                        column: 16,
+                                    },
+                                    end: Position {
+                                        index: 16,
+                                        line: 1,
+                                        column: 17,
+                                    },
+                                },
+                            },
+                        ),),],
+                        location: Location {
+                            start: Position {
+                                index: 13,
+                                line: 1,
+                                column: 14,
+                            },
+                            end: Position {
+                                index: 18,
+                                line: 1,
+                                column: 19,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14,
+                        },
+                        end: Position {
+                            index: 18,
+                            line: 1,
+                            column: 19,
+                        },
+                    },
+                },
+                else_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::Expression(Expression::IntegerLiteral(
+                            IntegerLiteral {
+                                value: "0".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 26,
+                                        line: 1,
+                                        column: 27,
+                                    },
+                                    end: Position {
+                                        index: 27,
+                                        line: 1,
+                                        column: 28,
+                                    },
+                                },
+                            },
+                        ),),],
+                        location: Location {
+                            start: Position {
+                                index: 24,
+                                line: 1,
+                                column: 25,
+                            },
+                            end: Position {
+                                index: 29,
+                                line: 1,
+                                column: 30,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 24,
+                            line: 1,
+                            column: 25,
+                        },
+                        end: Position {
+                            index: 29,
+                            line: 1,
+                            column: 30,
+                        },
+                    },
+                },
+                return_type: Type {
+                    name: TypeKind::I32,
+                    location: Location {
+                        start: Position {
+                            index: 33,
+                            line: 1,
+                            column: 34,
+                        },
+                        end: Position {
+                            index: 36,
+                            line: 1,
+                            column: 37,
+                        },
+                    },
+                },
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 36,
+                        line: 1,
+                        column: 37,
+                    },
+                },
+            },),)
+        );
+    }
+
+    #[test]
+    fn expression_returns_if_else_if_expression() {
+        let source = "if condition { 1 } else if condition { 2 } else { 0 } as i32";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::IfElseExpression(IfElseExpression {
+                condition: Box::new(Expression::Identifier(Identifier {
+                    name: "condition".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4,
+                        },
+                        end: Position {
+                            index: 12,
+                            line: 1,
+                            column: 13,
+                        },
+                    },
+                },)),
+                then_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::Expression(Expression::IntegerLiteral(
+                            IntegerLiteral {
+                                value: "1".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 15,
+                                        line: 1,
+                                        column: 16,
+                                    },
+                                    end: Position {
+                                        index: 16,
+                                        line: 1,
+                                        column: 17,
+                                    },
+                                },
+                            },
+                        ),),],
+                        location: Location {
+                            start: Position {
+                                index: 13,
+                                line: 1,
+                                column: 14,
+                            },
+                            end: Position {
+                                index: 18,
+                                line: 1,
+                                column: 19,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14,
+                        },
+                        end: Position {
+                            index: 18,
+                            line: 1,
+                            column: 19,
+                        },
+                    },
+                },
+                else_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::Expression(Expression::IfElseExpression(
+                            IfElseExpression {
+                                condition: Box::new(Expression::Identifier(Identifier {
+                                    name: "condition".to_string(),
+                                    location: Location {
+                                        start: Position {
+                                            index: 27,
+                                            line: 1,
+                                            column: 28,
+                                        },
+                                        end: Position {
+                                            index: 36,
+                                            line: 1,
+                                            column: 37,
+                                        },
+                                    },
+                                },)),
+                                then_block: Block {
+                                    statements: Statements {
+                                        statements: vec![Statement::Expression(
+                                            Expression::IntegerLiteral(IntegerLiteral {
+                                                value: "2".to_string(),
+                                                location: Location {
+                                                    start: Position {
+                                                        index: 39,
+                                                        line: 1,
+                                                        column: 40,
+                                                    },
+                                                    end: Position {
+                                                        index: 40,
+                                                        line: 1,
+                                                        column: 41,
+                                                    },
+                                                },
+                                            },),
+                                        ),],
+                                        location: Location {
+                                            start: Position {
+                                                index: 37,
+                                                line: 1,
+                                                column: 38,
+                                            },
+                                            end: Position {
+                                                index: 42,
+                                                line: 1,
+                                                column: 43,
+                                            },
+                                        },
+                                    },
+                                    location: Location {
+                                        start: Position {
+                                            index: 37,
+                                            line: 1,
+                                            column: 38,
+                                        },
+                                        end: Position {
+                                            index: 42,
+                                            line: 1,
+                                            column: 43,
+                                        },
+                                    },
+                                },
+                                else_block: Block {
+                                    statements: Statements {
+                                        statements: vec![Statement::Expression(
+                                            Expression::IntegerLiteral(IntegerLiteral {
+                                                value: "0".to_string(),
+                                                location: Location {
+                                                    start: Position {
+                                                        index: 50,
+                                                        line: 1,
+                                                        column: 51,
+                                                    },
+                                                    end: Position {
+                                                        index: 51,
+                                                        line: 1,
+                                                        column: 52,
+                                                    },
+                                                },
+                                            },),
+                                        ),],
+                                        location: Location {
+                                            start: Position {
+                                                index: 48,
+                                                line: 1,
+                                                column: 49,
+                                            },
+                                            end: Position {
+                                                index: 53,
+                                                line: 1,
+                                                column: 54,
+                                            },
+                                        },
+                                    },
+                                    location: Location {
+                                        start: Position {
+                                            index: 48,
+                                            line: 1,
+                                            column: 49,
+                                        },
+                                        end: Position {
+                                            index: 53,
+                                            line: 1,
+                                            column: 54,
+                                        },
+                                    },
+                                },
+                                return_type: Type {
+                                    name: TypeKind::I32,
+                                    location: Location {
+                                        start: Position {
+                                            index: 57,
+                                            line: 1,
+                                            column: 58,
+                                        },
+                                        end: Position {
+                                            index: 60,
+                                            line: 1,
+                                            column: 61,
+                                        },
+                                    },
+                                },
+                                location: Location {
+                                    start: Position {
+                                        index: 24,
+                                        line: 1,
+                                        column: 25,
+                                    },
+                                    end: Position {
+                                        index: 53,
+                                        line: 1,
+                                        column: 54,
+                                    },
+                                },
+                            },
+                        ),),],
+                        location: Location {
+                            start: Position {
+                                index: 24,
+                                line: 1,
+                                column: 25,
+                            },
+                            end: Position {
+                                index: 53,
+                                line: 1,
+                                column: 54,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 24,
+                            line: 1,
+                            column: 25,
+                        },
+                        end: Position {
+                            index: 53,
+                            line: 1,
+                            column: 54,
+                        },
+                    },
+                },
+                return_type: Type {
+                    name: TypeKind::I32,
+                    location: Location {
+                        start: Position {
+                            index: 57,
+                            line: 1,
+                            column: 58,
+                        },
+                        end: Position {
+                            index: 60,
+                            line: 1,
+                            column: 61,
+                        },
+                    },
+                },
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 60,
+                        line: 1,
+                        column: 61,
+                    },
+                },
+            },),)
         );
     }
 
@@ -1353,6 +1955,256 @@ mod tests {
                 }
             }))
         );
+    }
+
+    #[test]
+    fn statement_returns_if_statement() {
+        let source = "if condition { 1; } else { 0; }";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(
+            ast,
+            Some(Statement::IfStatement(IfStatement {
+                condition: Expression::Identifier(Identifier {
+                    name: "condition".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4,
+                        },
+                        end: Position {
+                            index: 12,
+                            line: 1,
+                            column: 13,
+                        },
+                    },
+                },),
+                then_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::ExpressionStatement(ExpressionStatement {
+                            expression: Expression::IntegerLiteral(IntegerLiteral {
+                                value: "1".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 15,
+                                        line: 1,
+                                        column: 16,
+                                    },
+                                    end: Position {
+                                        index: 16,
+                                        line: 1,
+                                        column: 17,
+                                    },
+                                },
+                            },),
+                            location: Location {
+                                start: Position {
+                                    index: 15,
+                                    line: 1,
+                                    column: 16,
+                                },
+                                end: Position {
+                                    index: 17,
+                                    line: 1,
+                                    column: 18,
+                                },
+                            },
+                        },),],
+                        location: Location {
+                            start: Position {
+                                index: 13,
+                                line: 1,
+                                column: 14,
+                            },
+                            end: Position {
+                                index: 19,
+                                line: 1,
+                                column: 20,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14,
+                        },
+                        end: Position {
+                            index: 19,
+                            line: 1,
+                            column: 20,
+                        },
+                    },
+                },
+                else_block: Some(Block {
+                    statements: Statements {
+                        statements: vec![Statement::ExpressionStatement(ExpressionStatement {
+                            expression: Expression::IntegerLiteral(IntegerLiteral {
+                                value: "0".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 27,
+                                        line: 1,
+                                        column: 28,
+                                    },
+                                    end: Position {
+                                        index: 28,
+                                        line: 1,
+                                        column: 29,
+                                    },
+                                },
+                            },),
+                            location: Location {
+                                start: Position {
+                                    index: 27,
+                                    line: 1,
+                                    column: 28,
+                                },
+                                end: Position {
+                                    index: 29,
+                                    line: 1,
+                                    column: 30,
+                                },
+                            },
+                        },),],
+                        location: Location {
+                            start: Position {
+                                index: 25,
+                                line: 1,
+                                column: 26,
+                            },
+                            end: Position {
+                                index: 31,
+                                line: 1,
+                                column: 32,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 25,
+                            line: 1,
+                            column: 26,
+                        },
+                        end: Position {
+                            index: 31,
+                            line: 1,
+                            column: 32,
+                        },
+                    },
+                },),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 31,
+                        line: 1,
+                        column: 32,
+                    },
+                },
+            },),)
+        )
+    }
+
+    #[test]
+    fn statement_returns_if_statement_without_else() {
+        let source = "if condition { 1; }";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).statement();
+        assert_eq!(
+            ast,
+            Some(Statement::IfStatement(IfStatement {
+                condition: Expression::Identifier(Identifier {
+                    name: "condition".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4,
+                        },
+                        end: Position {
+                            index: 12,
+                            line: 1,
+                            column: 13,
+                        },
+                    },
+                },),
+                then_block: Block {
+                    statements: Statements {
+                        statements: vec![Statement::ExpressionStatement(ExpressionStatement {
+                            expression: Expression::IntegerLiteral(IntegerLiteral {
+                                value: "1".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 15,
+                                        line: 1,
+                                        column: 16,
+                                    },
+                                    end: Position {
+                                        index: 16,
+                                        line: 1,
+                                        column: 17,
+                                    },
+                                },
+                            },),
+                            location: Location {
+                                start: Position {
+                                    index: 15,
+                                    line: 1,
+                                    column: 16,
+                                },
+                                end: Position {
+                                    index: 17,
+                                    line: 1,
+                                    column: 18,
+                                },
+                            },
+                        },),],
+                        location: Location {
+                            start: Position {
+                                index: 13,
+                                line: 1,
+                                column: 14,
+                            },
+                            end: Position {
+                                index: 19,
+                                line: 1,
+                                column: 20,
+                            },
+                        },
+                    },
+                    location: Location {
+                        start: Position {
+                            index: 13,
+                            line: 1,
+                            column: 14,
+                        },
+                        end: Position {
+                            index: 19,
+                            line: 1,
+                            column: 20,
+                        },
+                    },
+                },
+                else_block: None,
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 19,
+                        line: 1,
+                        column: 20,
+                    },
+                },
+            },),)
+        )
     }
 
     #[test]
