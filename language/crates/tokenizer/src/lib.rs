@@ -131,6 +131,18 @@ impl Tokenizer {
                 Some('>') => Some(self.create_token(TokenKind::Operator, 2)),
                 _ => Some(self.create_token(TokenKind::Operator, 1)),
             },
+            '>' | '<' => match self.source.peek_char(1) {
+                Some('=') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => Some(self.create_token(TokenKind::Operator, 1)),
+            },
+            '&' => match self.source.peek_char(1) {
+                Some('&') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => None,
+            },
+            '|' => match self.source.peek_char(1) {
+                Some('|') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -241,6 +253,7 @@ mod tests {
     use super::*;
     use crate::position::Position;
     use indoc::indoc;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn tokenize_integer_returns_none_for_empty_source() {
@@ -474,6 +487,90 @@ mod tests {
             Some(Token {
                 kind: TokenKind::Operator,
                 value: "->".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_less_than_operator() {
+        let mut tokenizer = Tokenizer::new("<".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "<".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_less_than_or_equal_operator() {
+        let mut tokenizer = Tokenizer::new("<=".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "<=".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_greater_than_operator() {
+        let mut tokenizer = Tokenizer::new(">".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: ">".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(1, 1, 2),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_greater_than_or_equal_operator() {
+        let mut tokenizer = Tokenizer::new(">=".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: ">=".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_and_operator() {
+        let mut tokenizer = Tokenizer::new("&&".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "&&".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_or_operator() {
+        let mut tokenizer = Tokenizer::new("||".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "||".to_string(),
                 start_position: Position::new(0, 1, 1),
                 end_position: Position::new(2, 1, 3),
             })
@@ -946,7 +1043,9 @@ mod tests {
 
     #[test]
     fn tokenize_returns_operator() {
-        let operators = ["==", "!=", "=", "!", "+", "-", "*", "/", "->"];
+        let operators = [
+            "==", "!=", "=", "!", "+", "-", "*", "/", "->", "<", "<=", ">", ">=", "&&", "||",
+        ];
         for operator in operators.iter() {
             let mut tokenizer = Tokenizer::new(operator.to_string());
             assert_eq!(
@@ -1596,6 +1695,412 @@ mod tests {
                         index: 136,
                         line: 8,
                         column: 18
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "<".to_string(),
+                    start_position: Position {
+                        index: 137,
+                        line: 8,
+                        column: 19
+                    },
+                    end_position: Position {
+                        index: 138,
+                        line: 8,
+                        column: 20
+                    }
+                },
+                Token {
+                    kind: TokenKind::Integer,
+                    value: "10".to_string(),
+                    start_position: Position {
+                        index: 139,
+                        line: 8,
+                        column: 21
+                    },
+                    end_position: Position {
+                        index: 141,
+                        line: 8,
+                        column: 23
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: ";".to_string(),
+                    start_position: Position {
+                        index: 141,
+                        line: 8,
+                        column: 23
+                    },
+                    end_position: Position {
+                        index: 142,
+                        line: 8,
+                        column: 24
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "i".to_string(),
+                    start_position: Position {
+                        index: 143,
+                        line: 8,
+                        column: 25
+                    },
+                    end_position: Position {
+                        index: 144,
+                        line: 8,
+                        column: 26
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "+".to_string(),
+                    start_position: Position {
+                        index: 144,
+                        line: 8,
+                        column: 26
+                    },
+                    end_position: Position {
+                        index: 145,
+                        line: 8,
+                        column: 27
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "+".to_string(),
+                    start_position: Position {
+                        index: 145,
+                        line: 8,
+                        column: 27
+                    },
+                    end_position: Position {
+                        index: 146,
+                        line: 8,
+                        column: 28
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: ")".to_string(),
+                    start_position: Position {
+                        index: 146,
+                        line: 8,
+                        column: 28
+                    },
+                    end_position: Position {
+                        index: 147,
+                        line: 8,
+                        column: 29
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: "{".to_string(),
+                    start_position: Position {
+                        index: 148,
+                        line: 8,
+                        column: 30
+                    },
+                    end_position: Position {
+                        index: 149,
+                        line: 8,
+                        column: 31
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "a".to_string(),
+                    start_position: Position {
+                        index: 154,
+                        line: 9,
+                        column: 5
+                    },
+                    end_position: Position {
+                        index: 155,
+                        line: 9,
+                        column: 6
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "=".to_string(),
+                    start_position: Position {
+                        index: 156,
+                        line: 9,
+                        column: 7
+                    },
+                    end_position: Position {
+                        index: 157,
+                        line: 9,
+                        column: 8
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "a".to_string(),
+                    start_position: Position {
+                        index: 158,
+                        line: 9,
+                        column: 9
+                    },
+                    end_position: Position {
+                        index: 159,
+                        line: 9,
+                        column: 10
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "+".to_string(),
+                    start_position: Position {
+                        index: 160,
+                        line: 9,
+                        column: 11
+                    },
+                    end_position: Position {
+                        index: 161,
+                        line: 9,
+                        column: 12
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "i".to_string(),
+                    start_position: Position {
+                        index: 162,
+                        line: 9,
+                        column: 13
+                    },
+                    end_position: Position {
+                        index: 163,
+                        line: 9,
+                        column: 14
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: ";".to_string(),
+                    start_position: Position {
+                        index: 163,
+                        line: 9,
+                        column: 14
+                    },
+                    end_position: Position {
+                        index: 164,
+                        line: 9,
+                        column: 15
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: "}".to_string(),
+                    start_position: Position {
+                        index: 165,
+                        line: 10,
+                        column: 1
+                    },
+                    end_position: Position {
+                        index: 166,
+                        line: 10,
+                        column: 2
+                    }
+                },
+                Token {
+                    kind: TokenKind::Keyword,
+                    value: "while".to_string(),
+                    start_position: Position {
+                        index: 167,
+                        line: 11,
+                        column: 1
+                    },
+                    end_position: Position {
+                        index: 172,
+                        line: 11,
+                        column: 6
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: "(".to_string(),
+                    start_position: Position {
+                        index: 173,
+                        line: 11,
+                        column: 7
+                    },
+                    end_position: Position {
+                        index: 174,
+                        line: 11,
+                        column: 8
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "a".to_string(),
+                    start_position: Position {
+                        index: 174,
+                        line: 11,
+                        column: 8
+                    },
+                    end_position: Position {
+                        index: 175,
+                        line: 11,
+                        column: 9
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "<".to_string(),
+                    start_position: Position {
+                        index: 176,
+                        line: 11,
+                        column: 10
+                    },
+                    end_position: Position {
+                        index: 177,
+                        line: 11,
+                        column: 11
+                    }
+                },
+                Token {
+                    kind: TokenKind::Integer,
+                    value: "100".to_string(),
+                    start_position: Position {
+                        index: 178,
+                        line: 11,
+                        column: 12
+                    },
+                    end_position: Position {
+                        index: 181,
+                        line: 11,
+                        column: 15
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: ")".to_string(),
+                    start_position: Position {
+                        index: 181,
+                        line: 11,
+                        column: 15
+                    },
+                    end_position: Position {
+                        index: 182,
+                        line: 11,
+                        column: 16
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: "{".to_string(),
+                    start_position: Position {
+                        index: 183,
+                        line: 11,
+                        column: 17
+                    },
+                    end_position: Position {
+                        index: 184,
+                        line: 11,
+                        column: 18
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "a".to_string(),
+                    start_position: Position {
+                        index: 189,
+                        line: 12,
+                        column: 5
+                    },
+                    end_position: Position {
+                        index: 190,
+                        line: 12,
+                        column: 6
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "=".to_string(),
+                    start_position: Position {
+                        index: 191,
+                        line: 12,
+                        column: 7
+                    },
+                    end_position: Position {
+                        index: 192,
+                        line: 12,
+                        column: 8
+                    }
+                },
+                Token {
+                    kind: TokenKind::Identifier,
+                    value: "a".to_string(),
+                    start_position: Position {
+                        index: 193,
+                        line: 12,
+                        column: 9
+                    },
+                    end_position: Position {
+                        index: 194,
+                        line: 12,
+                        column: 10
+                    }
+                },
+                Token {
+                    kind: TokenKind::Operator,
+                    value: "*".to_string(),
+                    start_position: Position {
+                        index: 195,
+                        line: 12,
+                        column: 11
+                    },
+                    end_position: Position {
+                        index: 196,
+                        line: 12,
+                        column: 12
+                    }
+                },
+                Token {
+                    kind: TokenKind::Integer,
+                    value: "2".to_string(),
+                    start_position: Position {
+                        index: 197,
+                        line: 12,
+                        column: 13
+                    },
+                    end_position: Position {
+                        index: 198,
+                        line: 12,
+                        column: 14
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: ";".to_string(),
+                    start_position: Position {
+                        index: 198,
+                        line: 12,
+                        column: 14
+                    },
+                    end_position: Position {
+                        index: 199,
+                        line: 12,
+                        column: 15
+                    }
+                },
+                Token {
+                    kind: TokenKind::Delimiter,
+                    value: "}".to_string(),
+                    start_position: Position {
+                        index: 200,
+                        line: 13,
+                        column: 1
+                    },
+                    end_position: Position {
+                        index: 201,
+                        line: 13,
+                        column: 2
                     }
                 }
             ]
