@@ -214,6 +214,16 @@ impl CodeGenerator<'_> {
                     ast::OperatorKind::Subtract => instructions.push(core::Instruction::I32Sub),
                     ast::OperatorKind::Multiply => instructions.push(core::Instruction::I32Mul),
                     ast::OperatorKind::Divide => instructions.push(core::Instruction::I32DivS),
+                    ast::OperatorKind::Equal => instructions.push(core::Instruction::I32Eq),
+                    ast::OperatorKind::NotEqual => instructions.push(core::Instruction::I32Ne),
+                    ast::OperatorKind::LessThan => instructions.push(core::Instruction::I32LtS),
+                    ast::OperatorKind::LessThanOrEqual => {
+                        instructions.push(core::Instruction::I32LeS)
+                    }
+                    ast::OperatorKind::GreaterThan => instructions.push(core::Instruction::I32GtS),
+                    ast::OperatorKind::GreaterThanOrEqual => {
+                        instructions.push(core::Instruction::I32GeS)
+                    }
                 }
                 instructions
             }
@@ -525,6 +535,28 @@ mod tests {
         "};
         let stdout = run(source).unwrap().stdout;
         assert_eq!(stdout, "1 4 6");
+    }
+
+    #[test]
+    fn comparsion_expression() {
+        let source = indoc! {"
+            fn main() -> i32 {
+                print_int(1 == 1);
+                print_char(32); // ' '
+                print_int(1 != 1);
+                print_char(32); // ' '
+                print_int(1 < 1);
+                print_char(32); // ' '
+                print_int(1 <= 1);
+                print_char(32); // ' '
+                print_int(1 > 1);
+                print_char(32); // ' '
+                print_int(1 >= 1);
+                0
+            }
+        "};
+        let stdout = run(source).unwrap().stdout;
+        assert_eq!(stdout, "1 0 0 1 0 1");
     }
 
     #[test]
