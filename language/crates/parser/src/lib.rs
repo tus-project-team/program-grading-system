@@ -366,10 +366,79 @@ impl Parser {
     }
 
     /// ```bnf
-    /// expression = add_expression
+    /// expression = comparison_expression
     /// ```
     fn expression(&mut self) -> Option<Expression> {
-        self.add_expression()
+        self.comparison_expression()
+    }
+
+    /// ```bnf
+    /// comparison_expression = add_expression (("<" | "<=" | ">" | ">=" | "==" | "!=") add_expression)*
+    /// ```
+    fn comparison_expression(&mut self) -> Option<Expression> {
+        self.transaction(|tx| {
+            let lhs = tx.add_expression()?;
+            let mut expression = lhs;
+            while let Some(operator) = tx.consume_comparison_operator() {
+                let rhs = tx.add_expression()?;
+                let location = Location {
+                    start: expression.location().start,
+                    end: rhs.location().end,
+                };
+                expression = Expression::BinaryExpression(BinaryExpression {
+                    location,
+                    left: Box::new(expression),
+                    operator,
+                    right: Box::new(rhs),
+                });
+            }
+            Some(expression)
+        })
+    }
+
+    /// Consume a comparison operator.
+    fn consume_comparison_operator(&mut self) -> Option<Operator> {
+        let token = {
+            let token = self.peek_token(0)?;
+            if token.kind != TokenKind::Operator {
+                return None;
+            }
+            let location = Location {
+                start: token.start_position,
+                end: token.end_position,
+            };
+            match token.value.as_str() {
+                "<" => Some(Operator {
+                    operator: OperatorKind::LessThan,
+                    location,
+                }),
+                "<=" => Some(Operator {
+                    operator: OperatorKind::LessThanOrEqual,
+                    location,
+                }),
+                ">" => Some(Operator {
+                    operator: OperatorKind::GreaterThan,
+                    location,
+                }),
+                ">=" => Some(Operator {
+                    operator: OperatorKind::GreaterThanOrEqual,
+                    location,
+                }),
+                "==" => Some(Operator {
+                    operator: OperatorKind::Equal,
+                    location,
+                }),
+                "!=" => Some(Operator {
+                    operator: OperatorKind::NotEqual,
+                    location,
+                }),
+                _ => None,
+            }
+        };
+        if token.is_some() {
+            self.advance_token();
+        }
+        token
     }
 
     /// ```bnf
@@ -1768,6 +1837,665 @@ mod tests {
                 }
             }))
         );
+    }
+
+    #[test]
+    fn expression_returns_less_than_expression() {
+        let source = "1 < 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::LessThan,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        },
+                        end: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 5,
+                        line: 1,
+                        column: 6
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_returns_less_than_or_equal_expression() {
+        let source = "1 <= 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::LessThanOrEqual,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        )
+    }
+
+    #[test]
+    fn expression_returns_greater_than() {
+        let source = "1 > 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::GreaterThan,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 3,
+                            line: 1,
+                            column: 4
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        },
+                        end: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 5,
+                        line: 1,
+                        column: 6
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_returns_greater_than_or_equal() {
+        let source = "1 >= 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::GreaterThanOrEqual,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_return_equal_expression() {
+        let source = "1 == 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::Equal,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_return_not_equal_expression() {
+        let source = "1 != 2";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "1".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::NotEqual,
+                    location: Location {
+                        start: Position {
+                            index: 2,
+                            line: 1,
+                            column: 3
+                        },
+                        end: Position {
+                            index: 4,
+                            line: 1,
+                            column: 5
+                        }
+                    }
+                },
+                right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                    value: "2".to_string(),
+                    location: Location {
+                        start: Position {
+                            index: 5,
+                            line: 1,
+                            column: 6
+                        },
+                        end: Position {
+                            index: 6,
+                            line: 1,
+                            column: 7
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 6,
+                        line: 1,
+                        column: 7
+                    }
+                }
+            }))
+        );
+    }
+
+    #[test]
+    fn expression_return_comparsion_expression_with_calculation() {
+        let source = "1 + 2 == 3 * 4 != 5 / 6";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::BinaryExpression(BinaryExpression {
+                left: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "1".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 0,
+                                    line: 1,
+                                    column: 1
+                                },
+                                end: Position {
+                                    index: 1,
+                                    line: 1,
+                                    column: 2
+                                }
+                            }
+                        })),
+                        operator: Operator {
+                            operator: OperatorKind::Add,
+                            location: Location {
+                                start: Position {
+                                    index: 2,
+                                    line: 1,
+                                    column: 3
+                                },
+                                end: Position {
+                                    index: 3,
+                                    line: 1,
+                                    column: 4
+                                }
+                            }
+                        },
+                        right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "2".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 4,
+                                    line: 1,
+                                    column: 5
+                                },
+                                end: Position {
+                                    index: 5,
+                                    line: 1,
+                                    column: 6
+                                }
+                            }
+                        })),
+                        location: Location {
+                            start: Position {
+                                index: 0,
+                                line: 1,
+                                column: 1
+                            },
+                            end: Position {
+                                index: 5,
+                                line: 1,
+                                column: 6
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Equal,
+                        location: Location {
+                            start: Position {
+                                index: 6,
+                                line: 1,
+                                column: 7
+                            },
+                            end: Position {
+                                index: 8,
+                                line: 1,
+                                column: 9
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "3".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 9,
+                                    line: 1,
+                                    column: 10
+                                },
+                                end: Position {
+                                    index: 10,
+                                    line: 1,
+                                    column: 11
+                                }
+                            }
+                        })),
+                        operator: Operator {
+                            operator: OperatorKind::Multiply,
+                            location: Location {
+                                start: Position {
+                                    index: 11,
+                                    line: 1,
+                                    column: 12
+                                },
+                                end: Position {
+                                    index: 12,
+                                    line: 1,
+                                    column: 13
+                                }
+                            }
+                        },
+                        right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "4".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 13,
+                                    line: 1,
+                                    column: 14
+                                },
+                                end: Position {
+                                    index: 14,
+                                    line: 1,
+                                    column: 15
+                                }
+                            }
+                        })),
+                        location: Location {
+                            start: Position {
+                                index: 9,
+                                line: 1,
+                                column: 10
+                            },
+                            end: Position {
+                                index: 14,
+                                line: 1,
+                                column: 15
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1
+                        },
+                        end: Position {
+                            index: 14,
+                            line: 1,
+                            column: 15
+                        }
+                    }
+                })),
+                operator: Operator {
+                    operator: OperatorKind::NotEqual,
+                    location: Location {
+                        start: Position {
+                            index: 15,
+                            line: 1,
+                            column: 16
+                        },
+                        end: Position {
+                            index: 17,
+                            line: 1,
+                            column: 18
+                        }
+                    }
+                },
+                right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                    left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "5".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 18,
+                                line: 1,
+                                column: 19
+                            },
+                            end: Position {
+                                index: 19,
+                                line: 1,
+                                column: 20
+                            }
+                        }
+                    })),
+                    operator: Operator {
+                        operator: OperatorKind::Divide,
+                        location: Location {
+                            start: Position {
+                                index: 20,
+                                line: 1,
+                                column: 21
+                            },
+                            end: Position {
+                                index: 21,
+                                line: 1,
+                                column: 22
+                            }
+                        }
+                    },
+                    right: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                        value: "6".to_string(),
+                        location: Location {
+                            start: Position {
+                                index: 22,
+                                line: 1,
+                                column: 23
+                            },
+                            end: Position {
+                                index: 23,
+                                line: 1,
+                                column: 24
+                            }
+                        }
+                    })),
+                    location: Location {
+                        start: Position {
+                            index: 18,
+                            line: 1,
+                            column: 19
+                        },
+                        end: Position {
+                            index: 23,
+                            line: 1,
+                            column: 24
+                        }
+                    }
+                })),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1
+                    },
+                    end: Position {
+                        index: 23,
+                        line: 1,
+                        column: 24
+                    }
+                }
+            }))
+        )
     }
 
     #[test]

@@ -102,6 +102,12 @@ pub enum OperatorKind {
     Subtract,
     Multiply,
     Divide,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
 }
 
 impl std::fmt::Display for OperatorKind {
@@ -111,6 +117,12 @@ impl std::fmt::Display for OperatorKind {
             OperatorKind::Subtract => write!(f, "-"),
             OperatorKind::Multiply => write!(f, "*"),
             OperatorKind::Divide => write!(f, "/"),
+            OperatorKind::LessThan => write!(f, "<"),
+            OperatorKind::LessThanOrEqual => write!(f, "<="),
+            OperatorKind::GreaterThan => write!(f, ">"),
+            OperatorKind::GreaterThanOrEqual => write!(f, ">="),
+            OperatorKind::Equal => write!(f, "=="),
+            OperatorKind::NotEqual => write!(f, "!="),
         }
     }
 }
@@ -124,6 +136,12 @@ impl std::str::FromStr for OperatorKind {
             "-" => Ok(OperatorKind::Subtract),
             "*" => Ok(OperatorKind::Multiply),
             "/" => Ok(OperatorKind::Divide),
+            "<" => Ok(OperatorKind::LessThan),
+            "<=" => Ok(OperatorKind::LessThanOrEqual),
+            ">" => Ok(OperatorKind::GreaterThan),
+            ">=" => Ok(OperatorKind::GreaterThanOrEqual),
+            "==" => Ok(OperatorKind::Equal),
+            "!=" => Ok(OperatorKind::NotEqual),
             _ => Err(format!("Invalid operator: {}", s)),
         }
     }
