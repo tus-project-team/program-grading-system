@@ -2,7 +2,7 @@ use ast::{
     AssignmentExpression, BinaryExpression, Block, Expression, ExpressionStatement, FunctionCall,
     FunctionDefinition, Identifier, IfElseExpression, IfStatement, IntegerLiteral, Location,
     Operator, OperatorKind, Parameter, Parameters, Program, Statement, Statements, Type, TypeKind,
-    VariableDefinition,
+    UnaryExpression, VariableDefinition,
 };
 use tokenizer::{
     position::Position,
@@ -641,24 +641,17 @@ impl Parser {
                         end: token.end_position,
                     })
             {
-                let expression = tx.primary_expression()?;
-                Some(Expression::BinaryExpression(BinaryExpression {
+                let operand = tx.primary_expression()?;
+                Some(Expression::UnaryExpression(UnaryExpression {
                     location: Location {
                         start: not_location.start,
-                        end: expression.location().end,
+                        end: operand.location().end,
                     },
-                    left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
-                        value: "1".to_string(),
-                        location: Location {
-                            start: not_location.start,
-                            end: not_location.start,
-                        },
-                    })),
+                    operand: Box::new(operand),
                     operator: Operator {
-                        operator: OperatorKind::NotEqual,
+                        operator: OperatorKind::LogicalNot,
                         location: not_location,
                     },
-                    right: Box::new(expression),
                 }))
             } else {
                 tx.primary_expression()
@@ -2724,65 +2717,50 @@ mod tests {
         let ast = Parser::new(tokens).expression();
         assert_eq!(
             ast,
-            Some(Expression::BinaryExpression(BinaryExpression {
-                left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
-                    value: "1".to_string(),
-                    location: Location {
-                        start: Position {
-                            index: 0,
-                            line: 1,
-                            column: 1,
-                        },
-                        end: Position {
-                            index: 0,
-                            line: 1,
-                            column: 1,
-                        },
-                    },
-                },)),
+            Some(Expression::UnaryExpression(UnaryExpression {
                 operator: Operator {
-                    operator: OperatorKind::NotEqual,
+                    operator: OperatorKind::LogicalNot,
                     location: Location {
                         start: Position {
                             index: 0,
                             line: 1,
-                            column: 1,
+                            column: 1
                         },
                         end: Position {
                             index: 1,
                             line: 1,
-                            column: 2,
-                        },
-                    },
+                            column: 2
+                        }
+                    }
                 },
-                right: Box::new(Expression::Identifier(Identifier {
+                operand: Box::new(Expression::Identifier(Identifier {
                     name: "a".to_string(),
                     location: Location {
                         start: Position {
                             index: 1,
                             line: 1,
-                            column: 2,
+                            column: 2
                         },
                         end: Position {
                             index: 2,
                             line: 1,
-                            column: 3,
-                        },
-                    },
-                },)),
+                            column: 3
+                        }
+                    }
+                })),
                 location: Location {
                     start: Position {
                         index: 0,
                         line: 1,
-                        column: 1,
+                        column: 1
                     },
                     end: Position {
                         index: 2,
                         line: 1,
-                        column: 3,
-                    },
-                },
-            },),)
+                        column: 3
+                    }
+                }
+            }))
         );
     }
 

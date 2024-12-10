@@ -74,6 +74,7 @@ pub struct IfStatement {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
+    UnaryExpression(UnaryExpression),
     AssignmentExpression(AssignmentExpression),
     IfElseExpression(IfElseExpression),
     Identifier(Identifier),
@@ -85,6 +86,7 @@ impl Expression {
     pub fn location(&self) -> &Location {
         match self {
             Expression::BinaryExpression(binary_expression) => &binary_expression.location,
+            Expression::UnaryExpression(unary_expression) => &unary_expression.location,
             Expression::AssignmentExpression(assignment_expression) => {
                 &assignment_expression.location
             }
@@ -108,6 +110,9 @@ pub enum OperatorKind {
     GreaterThanOrEqual,
     Equal,
     NotEqual,
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
 }
 
 impl std::fmt::Display for OperatorKind {
@@ -123,6 +128,9 @@ impl std::fmt::Display for OperatorKind {
             OperatorKind::GreaterThanOrEqual => write!(f, ">="),
             OperatorKind::Equal => write!(f, "=="),
             OperatorKind::NotEqual => write!(f, "!="),
+            OperatorKind::LogicalAnd => write!(f, "&&"),
+            OperatorKind::LogicalOr => write!(f, "||"),
+            OperatorKind::LogicalNot => write!(f, "!"),
         }
     }
 }
@@ -142,6 +150,9 @@ impl std::str::FromStr for OperatorKind {
             ">=" => Ok(OperatorKind::GreaterThanOrEqual),
             "==" => Ok(OperatorKind::Equal),
             "!=" => Ok(OperatorKind::NotEqual),
+            "&&" => Ok(OperatorKind::LogicalAnd),
+            "||" => Ok(OperatorKind::LogicalOr),
+            "!" => Ok(OperatorKind::LogicalNot),
             _ => Err(format!("Invalid operator: {}", s)),
         }
     }
@@ -158,6 +169,13 @@ pub struct BinaryExpression {
     pub left: Box<Expression>,
     pub operator: Operator,
     pub right: Box<Expression>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UnaryExpression {
+    pub operator: Operator,
+    pub operand: Box<Expression>,
     pub location: Location,
 }
 
