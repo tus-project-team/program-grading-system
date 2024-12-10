@@ -135,6 +135,14 @@ impl Tokenizer {
                 Some('=') => Some(self.create_token(TokenKind::Operator, 2)),
                 _ => Some(self.create_token(TokenKind::Operator, 1)),
             },
+            '&' => match self.source.peek_char(1) {
+                Some('&') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => None,
+            },
+            '|' => match self.source.peek_char(1) {
+                Some('|') => Some(self.create_token(TokenKind::Operator, 2)),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -245,6 +253,7 @@ mod tests {
     use super::*;
     use crate::position::Position;
     use indoc::indoc;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn tokenize_integer_returns_none_for_empty_source() {
@@ -534,6 +543,34 @@ mod tests {
             Some(Token {
                 kind: TokenKind::Operator,
                 value: ">=".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_and_operator() {
+        let mut tokenizer = Tokenizer::new("&&".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "&&".to_string(),
+                start_position: Position::new(0, 1, 1),
+                end_position: Position::new(2, 1, 3),
+            })
+        );
+    }
+
+    #[test]
+    fn tokenize_operator_returns_or_operator() {
+        let mut tokenizer = Tokenizer::new("||".to_string());
+        assert_eq!(
+            tokenizer.tokenize_operator(),
+            Some(Token {
+                kind: TokenKind::Operator,
+                value: "||".to_string(),
                 start_position: Position::new(0, 1, 1),
                 end_position: Position::new(2, 1, 3),
             })
@@ -1007,7 +1044,7 @@ mod tests {
     #[test]
     fn tokenize_returns_operator() {
         let operators = [
-            "==", "!=", "=", "!", "+", "-", "*", "/", "->", "<", "<=", ">", ">=",
+            "==", "!=", "=", "!", "+", "-", "*", "/", "->", "<", "<=", ">", ">=", "&&", "||",
         ];
         for operator in operators.iter() {
             let mut tokenizer = Tokenizer::new(operator.to_string());
