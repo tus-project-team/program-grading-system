@@ -602,8 +602,8 @@ impl Parser {
 
     /// ```bnf
     /// unary_expression =
-    ///     "-" primary_expression
-    ///   | "!" primary_expression
+    ///     "-" unary_expression
+    ///   | "!" unary_expression
     ///   | primary_expression
     /// ```
     fn unary_expression(&mut self) -> Option<Expression> {
@@ -615,11 +615,11 @@ impl Parser {
                         end: token.end_position,
                     })
             {
-                let expression = tx.primary_expression()?;
+                let operand = tx.unary_expression()?;
                 Some(Expression::BinaryExpression(BinaryExpression {
                     location: Location {
                         start: minus_location.start,
-                        end: expression.location().end,
+                        end: operand.location().end,
                     },
                     left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
                         value: "0".to_string(),
@@ -632,7 +632,7 @@ impl Parser {
                         operator: OperatorKind::Subtract,
                         location: minus_location,
                     },
-                    right: Box::new(expression),
+                    right: Box::new(operand),
                 }))
             } else if let Some(not_location) =
                 tx.consume_token(TokenKind::Operator, "!")
@@ -641,7 +641,7 @@ impl Parser {
                         end: token.end_position,
                     })
             {
-                let operand = tx.primary_expression()?;
+                let operand = tx.unary_expression()?;
                 Some(Expression::UnaryExpression(UnaryExpression {
                     location: Location {
                         start: not_location.start,
@@ -2762,6 +2762,235 @@ mod tests {
                 }
             }))
         );
+    }
+
+    #[test]
+    fn expression_return_repeated_unary_expression() {
+        let source = "!!- -!  !a";
+        let tokens = Tokenizer::new(source.to_string()).tokenize();
+        let ast = Parser::new(tokens).expression();
+        assert_eq!(
+            ast,
+            Some(Expression::UnaryExpression(UnaryExpression {
+                operator: Operator {
+                    operator: OperatorKind::LogicalNot,
+                    location: Location {
+                        start: Position {
+                            index: 0,
+                            line: 1,
+                            column: 1,
+                        },
+                        end: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2,
+                        },
+                    },
+                },
+                operand: Box::new(Expression::UnaryExpression(UnaryExpression {
+                    operator: Operator {
+                        operator: OperatorKind::LogicalNot,
+                        location: Location {
+                            start: Position {
+                                index: 1,
+                                line: 1,
+                                column: 2,
+                            },
+                            end: Position {
+                                index: 2,
+                                line: 1,
+                                column: 3,
+                            },
+                        },
+                    },
+                    operand: Box::new(Expression::BinaryExpression(BinaryExpression {
+                        left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                            value: "0".to_string(),
+                            location: Location {
+                                start: Position {
+                                    index: 2,
+                                    line: 1,
+                                    column: 3,
+                                },
+                                end: Position {
+                                    index: 2,
+                                    line: 1,
+                                    column: 3,
+                                },
+                            },
+                        },)),
+                        operator: Operator {
+                            operator: OperatorKind::Subtract,
+                            location: Location {
+                                start: Position {
+                                    index: 2,
+                                    line: 1,
+                                    column: 3,
+                                },
+                                end: Position {
+                                    index: 3,
+                                    line: 1,
+                                    column: 4,
+                                },
+                            },
+                        },
+                        right: Box::new(Expression::BinaryExpression(BinaryExpression {
+                            left: Box::new(Expression::IntegerLiteral(IntegerLiteral {
+                                value: "0".to_string(),
+                                location: Location {
+                                    start: Position {
+                                        index: 4,
+                                        line: 1,
+                                        column: 5,
+                                    },
+                                    end: Position {
+                                        index: 4,
+                                        line: 1,
+                                        column: 5,
+                                    },
+                                },
+                            },)),
+                            operator: Operator {
+                                operator: OperatorKind::Subtract,
+                                location: Location {
+                                    start: Position {
+                                        index: 4,
+                                        line: 1,
+                                        column: 5,
+                                    },
+                                    end: Position {
+                                        index: 5,
+                                        line: 1,
+                                        column: 6,
+                                    },
+                                },
+                            },
+                            right: Box::new(Expression::UnaryExpression(UnaryExpression {
+                                operator: Operator {
+                                    operator: OperatorKind::LogicalNot,
+                                    location: Location {
+                                        start: Position {
+                                            index: 5,
+                                            line: 1,
+                                            column: 6,
+                                        },
+                                        end: Position {
+                                            index: 6,
+                                            line: 1,
+                                            column: 7,
+                                        },
+                                    },
+                                },
+                                operand: Box::new(Expression::UnaryExpression(UnaryExpression {
+                                    operator: Operator {
+                                        operator: OperatorKind::LogicalNot,
+                                        location: Location {
+                                            start: Position {
+                                                index: 8,
+                                                line: 1,
+                                                column: 9,
+                                            },
+                                            end: Position {
+                                                index: 9,
+                                                line: 1,
+                                                column: 10,
+                                            },
+                                        },
+                                    },
+                                    operand: Box::new(Expression::Identifier(Identifier {
+                                        name: "a".to_string(),
+                                        location: Location {
+                                            start: Position {
+                                                index: 9,
+                                                line: 1,
+                                                column: 10,
+                                            },
+                                            end: Position {
+                                                index: 10,
+                                                line: 1,
+                                                column: 11,
+                                            },
+                                        },
+                                    },)),
+                                    location: Location {
+                                        start: Position {
+                                            index: 8,
+                                            line: 1,
+                                            column: 9,
+                                        },
+                                        end: Position {
+                                            index: 10,
+                                            line: 1,
+                                            column: 11,
+                                        },
+                                    },
+                                },)),
+                                location: Location {
+                                    start: Position {
+                                        index: 5,
+                                        line: 1,
+                                        column: 6,
+                                    },
+                                    end: Position {
+                                        index: 10,
+                                        line: 1,
+                                        column: 11,
+                                    },
+                                },
+                            },)),
+                            location: Location {
+                                start: Position {
+                                    index: 4,
+                                    line: 1,
+                                    column: 5,
+                                },
+                                end: Position {
+                                    index: 10,
+                                    line: 1,
+                                    column: 11,
+                                },
+                            },
+                        },)),
+                        location: Location {
+                            start: Position {
+                                index: 2,
+                                line: 1,
+                                column: 3,
+                            },
+                            end: Position {
+                                index: 10,
+                                line: 1,
+                                column: 11,
+                            },
+                        },
+                    },)),
+                    location: Location {
+                        start: Position {
+                            index: 1,
+                            line: 1,
+                            column: 2,
+                        },
+                        end: Position {
+                            index: 10,
+                            line: 1,
+                            column: 11,
+                        },
+                    },
+                },)),
+                location: Location {
+                    start: Position {
+                        index: 0,
+                        line: 1,
+                        column: 1,
+                    },
+                    end: Position {
+                        index: 10,
+                        line: 1,
+                        column: 11,
+                    },
+                },
+            },),)
+        )
     }
 
     #[test]
