@@ -2328,7 +2328,7 @@ mod tests {
     }
 
     #[test]
-    fn expression_return_comparsion_expression_with_calculation() {
+    fn expression_return_comparison_expression_with_calculation() {
         let source = "1 + 2 == 3 * 4 != 5 / 6";
         let tokens = Tokenizer::new(source.to_string()).tokenize();
         let ast = Parser::new(tokens).expression();

@@ -588,7 +588,7 @@ mod tests {
     }
 
     #[test]
-    fn comparsion_expression() {
+    fn comparison_expression() {
         let source = indoc! {"
             fn main() -> i32 {
                 print_int(1 == 1);
