@@ -79,8 +79,8 @@ export function ProblemList() {
   }, [])
 
   return (
-    <div>
-      <div className="mb-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="@container">
+      <div className="@2xl:grid-cols-2 mb-6 grid grid-cols-1 gap-6">
         {problems.map((problem) => (
           <Card className="flex flex-col" key={problem.id}>
             <CardHeader>
