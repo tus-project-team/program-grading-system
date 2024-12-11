@@ -1,7 +1,10 @@
 "use client"
 
 import { Progress } from "@/components/ui/progress"
-import { FC, useEffect, useState } from "react"
+import { $api } from "@/lib/api"
+import { FC } from "react"
+
+const STUDENT_ID = 1 // TODO: change this to the actual student ID
 
 type ProgressData = {
   solvedProblems: number
@@ -9,16 +12,16 @@ type ProgressData = {
 }
 
 export const ProgressOverview: FC = () => {
-  const [progress, setProgress] = useState<ProgressData>({
-    solvedProblems: 0,
-    totalProblems: 0,
-  })
-
-  useEffect(() => {
-    // ここで進捗データを取得するAPIを呼び出す
-    // 仮のデータを使用
-    setProgress({ solvedProblems: 25, totalProblems: 100 })
-  }, [])
+  const problems = $api.useSuspenseQuery("get", "/api/problems")
+  const submissions = $api.useSuspenseQuery("get", "/api/submissions")
+  const progress: ProgressData = {
+    solvedProblems: submissions.data.filter(
+      (submission) =>
+        submission.student_id === STUDENT_ID &&
+        submission.result.status === "Accepted",
+    ).length,
+    totalProblems: problems.data.length,
+  }
 
   const progressPercentage =
     (progress.solvedProblems / progress.totalProblems) * 100

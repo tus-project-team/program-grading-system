@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_teacher/admin/problems/$problemId/")({
       )
     } catch (error) {
       if (error instanceof APIError && error.status === 404) {
-        throw notFound({ routeId: "/(teacher)/admin/problems/$problemId/" })
+        throw notFound({ routeId: "/_teacher/admin/problems/$problemId/" })
       }
       throw error
     }

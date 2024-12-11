@@ -7,12 +7,12 @@ import { RecentSubmissions } from "./-components/recent-submissions"
 
 const Index = () => {
   return (
-    <div className="@container container mx-auto p-6">
+    <div className="container mx-auto p-6 @container">
       <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
-      <div className="@3xl:grid-cols-4 grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6 @3xl:grid-cols-4">
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>問題一覧</CardTitle>
+            <CardTitle>未提出の問題一覧</CardTitle>
           </CardHeader>
           <CardContent>
             <ProblemList />
