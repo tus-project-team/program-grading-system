@@ -12,6 +12,10 @@
 
 アプリ全体で使われるコンポーネントがここにあります。
 
+##### `src/components/layout`
+
+アプリ全体のレイアウトを構成するコンポーネントがここにあります。
+
 ##### `src/components/ui`
 
 [`shadcn/ui`](https://ui.shadcn.com/) のコンポーネントがここにあります。

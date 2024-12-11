@@ -95,7 +95,7 @@ jobs:
       - name: Install Rust toolchain
         run: rustup toolchain install stable
       - name: Test
-        run: cargo test
+        run: cargo test --workspace
 
   machete:
     name: Machete

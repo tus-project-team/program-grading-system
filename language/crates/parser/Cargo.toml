@@ -1,0 +1,12 @@
+[package]
+name = "parser"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ast = { workspace = true }
+tokenizer = { workspace = true }
+
+[dev-dependencies]
+indoc = { workspace = true }
+pretty_assertions = { workspace = true }
