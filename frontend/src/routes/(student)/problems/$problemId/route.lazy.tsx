@@ -101,7 +101,7 @@ const ProblemError: ErrorRouteComponent = ({ error }) => {
 }
 
 const ProblemNotFound: NotFoundRouteComponent = () => {
-  const { problemId } = Route.useParams()
+  const { problemId } = Route.useParams<{ problemId: string }>()
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-6 text-center">
