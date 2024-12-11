@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -22,62 +21,51 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { components } from "openapi/schema"
 
-type Submission = components["schemas"]["Submission"]
+type Problem = components["schemas"]["Problem"]
 
-const columnHelper = createColumnHelper<Submission>()
+const columnHelper = createColumnHelper<Problem>()
 
 const columns = [
   columnHelper.accessor("id", {
     cell: (info) => info.getValue(),
     header: "ID",
   }),
-  columnHelper.accessor("student_id", {
+  columnHelper.accessor("title", {
     cell: (info) => info.getValue(),
-    header: "Student ID",
+    header: "Title",
   }),
-  columnHelper.accessor("problem_id", {
-    cell: (info) => info.getValue(),
-    header: "Problem ID",
-  }),
-  columnHelper.accessor("language", {
-    cell: (info) => `${info.getValue().name} ${info.getValue().version}`,
-    header: "Language",
-  }),
-  columnHelper.accessor("submitted_at", {
-    cell: (info) => formatDate(info.getValue()),
-    header: "Submitted At",
-  }),
-  columnHelper.accessor("result.status", {
+  columnHelper.accessor("body", {
     cell: (info) => (
-      <Badge
-        className={cn(
-          getStatusColor(info.getValue()),
-          "transition-colors duration-200",
-        )}
-      >
+      <div className="w-40 truncate" title={info.getValue()}>
         {info.getValue()}
-      </Badge>
+      </div>
     ),
-    header: "Status",
+    header: "Description",
+  }),
+  columnHelper.accessor("supported_languages", {
+    cell: (info) =>
+      info
+        .getValue()
+        .map((lang) => `${lang.name} ${lang.version}`)
+        .join(", "),
+    header: "Supported Languages",
   }),
   columnHelper.display({
     cell: (info) => (
       <Button asChild size="sm" variant="outline">
-        <Link to={`/admin/submissions/${info.row.original.id}`}>
-          View Details
-        </Link>
+        <Link to={`/admin/problems/${info.row.original.id}`}>View Details</Link>
       </Button>
     ),
     id: "actions",
   }),
 ]
 
-const SubmissionList = () => {
-  const submissions = $api.useSuspenseQuery("get", "/api/submissions")
+const ProblemList = () => {
+  const problems = $api.useSuspenseQuery("get", "/api/problems")
 
   const table = useReactTable({
     columns,
-    data: submissions.data,
+    data: problems.data,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -90,7 +78,7 @@ const SubmissionList = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-4 text-2xl font-bold">Submission List</h1>
+      <h1 className="mb-4 text-2xl font-bold">Problem List</h1>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -158,28 +146,6 @@ const SubmissionList = () => {
   )
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString()
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Accepted": {
-      return "bg-green-500 hover:bg-green-400"
-    }
-    case "CompileError":
-    case "RuntimeError": {
-      return "bg-red-500 hover:bg-red-400"
-    }
-    case "WrongAnswer": {
-      return "bg-yellow-500 hover:bg-yellow-400"
-    }
-    default: {
-      return "bg-gray-500 hover:bg-gray-400"
-    }
-  }
-}
-
-export const Route = createLazyFileRoute("/(teacher)/admin/submissions/")({
-  component: SubmissionList,
+export const Route = createLazyFileRoute("/_teacher/admin/problems/")({
+  component: ProblemList,
 })
