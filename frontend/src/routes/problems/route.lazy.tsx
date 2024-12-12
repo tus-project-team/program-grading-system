@@ -43,6 +43,12 @@ const ProblemList = () => {
               <th className="border border-gray-300 px-4 py-2 font-semibold">
                 問題名
               </th>
+              <th className="border border-gray-300 px-4 py-2 font-semibold">
+                言語
+              </th>
+              <th className="border border-gray-300 px-4 py-2 font-semibold">
+                テストケース
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +59,40 @@ const ProblemList = () => {
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-blue-500 underline">
                   <Link to={`/problems/${problem.id}`}>{problem.title}</Link>
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {problem.supported_languages &&
+                  problem.supported_languages.length > 0 ? (
+                    problem.supported_languages.join(", ")
+                  ) : (
+                    <span>No supported languages</span>
+                  )}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <table className="min-w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr>
+                        <th className="border border-gray-300 px-2 py-1">
+                          Input
+                        </th>
+                        <th className="border border-gray-300 px-2 py-1">
+                          Output
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {problem.test_cases.map((test_case, index) => (
+                        <tr key={index}>
+                          <td className="border border-gray-300 px-2 py-1">
+                            {test_case.input}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-1">
+                            {test_case.output}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </td>
               </tr>
             ))}
