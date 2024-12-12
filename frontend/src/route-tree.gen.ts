@@ -26,6 +26,8 @@ import { Route as TeacherAdminProblemsProblemIdIndexImport } from "./routes/_tea
 
 // Create Virtual Routes
 
+const StudentProblemsRouteLazyImport = createFileRoute("/_student/problems")()
+const studentProblemsRouteLazyImport = createFileRoute("/(student)/problems")()
 const StudentProblemsIndexLazyImport = createFileRoute("/_student/problems/")()
 const TeacherAdminSubmissionsIndexLazyImport = createFileRoute(
   "/_teacher/admin/submissions/",
@@ -49,10 +51,28 @@ const StudentRoute = StudentImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const StudentProblemsIndexLazyRoute = StudentProblemsIndexLazyImport.update({
-  id: "/problems/",
-  path: "/problems/",
+const StudentProblemsRouteLazyRoute = StudentProblemsRouteLazyImport.update({
+  id: "/problems",
+  path: "/problems",
   getParentRoute: () => StudentRoute,
+} as any).lazy(() =>
+  import("./routes/_student/problems/route.lazy").then((d) => d.Route),
+)
+
+const studentProblemsRouteLazyRoute = studentProblemsRouteLazyImport
+  .update({
+    id: "/(student)/problems",
+    path: "/problems",
+    getParentRoute: () => rootRoute,
+  } as any)
+  .lazy(() =>
+    import("./routes/(student)/problems/route.lazy").then((d) => d.Route),
+  )
+
+const StudentProblemsIndexLazyRoute = StudentProblemsIndexLazyImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => StudentProblemsRouteLazyRoute,
 } as any).lazy(() =>
   import("./routes/_student/problems/index.lazy").then((d) => d.Route),
 )
@@ -67,9 +87,9 @@ const StudentdashboardIndexRoute = StudentdashboardIndexImport.update({
 
 const StudentProblemsProblemIdRouteRoute =
   StudentProblemsProblemIdRouteImport.update({
-    id: "/problems/$problemId",
-    path: "/problems/$problemId",
-    getParentRoute: () => StudentRoute,
+    id: "/$problemId",
+    path: "/$problemId",
+    getParentRoute: () => StudentProblemsRouteLazyRoute,
   } as any).lazy(() =>
     import("./routes/_student/problems/$problemId/route.lazy").then(
       (d) => d.Route,
@@ -147,12 +167,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof TeacherImport
       parentRoute: typeof rootRoute
     }
+    "/(student)/problems": {
+      id: "/(student)/problems"
+      path: "/problems"
+      fullPath: "/problems"
+      preLoaderRoute: typeof studentProblemsRouteLazyImport
+      parentRoute: typeof rootRoute
+    }
+    "/_student/problems": {
+      id: "/_student/problems"
+      path: "/problems"
+      fullPath: "/problems"
+      preLoaderRoute: typeof StudentProblemsRouteLazyImport
+      parentRoute: typeof StudentImport
+    }
     "/_student/problems/$problemId": {
       id: "/_student/problems/$problemId"
-      path: "/problems/$problemId"
+      path: "/$problemId"
       fullPath: "/problems/$problemId"
       preLoaderRoute: typeof StudentProblemsProblemIdRouteImport
-      parentRoute: typeof StudentImport
+      parentRoute: typeof StudentProblemsRouteLazyImport
     }
     "/_student/(dashboard)/": {
       id: "/_student/(dashboard)/"
@@ -163,10 +197,10 @@ declare module "@tanstack/react-router" {
     }
     "/_student/problems/": {
       id: "/_student/problems/"
-      path: "/problems"
-      fullPath: "/problems"
+      path: "/"
+      fullPath: "/problems/"
       preLoaderRoute: typeof StudentProblemsIndexLazyImport
-      parentRoute: typeof StudentImport
+      parentRoute: typeof StudentProblemsRouteLazyImport
     }
     "/_teacher/admin/submissions/$submissionId": {
       id: "/_teacher/admin/submissions/$submissionId"
@@ -208,16 +242,30 @@ declare module "@tanstack/react-router" {
 
 // Create and export the route tree
 
-interface StudentRouteChildren {
+interface StudentProblemsRouteLazyRouteChildren {
   StudentProblemsProblemIdRouteRoute: typeof StudentProblemsProblemIdRouteRoute
-  StudentdashboardIndexRoute: typeof StudentdashboardIndexRoute
   StudentProblemsIndexLazyRoute: typeof StudentProblemsIndexLazyRoute
 }
 
+const StudentProblemsRouteLazyRouteChildren: StudentProblemsRouteLazyRouteChildren =
+  {
+    StudentProblemsProblemIdRouteRoute: StudentProblemsProblemIdRouteRoute,
+    StudentProblemsIndexLazyRoute: StudentProblemsIndexLazyRoute,
+  }
+
+const StudentProblemsRouteLazyRouteWithChildren =
+  StudentProblemsRouteLazyRoute._addFileChildren(
+    StudentProblemsRouteLazyRouteChildren,
+  )
+
+interface StudentRouteChildren {
+  StudentProblemsRouteLazyRoute: typeof StudentProblemsRouteLazyRouteWithChildren
+  StudentdashboardIndexRoute: typeof StudentdashboardIndexRoute
+}
+
 const StudentRouteChildren: StudentRouteChildren = {
-  StudentProblemsProblemIdRouteRoute: StudentProblemsProblemIdRouteRoute,
+  StudentProblemsRouteLazyRoute: StudentProblemsRouteLazyRouteWithChildren,
   StudentdashboardIndexRoute: StudentdashboardIndexRoute,
-  StudentProblemsIndexLazyRoute: StudentProblemsIndexLazyRoute,
 }
 
 const StudentRouteWithChildren =
@@ -246,9 +294,10 @@ const TeacherRouteWithChildren =
 
 export interface FileRoutesByFullPath {
   "": typeof TeacherRouteWithChildren
+  "/problems": typeof StudentProblemsRouteLazyRouteWithChildren
   "/problems/$problemId": typeof StudentProblemsProblemIdRouteRoute
   "/": typeof StudentdashboardIndexRoute
-  "/problems": typeof StudentProblemsIndexLazyRoute
+  "/problems/": typeof StudentProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof TeacherAdminSubmissionsSubmissionIdRouteRoute
   "/admin": typeof TeacherAdmindashboardIndexLazyRoute
   "/admin/problems": typeof TeacherAdminProblemsIndexLazyRoute
@@ -258,9 +307,9 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   "": typeof TeacherRouteWithChildren
+  "/problems": typeof StudentProblemsIndexLazyRoute
   "/problems/$problemId": typeof StudentProblemsProblemIdRouteRoute
   "/": typeof StudentdashboardIndexRoute
-  "/problems": typeof StudentProblemsIndexLazyRoute
   "/admin/submissions/$submissionId": typeof TeacherAdminSubmissionsSubmissionIdRouteRoute
   "/admin": typeof TeacherAdmindashboardIndexLazyRoute
   "/admin/problems": typeof TeacherAdminProblemsIndexLazyRoute
@@ -272,6 +321,8 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   "/_student": typeof StudentRouteWithChildren
   "/_teacher": typeof TeacherRouteWithChildren
+  "/(student)/problems": typeof studentProblemsRouteLazyRoute
+  "/_student/problems": typeof StudentProblemsRouteLazyRouteWithChildren
   "/_student/problems/$problemId": typeof StudentProblemsProblemIdRouteRoute
   "/_student/(dashboard)/": typeof StudentdashboardIndexRoute
   "/_student/problems/": typeof StudentProblemsIndexLazyRoute
@@ -286,9 +337,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | ""
+    | "/problems"
     | "/problems/$problemId"
     | "/"
-    | "/problems"
+    | "/problems/"
     | "/admin/submissions/$submissionId"
     | "/admin"
     | "/admin/problems"
@@ -297,9 +349,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | ""
+    | "/problems"
     | "/problems/$problemId"
     | "/"
-    | "/problems"
     | "/admin/submissions/$submissionId"
     | "/admin"
     | "/admin/problems"
@@ -309,6 +361,8 @@ export interface FileRouteTypes {
     | "__root__"
     | "/_student"
     | "/_teacher"
+    | "/(student)/problems"
+    | "/_student/problems"
     | "/_student/problems/$problemId"
     | "/_student/(dashboard)/"
     | "/_student/problems/"
@@ -323,11 +377,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   StudentRoute: typeof StudentRouteWithChildren
   TeacherRoute: typeof TeacherRouteWithChildren
+  studentProblemsRouteLazyRoute: typeof studentProblemsRouteLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   StudentRoute: StudentRouteWithChildren,
   TeacherRoute: TeacherRouteWithChildren,
+  studentProblemsRouteLazyRoute: studentProblemsRouteLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -341,15 +397,15 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_student",
-        "/_teacher"
+        "/_teacher",
+        "/(student)/problems"
       ]
     },
     "/_student": {
       "filePath": "_student.tsx",
       "children": [
-        "/_student/problems/$problemId",
-        "/_student/(dashboard)/",
-        "/_student/problems/"
+        "/_student/problems",
+        "/_student/(dashboard)/"
       ]
     },
     "/_teacher": {
@@ -362,9 +418,20 @@ export const routeTree = rootRoute
         "/_teacher/admin/problems/$problemId/"
       ]
     },
+    "/(student)/problems": {
+      "filePath": "(student)/problems/route.lazy.tsx"
+    },
+    "/_student/problems": {
+      "filePath": "_student/problems/route.lazy.tsx",
+      "parent": "/_student",
+      "children": [
+        "/_student/problems/$problemId",
+        "/_student/problems/"
+      ]
+    },
     "/_student/problems/$problemId": {
       "filePath": "_student/problems/$problemId/route.tsx",
-      "parent": "/_student"
+      "parent": "/_student/problems"
     },
     "/_student/(dashboard)/": {
       "filePath": "_student/(dashboard)/index.tsx",
@@ -372,7 +439,7 @@ export const routeTree = rootRoute
     },
     "/_student/problems/": {
       "filePath": "_student/problems/index.lazy.tsx",
-      "parent": "/_student"
+      "parent": "/_student/problems"
     },
     "/_teacher/admin/submissions/$submissionId": {
       "filePath": "_teacher/admin/submissions/$submissionId/route.tsx",
