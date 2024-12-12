@@ -118,7 +118,7 @@ const ProblemNotFound: NotFoundRouteComponent = () => {
   )
 }
 
-export const Route = createLazyFileRoute("/(student)/problems/$problemId")({
+export const Route = createLazyFileRoute("/_student/problems/$problemId")({
   component: Problem,
   errorComponent: ProblemError,
   notFoundComponent: ProblemNotFound,

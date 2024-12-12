@@ -1,24 +1,28 @@
 import { $api, APIError } from "@/lib/api"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 
-export const Route = createFileRoute("/(teacher)/admin/problems/$problemId/")({
+export const Route = createFileRoute(
+  "/_teacher/admin/submissions/$submissionId",
+)({
   loader: async ({ context: { queryClient }, params }) => {
     try {
       await queryClient.ensureQueryData(
-        $api.queryOptions("get", "/api/problems/{problemId}", {
+        $api.queryOptions("get", "/api/submissions/{submissionId}", {
           params: {
-            path: { problemId: Number.parseInt(params.problemId) },
+            path: { submissionId: Number.parseInt(params.submissionId) },
           },
         }),
       )
     } catch (error) {
       if (error instanceof APIError && error.status === 404) {
-        throw notFound({ routeId: "/(teacher)/admin/problems/$problemId/" })
+        throw notFound({
+          routeId: "/_teacher/admin/submissions/$submissionId",
+        })
       }
       throw error
     }
   },
   notFoundComponent: () => {
-    return "Problem not found"
+    return "Submission not found"
   },
 })
