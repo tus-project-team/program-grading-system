@@ -46,7 +46,7 @@ export const SubmissionDetail = () => {
 }
 
 export const Route = createLazyFileRoute(
-  "/(teacher)/admin/submissions/$submissionId",
+  "/_teacher/admin/submissions/$submissionId",
 )({
   component: SubmissionDetail,
 })

@@ -180,6 +180,6 @@ const Problems = () => {
   )
 }
 
-export const Route = createLazyFileRoute("/(student)/problems")({
+export const Route = createLazyFileRoute("/_student/problems")({
   component: Problems,
 })

@@ -2,7 +2,7 @@ import { $api, APIError } from "@/lib/api"
 import { createFileRoute, notFound } from "@tanstack/react-router"
 
 export const Route = createFileRoute(
-  "/(teacher)/admin/submissions/$submissionId",
+  "/_teacher/admin/submissions/$submissionId",
 )({
   loader: async ({ context: { queryClient }, params }) => {
     try {
@@ -16,7 +16,7 @@ export const Route = createFileRoute(
     } catch (error) {
       if (error instanceof APIError && error.status === 404) {
         throw notFound({
-          routeId: "/(teacher)/admin/submissions/$submissionId",
+          routeId: "/_teacher/admin/submissions/$submissionId",
         })
       }
       throw error
