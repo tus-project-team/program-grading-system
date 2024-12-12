@@ -22,4 +22,7 @@ export const Route = createFileRoute(
       throw error
     }
   },
+  notFoundComponent: () => {
+    return "Submission not found"
+  },
 })
