@@ -18,4 +18,7 @@ export const Route = createFileRoute("/(teacher)/admin/problems/$problemId/")({
       throw error
     }
   },
+  notFoundComponent: () => {
+    return "Problem not found"
+  }
 })
