@@ -44,7 +44,7 @@ const ProblemList = () => {
                 問題名
               </th>
               <th className="border border-gray-300 px-4 py-2 font-semibold">
-                言語
+                プログラミング言語
               </th>
               <th className="border border-gray-300 px-4 py-2 font-semibold">
                 テストケース
