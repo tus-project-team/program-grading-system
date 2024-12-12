@@ -24,5 +24,5 @@ export const Route = createRootRouteWithContext<{
         </section>
       </div>
     )
-  }
+  },
 })

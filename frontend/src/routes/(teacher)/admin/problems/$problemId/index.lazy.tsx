@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { $api } from "@/lib/api"
-import { createLazyFileRoute, Link, NotFoundRouteComponent} from "@tanstack/react-router"
+import {
+  createLazyFileRoute,
+  Link,
+  NotFoundRouteComponent,
+} from "@tanstack/react-router"
 import { toast } from "sonner"
 
 import { ProblemForm } from "../-components/problem-form"

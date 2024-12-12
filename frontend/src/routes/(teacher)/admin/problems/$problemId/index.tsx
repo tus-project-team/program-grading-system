@@ -20,5 +20,5 @@ export const Route = createFileRoute("/(teacher)/admin/problems/$problemId/")({
   },
   notFoundComponent: () => {
     return "Problem not found"
-  }
+  },
 })
