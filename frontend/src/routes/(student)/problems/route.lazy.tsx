@@ -54,8 +54,8 @@ const ProblemList = () => {
           <tbody>
             {problemData.map((problem) => (
               <tr key={problem.id}>
-                <td className="border border-gray-300 px-4 py-2">
-                  {problem.id}
+                <td className="border border-gray-300 px-4 py-2 text-blue-500 underline">
+                  <Link to={`/problems/${problem.id}`}>{problem.id}</Link>
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-blue-500 underline">
                   <Link to={`/problems/${problem.id}`}>{problem.title}</Link>
@@ -63,34 +63,56 @@ const ProblemList = () => {
                 <td className="border border-gray-300 px-4 py-2">
                   {problem.supported_languages &&
                   problem.supported_languages.length > 0 ? (
-                    problem.supported_languages.join(", ")
+                    <ul>
+                      {problem.supported_languages.map((language, index) => (
+                        <li key={index}>
+                          {language.name} (v{language.version})
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
                     <span>No supported languages</span>
                   )}
                 </td>
+
                 <td className="border border-gray-300 px-4 py-2">
-                  <table className="min-w-full border-collapse border border-gray-300">
+                  <table className="min-w-full table-fixed border-collapse border border-gray-300">
                     <thead>
                       <tr>
-                        <th className="border border-gray-300 px-2 py-1">
+                        <th className="w-1/2 border border-gray-300 px-2 py-1">
                           入力
                         </th>
-                        <th className="border border-gray-300 px-2 py-1">
+                        <th className="w-1/2 border border-gray-300 px-2 py-1">
                           出力
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {problem.test_cases.map((test_case, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-2 py-1">
-                            {test_case.input}
-                          </td>
-                          <td className="border border-gray-300 px-2 py-1">
-                            {test_case.output}
+                      {problem.test_cases.length > 0 ? (
+                        problem.test_cases.map((test_case, index) => (
+                          <tr key={index}>
+                            <td className="min-h-[2rem] border border-gray-300 px-2 py-1 text-center">
+                              {test_case.input || (
+                                <span className="text-gray-500">なし</span>
+                              )}
+                            </td>
+                            <td className="min-h-[2rem] border border-gray-300 px-2 py-1 text-center">
+                              {test_case.output || (
+                                <span className="text-gray-500">なし</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            className="min-h-[2rem] border border-gray-300 px-2 py-1 text-center text-gray-500"
+                            colSpan={2}
+                          >
+                            No test cases available
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </td>
