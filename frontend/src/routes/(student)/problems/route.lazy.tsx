@@ -14,8 +14,8 @@ import { Link } from "@tanstack/react-router"
 import { RefreshCcwIcon } from "lucide-react"
 import { useEffect } from "react"
 
-import { useProblemsContext } from "./-context"
 import { ProblemsProvider } from "./-context/problems-context"
+import { useProblemsContext } from "./-context/use-problems-context"
 
 const ProblemList = () => {
   const { problems } = useProblemsContext()
