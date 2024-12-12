@@ -18,9 +18,12 @@ export const Problem = z
   .object({
     body: z.string(),
     id: z.number().int().nonnegative(),
+    inputConditions: z.string().nullable(),
+    outputConditions: z.string().nullable(),
     supported_languages: z.array(Language),
     test_cases: z.array(TestCase),
     title: z.string(),
+    usePropertyBasedTesting: z.boolean(),
   })
   .openapi("Problem")
 
