@@ -1,0 +1,6 @@
+dbs:
+  - path: /app/prisma/data/deploy.db
+    replicas:
+      - type: gcs
+        bucket: ${LITESTREAM_BUCKET}
+        path: deploy.db
