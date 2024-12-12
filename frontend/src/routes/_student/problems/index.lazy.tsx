@@ -5,6 +5,6 @@ const Problems = () => {
   return "Hello /problems!"
 }
 
-export const Route = createLazyFileRoute("/(student)/problems/")({
+export const Route = createLazyFileRoute("/_student/problems/")({
   component: Problems,
 })

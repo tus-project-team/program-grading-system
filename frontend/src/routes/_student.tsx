@@ -1,12 +1,12 @@
 import { BaseLayout } from "@/components/layout/base-layout"
-import { createLazyFileRoute, Outlet } from "@tanstack/react-router"
-import { HomeIcon, LayoutListIcon, ListChecksIcon } from "lucide-react"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { HomeIcon, LayoutListIcon } from "lucide-react"
 import { FC } from "react"
 
-const TeacherLayout: FC = () => {
+const StudentLayout: FC = () => {
   return (
     <BaseLayout
-      base="/admin/"
+      base="/"
       items={[
         {
           href: "",
@@ -20,12 +20,6 @@ const TeacherLayout: FC = () => {
           title: "Problems",
           type: "link",
         },
-        {
-          href: "submissions",
-          icon: ListChecksIcon,
-          title: "Submissions",
-          type: "link",
-        },
       ]}
     >
       <Outlet />
@@ -33,6 +27,6 @@ const TeacherLayout: FC = () => {
   )
 }
 
-export const Route = createLazyFileRoute("/(teacher)")({
-  component: TeacherLayout,
+export const Route = createFileRoute("/_student")({
+  component: StudentLayout,
 })
