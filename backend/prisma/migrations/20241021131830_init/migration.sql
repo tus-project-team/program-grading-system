@@ -21,6 +21,9 @@ CREATE TABLE "Problem" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "title" TEXT NOT NULL,
     "body" TEXT NOT NULL,
+    "usePropertyBasedTesting" BOOLEAN NOT NULL DEFAULT false,
+    "inputConditions" TEXT,
+    "outputConditions" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
