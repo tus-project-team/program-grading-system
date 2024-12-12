@@ -73,10 +73,10 @@ const ProblemList = () => {
                     <thead>
                       <tr>
                         <th className="border border-gray-300 px-2 py-1">
-                          Input
+                          入力
                         </th>
                         <th className="border border-gray-300 px-2 py-1">
-                          Output
+                          出力
                         </th>
                       </tr>
                     </thead>
