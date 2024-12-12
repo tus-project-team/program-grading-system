@@ -29,15 +29,18 @@ model Student {
 }
 
 model Problem {
-  id                 Int          @id @default(autoincrement())
-  title              String
-  body               String
-  testCases          TestCase[] // A problem has multiple test cases
-  supportedLanguages Language[] // Supported languages for the problem
-  submissions        Submission[] // Multiple students can submit to this problem
-  teachers           Teacher[] // A problem can be assigned to multiple teachers
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                      Int          @id @default(autoincrement())
+  title                   String
+  body                    String
+  testCases               TestCase[] // A problem has multiple test cases
+  supportedLanguages      Language[] // Supported languages for the problem
+  submissions             Submission[] // Multiple students can submit to this problem
+  teachers                Teacher[] // A problem can be assigned to multiple teachers
+  usePropertyBasedTesting Boolean      @default(false)
+  inputConditions         String?
+  outputConditions        String?
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
 }
 
 model TestCase {
