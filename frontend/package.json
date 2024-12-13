@@ -63,7 +63,7 @@
     "@types/eslint-config-prettier": "6.11.3",
     "@types/eslint-plugin-jsx-a11y": "6.10.0",
     "@types/eslint__js": "8.42.3",
-    "@types/node": "22.10.1",
+    "@types/node": "22.10.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "@vitejs/plugin-react-swc": "3.7.2",
