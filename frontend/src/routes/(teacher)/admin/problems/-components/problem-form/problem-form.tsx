@@ -53,6 +53,8 @@ const problemSchema = v.object({
     ),
   ),
   title: v.pipe(v.string(), v.nonEmpty("Title is required")),
+  newLanguage: v.optional(v.string()),
+  newVersion: v.optional(v.string()),
 })
 
 export type ProblemFormProps = {
@@ -281,7 +283,7 @@ export const ProblemForm: FC<ProblemFormProps> = ({
               <div className="flex items-end gap-2">
                 <div className="grid gap-2 flex-1">
                   <Label>言語</Label>
-                  <form.Field name="supported_languages">
+                  <form.Field name="newLanguage">
                     {(field) => (
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -328,8 +330,8 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                         name: newLang,
                         version: newVer
                       })
-                      form.setFieldValue("newLanguage", "")
-                      form.setFieldValue("newVersion", "")
+                      form.setFieldValue("newLanguage", undefined)
+                      form.setFieldValue("newVersion", undefined)
                     }
                   }}
                 >
