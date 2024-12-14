@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { $api } from "@/lib/api"
-import { createLazyFileRoute, Link } from "@tanstack/react-router"
+import {
+  createLazyFileRoute,
+  Link,
+  NotFoundRouteComponent,
+} from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 
 import { SubmissionInfo } from "./-components/submission-info"
@@ -45,8 +49,27 @@ export const SubmissionDetail = () => {
   )
 }
 
+const AdminSubmissionNotFound: NotFoundRouteComponent = () => {
+  const { submissionId } = Route.useParams()
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-6 text-center">
+      <section className="space-y-2">
+        <h1 className="text-2xl font-bold">Submission not found</h1>
+        <p className="text-muted-foreground">
+          The submission with ID <code>{submissionId}</code> does not exist.
+        </p>
+      </section>
+      <Button asChild variant="link">
+        <Link to="/admin/submissions">Back to submissions</Link>
+      </Button>
+    </div>
+  )
+}
+
 export const Route = createLazyFileRoute(
-  "/(teacher)/admin/submissions/$submissionId",
+  "/_teacher/admin/submissions/$submissionId",
 )({
   component: SubmissionDetail,
+  notFoundComponent: AdminSubmissionNotFound,
 })
