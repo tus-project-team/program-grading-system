@@ -16,8 +16,6 @@ import {
 import { Fingerprint } from "lucide-react"
 import { useState } from "react"
 
-type Role = "admin" | "student" | "teacher"
-
 type FormData = {
   email: string
   name: string
@@ -27,6 +25,8 @@ type FormData = {
 type PasskeyAuthProps = {
   onAuthenticationSuccess: (token: string) => void
 }
+
+type Role = "admin" | "student" | "teacher"
 
 export const PasskeyAuth = ({ onAuthenticationSuccess }: PasskeyAuthProps) => {
   const [mode, setMode] = useState<"login" | "register">("login")
