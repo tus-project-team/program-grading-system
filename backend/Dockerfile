@@ -63,7 +63,7 @@ COPY backend/litestream.yml /litestream.yml
 COPY backend/run.sh /run.sh
 RUN chmod +x /run.sh
 
-FROM gcr.io/distroless/cc-debian12:debug AS production
+FROM gcr.io/distroless/cc-debian12:debug@sha256:c1aad82df2b344ef00c9d01608f6ef13b833e50be2affb63fb4e87fe03df46e4 AS production
 WORKDIR /
 COPY --from=build /tmp/prod/node_modules /node_modules
 COPY --from=build /tmp/prod/app /app
