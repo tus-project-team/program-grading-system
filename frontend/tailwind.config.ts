@@ -1,12 +1,13 @@
 import type { Config } from "tailwindcss"
 
+import containerQueries from "@tailwindcss/container-queries"
 import typography from "@tailwindcss/typography"
 import animate from "tailwindcss-animate"
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: ["class"],
-  plugins: [animate, typography],
+  plugins: [animate, typography, containerQueries],
   theme: {
     extend: {
       animation: {
