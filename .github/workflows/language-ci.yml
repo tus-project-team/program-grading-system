@@ -112,6 +112,8 @@ jobs:
         uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
       - name: Install cargo-make
         run: cargo binstall cargo-make
+      - name: Install target
+        run: rustup target add ${{ matrix.target }}
       - name: Build
         run: cargo make build
         env:

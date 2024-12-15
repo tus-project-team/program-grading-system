@@ -53,7 +53,6 @@ args = [
 command = "cargo"
 args = ["build", "--all-features", "--all-targets"]
 workspace = true
-install_crate.rustup_component_name = "${CARGO_MAKE_RUST_TARGET_TRIPLE}"
 
 
 [tasks.test]
