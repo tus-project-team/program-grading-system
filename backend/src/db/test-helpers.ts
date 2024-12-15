@@ -17,13 +17,12 @@ export const resetDb = async () => {
     prisma.problem.deleteMany(),
     prisma.language.deleteMany(),
     prisma.supportedLanguage.deleteMany(),
-    prisma.credential.deleteMany(),
-    prisma.challenge.deleteMany(),
     prisma.student.deleteMany(),
     prisma.teacher.deleteMany(),
-    prisma.user.deleteMany(),
   ])
 }
+
+const kebabCase = (str: string) => str.replaceAll(/\s/g, "-").toLowerCase()
 
 /**
  * Create a User data object, but never insert it into the db
@@ -31,31 +30,13 @@ export const resetDb = async () => {
  * @param data The data to generate the user with
  * @returns The generated user data
  */
-
-export const createUserData = ({
-  email = faker.internet.email(),
-  name = faker.person.fullName(),
-  role = "student",
-  ...data
-}: Partial<Prisma.UserCreateInput> = {}): Prisma.UserCreateInput => ({
-  email,
-  name,
-  role,
-  ...data,
-})
-
-export const createUser = (data: Partial<Prisma.UserCreateInput> = {}) =>
-  prisma.user.create({
-    data: createUserData(data),
-  })
-
 export const createStudentData = ({
-  user = {
-    create: createUserData({ role: "student" }),
-  },
+  name = faker.person.fullName(),
+  email = `${kebabCase(name)}@student.example.com`,
   ...data
 }: Partial<Prisma.StudentCreateInput> = {}): Prisma.StudentCreateInput => ({
-  user,
+  email,
+  name,
   ...data,
 })
 
@@ -69,9 +50,6 @@ export const createStudentData = ({
 export const createStudent = (data: Partial<Prisma.StudentCreateInput> = {}) =>
   prisma.student.create({
     data: createStudentData(data),
-    include: {
-      user: true,
-    },
   })
 
 /**
@@ -81,14 +59,15 @@ export const createStudent = (data: Partial<Prisma.StudentCreateInput> = {}) =>
  * @returns The generated teacher data
  */
 export const createTeacherData = ({
-  user = {
-    create: createUserData({ role: "teacher" }),
-  },
+  name = faker.person.fullName(),
+  email = `${kebabCase(name)}@teacher.example.com`,
   ...data
 }: Partial<Prisma.TeacherCreateInput> = {}): Prisma.TeacherCreateInput => ({
-  user,
+  email,
+  name,
   ...data,
 })
+
 /**
  * Create a Teacher
  *
@@ -99,10 +78,8 @@ export const createTeacherData = ({
 export const createTeacher = (data: Partial<Prisma.TeacherCreateInput> = {}) =>
   prisma.teacher.create({
     data: createTeacherData(data),
-    include: {
-      user: true,
-    },
   })
+
 /**
  * Create a Problem data object, but never insert it into the db
  *
@@ -296,15 +273,17 @@ const createLanguageDataForSubmission =
 
 const createStudentDataForSubmission =
   (): Prisma.StudentCreateNestedOneWithoutSubmissionsInput => {
-    const userData = createUserData({ role: "student" })
+    const student = createStudentData()
     return {
-      create: {
-        user: {
-          create: userData,
+      connectOrCreate: {
+        create: student,
+        where: {
+          email: student.email,
         },
       },
     }
   }
+
 /**
  * Create a Submission data object, but never insert it into the db
  *

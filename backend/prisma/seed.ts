@@ -1,5 +1,3 @@
-import type { Prisma } from "@prisma/client"
-
 import { z } from "@hono/zod-openapi"
 import { parseArgs } from "node:util"
 
@@ -32,94 +30,46 @@ const initEnumTables = async () => {
 }
 
 const generateFakeData = async () => {
-  // 教師データの作成
-  const teacherData = [
-    {
-      email: "alice@teacher.example.com",
-      name: "Teacher Alice",
-    },
-    {
-      email: "bob@teacher.example.com",
-      name: "Teacher Bob",
-    },
-    {
-      email: "charlie@teacher.example.com",
-      name: "Teacher Charlie",
-    },
-  ]
-
-  const teachers = await prisma.$transaction(async (tx) => {
-    const createdTeachers = await Promise.all(
-      teacherData.map(async (data) => {
-        const user = await tx.user.create({
-          data: {
-            email: data.email,
-            name: data.name,
-            role: "teacher",
-            teacher: {
-              create: {}, // Teacher will be created with a relation to the user
-            },
-          },
-          include: {
-            teacher: true,
-          },
-        })
-        if (!user.teacher) {
-          throw new Error(`Failed to create teacher for user ${user.id}`)
-        }
-        return user.teacher
-      }),
-    )
-    return createdTeachers
+  await prisma.teacher.createManyAndReturn({
+    data: [
+      {
+        email: "alice@teacher.example.com",
+        name: "Teacher Alice",
+      },
+      {
+        email: "bob@teacher.example.com",
+        name: "Teacher Bob",
+      },
+      {
+        email: "charlie@teacher.example.com",
+        name: "Teacher Charlie",
+      },
+    ],
   })
 
-  // 学生データの作成
-  const studentData = [
-    {
-      email: "dave@student.example.com",
-      name: "Student Dave",
-    },
-    {
-      email: "eve@student.example.com",
-      name: "Student Eve",
-    },
-    {
-      email: "frank@student.example.com",
-      name: "Student Frank",
-    },
-    {
-      email: "george@student.example.com",
-      name: "Student George",
-    },
-    {
-      email: "harry@student.example.com",
-      name: "Student Harry",
-    },
-  ]
-
-  const students = await prisma.$transaction(async (tx) => {
-    const createdStudents = await Promise.all(
-      studentData.map(async (data) => {
-        const user = await tx.user.create({
-          data: {
-            email: data.email,
-            name: data.name,
-            role: "student",
-            student: {
-              create: {},
-            },
-          },
-          include: {
-            student: true,
-          },
-        })
-        if (!user.student) {
-          throw new Error(`Failed to create student for user ${user.id}`)
-        }
-        return user.student
-      }),
-    )
-    return createdStudents
+  const students = await prisma.student.createManyAndReturn({
+    data: [
+      {
+        email: "dave@student.example.com",
+        name: "Student Dave",
+      },
+      {
+        email: "eve@student.example.com",
+        name: "Student Eve",
+      },
+      {
+        email: "frank@student.example.com",
+        name: "Student Frank",
+      },
+      {
+        email: "george@student.example.com",
+        name: "Student George",
+      },
+      {
+        email: "harry@student.example.com",
+        name: "Student Harry",
+      },
+    ],
   })
 
   await prisma.supportedLanguage.createMany({
@@ -132,25 +82,8 @@ const generateFakeData = async () => {
   })
 
   const problems = await prisma.$transaction(async (tx) => {
-    const createProblemWithTeacher = async (
-      problemData: Omit<Prisma.ProblemCreateInput, "teachers">,
-      teacherIndex: number,
-    ) => {
-      return await tx.problem.create({
-        data: {
-          ...problemData,
-          teachers: {
-            connect: [{ id: teachers[teacherIndex].id }],
-          },
-        },
-        include: {
-          testCases: true,
-        },
-      })
-    }
-
-    const helloWorld = await createProblemWithTeacher(
-      {
+    const helloWorld = await tx.problem.create({
+      data: {
         body: "Print 'Hello, World!' to the console.",
         supportedLanguages: {
           create: [
@@ -176,11 +109,12 @@ const generateFakeData = async () => {
         },
         title: "Hello, World!",
       },
-      0,
-    )
-
-    const sum = await createProblemWithTeacher(
-      {
+      include: {
+        testCases: true,
+      },
+    })
+    const sum = await tx.problem.create({
+      data: {
         body: "Print the sum of two numbers.",
         supportedLanguages: {
           create: [
@@ -210,11 +144,12 @@ const generateFakeData = async () => {
         },
         title: "Sum of Two Numbers",
       },
-      1,
-    )
-
-    const product = await createProblemWithTeacher(
-      {
+      include: {
+        testCases: true,
+      },
+    })
+    const product = await tx.problem.create({
+      data: {
         body: "Print the product of two numbers.",
         supportedLanguages: {
           create: [
@@ -248,16 +183,12 @@ const generateFakeData = async () => {
         },
         title: "Product of Two Numbers",
       },
-      2,
-    )
-
-    const fibonacci = (n: number): number => {
-      if (n <= 1) return n
-      return fibonacci(n - 1) + fibonacci(n - 2)
-    }
-
-    const fibonacciProblem = await createProblemWithTeacher(
-      {
+      include: {
+        testCases: true,
+      },
+    })
+    const fibonacci = await tx.problem.create({
+      data: {
         body: "Print the fibonacci number at the given index.",
         supportedLanguages: {
           create: [
@@ -274,18 +205,61 @@ const generateFakeData = async () => {
           ],
         },
         testCases: {
-          create: Array.from({ length: 11 }, (_, i) => ({
-            input: i.toString(),
-            output: fibonacci(i).toString(),
-          })),
+          create: [
+            {
+              input: "0",
+              output: "0",
+            },
+            {
+              input: "1",
+              output: "1",
+            },
+            {
+              input: "2",
+              output: "1",
+            },
+            {
+              input: "3",
+              output: "2",
+            },
+            {
+              input: "4",
+              output: "3",
+            },
+            {
+              input: "5",
+              output: "5",
+            },
+            {
+              input: "6",
+              output: "8",
+            },
+            {
+              input: "7",
+              output: "13",
+            },
+            {
+              input: "8",
+              output: "21",
+            },
+            {
+              input: "9",
+              output: "34",
+            },
+            {
+              input: "10",
+              output: "55",
+            },
+          ],
         },
         title: "Fibonacci",
       },
-      0,
-    )
-
+      include: {
+        testCases: true,
+      },
+    })
     return {
-      fibonacciProblem,
+      fibonacci,
       helloWorld,
       product,
       sum,
@@ -524,7 +498,7 @@ const generateFakeData = async () => {
           },
           problem: {
             connect: {
-              id: problems.fibonacciProblem.id,
+              id: problems.fibonacci.id,
             },
           },
           result: {
@@ -544,7 +518,7 @@ const generateFakeData = async () => {
           },
           testResults: {
             createMany: {
-              data: problems.fibonacciProblem.testCases.map(({ id }, i) =>
+              data: problems.fibonacci.testCases.map(({ id }, i) =>
                 i === 0 && i % 3 === 0
                   ? {
                       message: "Failed",

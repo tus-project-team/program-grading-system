@@ -7,14 +7,6 @@ import { cerateSupportedLanguage, createProblem } from "../../db/test-helpers"
 import { ProblemUpdate } from "../components/schemas"
 import app from "./problems"
 
-const sortLanguages = (languages: { name: string; version: string }[]) => {
-  return [...languages].sort((a, b) =>
-    a.name === b.name
-      ? a.version.localeCompare(b.version)
-      : a.name.localeCompare(b.name),
-  )
-}
-
 describe("updateProblem", () => {
   test("should update a problem", async () => {
     const python = await cerateSupportedLanguage({
@@ -62,10 +54,9 @@ describe("updateProblem", () => {
 
     const actual = await response.json()
     expect(actual).toEqual({
-      ...expected,
       id: problem.id,
-      supported_languages: sortLanguages(expected.supported_languages),
-    })
+      ...expected,
+    } satisfies typeof actual)
   })
 
   test("should update a problem with empty supported languages", async () => {
@@ -155,20 +146,22 @@ describe("updateProblem", () => {
     const expected: z.infer<typeof ProblemUpdate> = {
       body: "New Body",
       supported_languages: [
-        {
-          name: python.name,
-          version: python.version,
-        },
+        ...problem.supportedLanguages.map(
+          ({ languageName: name, languageVersion: version }) => ({
+            name,
+            version,
+          }),
+        ),
         {
           name: javascript.name,
           version: javascript.version,
         },
       ],
       test_cases: [
-        {
-          input: "1",
-          output: "1",
-        },
+        ...problem.testCases.map(({ input, output }) => ({
+          input,
+          output,
+        })),
         {
           input: "2",
           output: "2",
@@ -183,22 +176,17 @@ describe("updateProblem", () => {
       },
     })
     expect(response.status).toBe(200)
-    if (response.status !== 200) return
+    if (response.status !== 200) return // type guard
 
     const actual = await response.json()
     expect(actual).toEqual({
       id: problem.id,
       ...expected,
-      supported_languages: sortLanguages(expected.supported_languages),
-    })
+    } satisfies typeof actual)
 
     const updatedProblem = await prisma.problem.findUnique({
       include: {
-        supportedLanguages: {
-          include: {
-            language: true,
-          },
-        },
+        supportedLanguages: true,
         testCases: true,
       },
       where: {
@@ -207,38 +195,40 @@ describe("updateProblem", () => {
     })
 
     expect(updatedProblem).not.toBeNull()
-    if (!updatedProblem) return
-
-    const originalLanguage = updatedProblem.supportedLanguages.find(
-      (lang) =>
-        lang.language.name === python.name &&
-        lang.language.version === python.version,
+    if (updatedProblem == null) return // type guard
+    expect(updatedProblem.id).toBe(problem.id)
+    expect(
+      Object.fromEntries(
+        Object.entries(
+          updatedProblem.supportedLanguages.find(
+            ({ id }) => id === problem.supportedLanguages[0].id,
+          ) ?? {},
+        ).filter(([key]) => key !== "updatedAt"),
+      ),
+    ).toEqual(
+      Object.fromEntries(
+        Object.entries(problem.supportedLanguages[0]).filter(
+          ([key]) => key !== "updatedAt",
+        ),
+      ),
     )
-
-    expect(originalLanguage).toBeDefined()
-    expect({
-      name: originalLanguage?.language.name,
-      version: originalLanguage?.language.version,
-    }).toEqual({
-      name: python.name,
-      version: python.version,
-    })
-
-    const newLanguage = updatedProblem.supportedLanguages.find(
-      (lang) =>
-        lang.language.name === javascript.name &&
-        lang.language.version === javascript.version,
+    expect(
+      Object.fromEntries(
+        Object.entries(
+          updatedProblem.testCases.find(
+            ({ id }) => id === problem.testCases[0].id,
+          ) ?? {},
+        ).filter(([key]) => key !== "updatedAt"),
+      ),
+    ).toEqual(
+      Object.fromEntries(
+        Object.entries(problem.testCases[0]).filter(
+          ([key]) => key !== "updatedAt",
+        ),
+      ),
     )
-
-    expect(newLanguage).toBeDefined()
-    expect({
-      name: newLanguage?.language.name,
-      version: newLanguage?.language.version,
-    }).toEqual({
-      name: javascript.name,
-      version: javascript.version,
-    })
   })
+
   test("should return 404 if problem not found", async () => {
     const response = await testClient(app).problems[":problemId"].$put({
       json: {
