@@ -1,0 +1,76 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+  REGION: ${{ secrets.GOOGLE_CLOUD_REGION }}
+  REPOSITORY: ${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
+  IMAGE: ${{ secrets.DOCKER_IMAGE }}
+
+jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-24.04
+    outputs:
+      backend: ${{ steps.changes.outputs.frontend }}
+      workflows: ${{ steps.changes.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Check frontend files changed
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        with:
+          filters: |
+            backend:
+                - 'backend/**'
+            workflows:
+                - '.github/workflows/deploy-backend.yml'
+
+  build-and-push:
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.workflows == 'true'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - id: auth
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+        with:
+          project_id: ${{ env.PROJECT_NAME }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_NAME }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+          -f backend/Dockerfile .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_NAME }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.IMAGE }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_NAME }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+            --port="3000" \
+            --region ${{ env.REGION }} \
+            --max-instances=1 \
+            --ingress=internal-and-cloud-load-balancing  \
+            --allow-unauthenticated \
+            --set-env-vars=LITESTREAM_BUCKET=${{ secrets.LITESTREAM_BUCKET }}
