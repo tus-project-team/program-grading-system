@@ -68,7 +68,7 @@ args = ["machete"]
 
 
 [tasks.setup-machete.install_crate]
-crate_name = "machete"
+crate_name = "cargo-machete"
 binary = "machete"
 test_arg = ["--help"]
 install_command = "binstall"
