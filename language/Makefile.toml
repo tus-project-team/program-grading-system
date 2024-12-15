@@ -1,12 +1,65 @@
+[config]
+default_to_workspace = false
+
+
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
 
 [tasks.format]
 install_crate = "rustfmt"
 command = "cargo"
-args = ["fmt", "--all", "--", "--emit=files"]
+args = ["fmt", "--all", "--", "--check"]
+
+
+[tasks.format-write]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all"]
+
 
 [tasks.lint]
 install_crate = "clippy"
 command = "cargo"
-args = ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
+args = [
+  "clippy",
+  "--workspace",
+  "--all-targets",
+  "--all-features",
+  "--",
+  "-D",
+  "warnings",
+]
+
+
+[tasks.lint-write]
+install_crate = "clippy"
+command = "cargo"
+args = [
+  "clippy",
+  "--workspace",
+  "--all-targets",
+  "--all-features",
+  "--fix",
+  "--allow-dirty",
+  "--allow-staged",
+  "--",
+  "-D",
+  "warnings",
+]
+
+
+[tasks.build]
+command = "cargo"
+args = ["build", "--all-features", "--all-targets"]
+workspace = true
+
+
+[tasks.test]
+command = "cargo"
+args = ["test", "--all-features", "--all-targets", "--workspace"]
+
+
+[tasks.machete]
+command = "cargo"
+args = ["machete"]

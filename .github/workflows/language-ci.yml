@@ -39,10 +39,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install rustfmt
-        run: rustup component add rustfmt
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: cargo make format
 
   lint:
     name: Lint
@@ -58,10 +60,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install clippy
-        run: rustup component add clippy
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Check linting
-        run: cargo clippy -- -D warnings
+        run: cargo make lint
 
   build:
     name: Build
@@ -77,8 +81,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Build
-        run: cargo build
+        run: cargo make build
 
   test:
     name: Test
@@ -94,8 +102,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Test
-        run: cargo test --workspace
+        run: cargo make test
 
   machete:
     name: Machete
@@ -111,7 +123,9 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install machete
-        run: cargo install cargo-machete
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Run machete
-        run: cargo machete
+        run: cargo make machete
