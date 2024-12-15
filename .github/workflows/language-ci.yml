@@ -69,12 +69,39 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     needs: changes
     if: needs.changes.outputs.language == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./language
+    strategy:
+      matrix:
+        include:
+          - name: linux-x86_64
+            runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - name: linux-aarch64
+            runner: ubuntu-24.04
+            target: aarch64-unknown-linux-gnu
+          - name: linux-riscv64
+            runner: ubuntu-24.04
+            target: riscv64gc-unknown-linux-gnu
+          - name: macos-aarch64
+            runner: macos-15
+            target: aarch64-apple-darwin
+          - name: windows-x86_64
+            runner: windows-2022
+            target: x86_64-pc-windows-msvc
+          - name: windows-aarch64
+            runner: windows-2022
+            target: aarch64-pc-windows-msvc
+          - name: wasm32-unknown-unknown
+            runner: ubuntu-24.04
+            target: wasm32-unknown-unknown
+          - name: wasm32-wasip2
+            runner: ubuntu-24.04
+            target: wasm32-wasip2
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Cache dependencies
@@ -87,6 +114,8 @@ jobs:
         run: cargo binstall cargo-make
       - name: Build
         run: cargo make build
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.target }}
 
   test:
     name: Test
