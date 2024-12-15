@@ -53,6 +53,7 @@ args = [
 command = "cargo"
 args = ["build", "--all-features", "--all-targets"]
 workspace = true
+install_crate.rustup_component_name = "${CARGO_MAKE_RUST_TARGET_TRIPLE}"
 
 
 [tasks.test]
@@ -61,5 +62,13 @@ args = ["test", "--all-features", "--all-targets", "--workspace"]
 
 
 [tasks.machete]
+dependencies = ["setup-machete"]
 command = "cargo"
 args = ["machete"]
+
+
+[tasks.setup-machete.install_crate]
+crate_name = "machete"
+binary = "machete"
+test_arg = ["--help"]
+install_command = "binstall"
