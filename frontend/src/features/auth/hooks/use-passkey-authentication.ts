@@ -49,7 +49,7 @@ export function usePasskeyAuthentication() {
               .userHandle
               ? arrayBufferToBase64(
                   (credential.response as AuthenticatorAssertionResponse)
-                    .userHandle!,
+                    .userHandle as ArrayBufferLike,
                 )
               : undefined,
           },
@@ -119,7 +119,7 @@ export function usePasskeyAuthentication() {
 function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
   const uint8Array =
     buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
-  return btoa(String.fromCharCode(...uint8Array))
+  return btoa(String.fromCodePoint(...uint8Array))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replaceAll("=", "")
@@ -134,7 +134,7 @@ function base64ToArrayBuffer(base64: string): Uint8Array {
   const binaryString = atob(standardBase64)
   const bytes = new Uint8Array(binaryString.length)
   for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i)
+    bytes[i] = String.prototype.codePointAt.call(binaryString, i) as number
   }
   return bytes
 }

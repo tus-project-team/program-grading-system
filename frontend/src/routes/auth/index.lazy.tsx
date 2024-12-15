@@ -10,9 +10,7 @@ function AuthPage() {
   const navigate = useNavigate()
 
   const handleAuthSuccess = (token: string) => {
-    // トークンを保存
     localStorage.setItem("token", token)
-    // ホームページにリダイレクト
     navigate({ to: "/" })
   }
 
@@ -21,9 +19,7 @@ function AuthPage() {
       <div className="w-full max-w-md space-y-8 p-4">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="mt-2 text-gray-600">
-            オンラインジャッジシステムにログイン
-          </p>
+          <p className="mt-2 text-gray-600">Shuiroにログイン</p>
         </div>
         <PasskeyAuth onAuthenticationSuccess={handleAuthSuccess} />
       </div>

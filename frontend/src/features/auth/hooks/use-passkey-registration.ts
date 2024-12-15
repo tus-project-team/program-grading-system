@@ -62,11 +62,9 @@ export function usePasskeyRegistration() {
         throw new Error("サーバーからチャレンジが返されませんでした")
       }
 
-      // デバッグ情報を追加
       console.log("Challenge received:", response.challenge)
       console.log("Challenge type:", typeof response.challenge)
 
-      // URLセーフなBase64のバリデーションを追加
       if (!/^[\w-]*={0,2}$/.test(response.challenge)) {
         throw new Error("Invalid Base64 challenge received from server")
       }
@@ -108,7 +106,7 @@ export function usePasskeyRegistration() {
           globalThis.location.hostname !== "localhost"
         ) {
           throw new Error(
-            "Passkey の作成には HTTPS または localhost 環境が必要です",
+            "Passkey の作成にはHTTPSまたはlocalhost環境が必要です",
           )
         }
 
@@ -132,7 +130,7 @@ export function usePasskeyRegistration() {
           )
         }
         throw new Error(
-          "Passkey の作成に失敗しました。ブラウザが Passkey をサポートしているか確認してください。",
+          "Passkey の作成に失敗しました。ブラウザがPasskeyをサポートしているか確認してください。",
         )
       }
     } catch (error) {
@@ -150,36 +148,32 @@ export function usePasskeyRegistration() {
   }
 }
 
-// Base64 URLセーフエンコーディング
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const binary = String.fromCharCode(...new Uint8Array(buffer))
+  const binary = String.fromCodePoint(...new Uint8Array(buffer))
   return btoa(binary)
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replaceAll("=", "")
 }
 
-// Base64 URLセーフデコーディング
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
   try {
-    // 必要に応じてパディングを追加（4の倍数になるように）
     const padded =
       base64.length % 4 === 0
         ? base64
         : base64.padEnd(base64.length + (4 - (base64.length % 4)), "=")
 
-    // URLセーフなBase64文字列を標準のBase64形式に変換
     const standardBase64 = padded.replaceAll("-", "+").replaceAll("_", "/")
 
     const binaryString = atob(standardBase64)
     const bytes = new Uint8Array(binaryString.length)
     for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
+      bytes[i] = String.prototype.codePointAt.call(binaryString, i) as number
     }
     return bytes.buffer as ArrayBuffer
   } catch (error) {
     console.error("Base64 decoding error:", error)
     console.error("Attempted to decode:", base64)
-    throw new Error("Challenge のデコードに失敗しました")
+    throw new Error("Challengeのデコードに失敗しました")
   }
 }

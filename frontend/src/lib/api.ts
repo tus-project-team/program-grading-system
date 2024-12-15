@@ -84,7 +84,7 @@ export const authApi = {
     return res.json()
   },
 
-  verifyAuthentication: async (credential: any) => {
+  verifyAuthentication: async (credential: string) => {
     const res = await fetch("/api/authenticate/verify", {
       body: JSON.stringify(credential),
       headers: { "Content-Type": "application/json" },
@@ -94,7 +94,7 @@ export const authApi = {
     return res.json()
   },
 
-  verifyRegistration: async (credential: any) => {
+  verifyRegistration: async (credential: string) => {
     const res = await fetch("/api/register/verify", {
       body: JSON.stringify(credential),
       headers: { "Content-Type": "application/json" },
