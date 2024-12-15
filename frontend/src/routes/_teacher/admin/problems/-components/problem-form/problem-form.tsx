@@ -22,6 +22,8 @@ import { SubmitButton } from "./submit-button"
 
 const problemSchema = v.object({
   body: v.string(),
+  newLanguage: v.optional(v.string()),
+  newVersion: v.optional(v.string()),
   supported_languages: v.pipe(
     v.array(
       v.object({
@@ -53,8 +55,6 @@ const problemSchema = v.object({
     ),
   ),
   title: v.pipe(v.string(), v.nonEmpty("Title is required")),
-  newLanguage: v.optional(v.string()),
-  newVersion: v.optional(v.string()),
 })
 
 export type ProblemFormProps = {
@@ -260,35 +260,34 @@ export const ProblemForm: FC<ProblemFormProps> = ({
               <div className="flex flex-wrap gap-2">
                 {languages.state.value.map((lang, index) => (
                   <div
-                    key={index}
                     className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2"
+                    key={index}
                   >
                     <span>
                       {lang.name} ({lang.version})
                     </span>
                     <Button
+                      className="h-4 w-4 p-0 hover:bg-transparent"
                       onClick={() => languages.removeValue(index)}
                       size="icon"
                       type="button"
                       variant="ghost"
-                      className="h-4 w-4 p-0 hover:bg-transparent"
                     >
-                      <span className="sr-only">Remove language</span>
-                      ×
+                      <span className="sr-only">Remove language</span>×
                     </Button>
                   </div>
                 ))}
               </div>
-      
+
               <div className="flex items-end gap-2">
-                <div className="grid gap-2 flex-1">
+                <div className="grid flex-1 gap-2">
                   <Label>言語</Label>
                   <form.Field name="newLanguage">
                     {(field) => (
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        value={field.state.value}
                       >
                         <option value="">言語を選択</option>
                         <option value="C++">C++</option>
@@ -299,15 +298,15 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                     )}
                   </form.Field>
                 </div>
-        
-                <div className="grid gap-2 flex-1">
+
+                <div className="grid flex-1 gap-2">
                   <Label>バージョン</Label>
                   <form.Field name="newVersion">
                     {(field) => (
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
+                        value={field.state.value}
                       >
                         <option value="">バージョンを選択</option>
                         <option value="vC++20">vC++20</option>
@@ -318,9 +317,8 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                     )}
                   </form.Field>
                 </div>
-        
+
                 <Button
-                  type="button"
                   className="px-8"
                   onClick={() => {
                     const newLang = form.getFieldValue("newLanguage")
@@ -328,12 +326,13 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                     if (newLang && newVer) {
                       languages.pushValue({
                         name: newLang,
-                        version: newVer
+                        version: newVer,
                       })
                       form.setFieldValue("newLanguage", undefined)
                       form.setFieldValue("newVersion", undefined)
                     }
                   }}
+                  type="button"
                 >
                   追加
                 </Button>
