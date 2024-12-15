@@ -16,6 +16,22 @@ const authMiddleware: Middleware = {
 }
 
 export class APIError extends Error {
+  static {
+    this.prototype.name = "APIError"
+  }
+
+  public readonly body: object | string
+  public readonly message: string
+  public readonly status: number
+  constructor(status: number, body: object | string) {
+    const description = APIError.getDescriptionFromBody(body)
+    const message = `${status}: ${description}`
+    super(message)
+    this.status = status
+    this.body = body
+    this.message = message
+  }
+
   // todo: Refactor the following logic. Maybe changing the schema of the error response is necessary.
   private static getDescriptionFromBody = (body: object | string): string => {
     if (typeof body === "string") {
@@ -38,22 +54,6 @@ export class APIError extends Error {
       return body.error.issues[0].message
     }
     return JSON.stringify(body)
-  }
-
-  static {
-    this.prototype.name = "APIError"
-  }
-  public readonly body: object | string
-  public readonly message: string
-  public readonly status: number
-
-  constructor(status: number, body: object | string) {
-    const description = APIError.getDescriptionFromBody(body)
-    const message = `${status}: ${description}`
-    super(message)
-    this.status = status
-    this.body = body
-    this.message = message
   }
 }
 

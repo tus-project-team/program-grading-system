@@ -1,6 +1,11 @@
 import path from "node:path"
 import { loadPyodide } from "pyodide"
 
+type RunResult = {
+  result: unknown
+  stdout: string
+}
+
 /**
  * Handles the standard input for the Python code.
  * @see https://pyodide.org/en/stable/usage/streams.html#a-stdin-handler
@@ -35,11 +40,6 @@ class StdoutHandler {
   batched(output: string) {
     this.output += output
   }
-}
-
-type RunResult = {
-  result: unknown
-  stdout: string
 }
 
 export const runPythonCode = async (

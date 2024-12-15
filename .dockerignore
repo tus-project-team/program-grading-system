@@ -1,0 +1,7 @@
+node_modules
+frontend/node_modules
+backend/node_modules
+languages/website/node_modules
+backend/prisma/*.db
+.env
+.env.local

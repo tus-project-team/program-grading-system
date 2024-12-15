@@ -1,12 +1,12 @@
 use clap::Parser;
-use language::{
-    parse::parser::Parser as ShuiroParser, tokenize::tokenizer::Tokenizer as ShuiroTokenizer,
-};
+use code_generator::CodeGenerator;
+use parser::parse;
+use tokenizer::tokenize;
 
 #[derive(clap::Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value_t = Mode::Parse)]
+    #[arg(short, long, default_value_t = Mode::Compile)]
     mode: Mode,
 
     #[arg(short, long, default_value_t = false)]
@@ -22,6 +22,7 @@ struct Args {
 enum Mode {
     Tokenize,
     Parse,
+    Compile,
 }
 
 impl std::str::FromStr for Mode {
@@ -31,6 +32,7 @@ impl std::str::FromStr for Mode {
         match s {
             "tokenize" => Ok(Self::Tokenize),
             "parse" => Ok(Self::Parse),
+            "compile" => Ok(Self::Compile),
             _ => Err("Invalid mode".to_string()),
         }
     }
@@ -41,6 +43,7 @@ impl std::fmt::Display for Mode {
         match self {
             Self::Parse => write!(f, "parse"),
             Self::Tokenize => write!(f, "tokenize"),
+            Self::Compile => write!(f, "compile"),
         }
     }
 }
@@ -55,7 +58,7 @@ fn main() {
     };
     match args.mode {
         Mode::Tokenize => {
-            let tokens = ShuiroTokenizer::new(source).tokenize();
+            let tokens = tokenize(source);
             if let Some(output) = args.output {
                 std::fs::write(output, format!("{:#?}", tokens)).expect("Failed to write output");
             } else {
@@ -63,12 +66,24 @@ fn main() {
             }
         }
         Mode::Parse => {
-            let tokens = ShuiroTokenizer::new(source).tokenize();
-            let ast = ShuiroParser::new(tokens).parse();
+            let tokens = tokenize(source);
+            let ast = parse(tokens);
             if let Some(output) = args.output {
                 std::fs::write(output, format!("{:#?}", ast)).expect("Failed to write output");
             } else {
                 println!("{:#?}", ast);
+            }
+        }
+        Mode::Compile => {
+            let tokens = tokenize(source);
+            let ast = parse(tokens);
+            let mut generator = CodeGenerator::new(ast).unwrap();
+            let mut wat = generator.generate().unwrap();
+            let wasm = wat.encode().unwrap();
+            if let Some(output) = args.output {
+                std::fs::write(output, &wasm).expect("Failed to write output");
+            } else {
+                println!("{:#?}", wat);
             }
         }
     }

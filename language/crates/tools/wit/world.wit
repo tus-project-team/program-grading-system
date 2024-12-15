@@ -1,0 +1,16 @@
+package component:tools;
+
+/// An example world for the component to target.
+world example {
+    record output {
+        tokens: string,
+        ast: string,
+        wasm: list<u8>,
+    }
+
+    record error {
+        error: string,
+    }
+
+    export compile: func(source: string) -> result<output, error>;
+}
