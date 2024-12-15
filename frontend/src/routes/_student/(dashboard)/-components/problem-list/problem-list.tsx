@@ -23,7 +23,9 @@ export const ProblemList = () => {
               <CardTitle>{problem.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow">
-              <p className="mb-4 text-sm text-gray-600">{problem.body}</p>
+              <p className="mb-4 line-clamp-3 text-sm text-gray-600">
+                {problem.body}
+              </p>
               <div className="mb-2 flex items-center space-x-2">
                 <Book className="h-4 w-4" />
                 <span className="text-sm font-medium">
