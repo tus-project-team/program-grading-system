@@ -79,7 +79,7 @@
     "eslint-plugin-unicorn": "56.0.1",
     "globals": "15.13.0",
     "happy-dom": "15.11.7",
-    "msw": "2.6.8",
+    "msw": "2.6.9",
     "openapi": "workspace:*",
     "openapi-typescript": "7.4.4",
     "postcss": "8.4.49",
