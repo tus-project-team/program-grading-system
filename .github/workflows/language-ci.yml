@@ -39,10 +39,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install rustfmt
-        run: rustup component add rustfmt
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: cargo make format
 
   lint:
     name: Lint
@@ -58,27 +60,50 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install clippy
-        run: rustup component add clippy
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Check linting
-        run: cargo clippy -- -D warnings
+        run: cargo make lint
 
   build:
     name: Build
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     needs: changes
     if: needs.changes.outputs.language == 'true' || needs.changes.outputs.workflows == 'true'
     defaults:
       run:
         working-directory: ./language
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - name: wasm32-unknown-unknown
+            runner: ubuntu-24.04
+            target: wasm32-unknown-unknown
+          - name: wasm32-wasip2
+            runner: ubuntu-24.04
+            target: wasm32-wasip2
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Cache dependencies
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
+      - name: Install target
+        run: rustup target add ${{ matrix.target }}
       - name: Build
-        run: cargo build
+        run: cargo make build
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.target }}
 
   test:
     name: Test
@@ -94,8 +119,12 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Test
-        run: cargo test --workspace
+        run: cargo make test
 
   machete:
     name: Machete
@@ -111,7 +140,9 @@ jobs:
         uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Install machete
-        run: cargo install cargo-machete
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@9bc0ba964d12bf4c034d65ce732726a2b1a8d9df # v1.10.17
+      - name: Install cargo-make
+        run: cargo binstall cargo-make
       - name: Run machete
-        run: cargo machete
+        run: cargo make machete
