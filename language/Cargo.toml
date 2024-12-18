@@ -32,4 +32,4 @@ serde_json = "1.0.133"
 thiserror = "2.0.4"
 tokenizer = { path = "crates/tokenizer" }
 indoc = "2.0.5"
-wast = "221.0.2"
+wast = "222.0.0"
