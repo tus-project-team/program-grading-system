@@ -580,7 +580,7 @@
     "/api/generate-test-case": {
       "post": {
         "operationId": "generateTestCase",
-        "summary": "コードを実行し、出力を返す",
+        "summary": "コードを実行し、生成した複数のテストケースを返す",
         "tags": [
           "code"
         ],
@@ -592,6 +592,11 @@
                 "properties": {
                   "code": {
                     "type": "string"
+                  },
+                  "count": {
+                    "type": "number",
+                    "minimum": 1,
+                    "default": 1
                   },
                   "inputStatus": {
                     "type": "string"
@@ -623,18 +628,33 @@
         },
         "responses": {
           "200": {
-            "description": "実行結果",
+            "description": "生成したテストケースの配列",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "output": {
-                      "type": "string"
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "input": {
+                            "type": "string"
+                          },
+                          "output": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "input",
+                          "output"
+                        ]
+                      }
                     }
                   },
                   "required": [
-                    "output"
+                    "results"
                   ]
                 }
               }

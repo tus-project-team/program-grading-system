@@ -135,7 +135,7 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** コードを実行し、出力を返す */
+    /** コードを実行し、生成した複数のテストケースを返す */
     post: operations["generateTestCase"]
     delete?: never
     options?: never
@@ -501,6 +501,8 @@ export interface operations {
       content: {
         "application/json": {
           code: string
+          /** @default 1 */
+          count?: number
           inputStatus: string
           language: {
             name: string
@@ -510,14 +512,17 @@ export interface operations {
       }
     }
     responses: {
-      /** @description 実行結果 */
+      /** @description 生成したテストケースの配列 */
       200: {
         headers: {
           [name: string]: unknown
         }
         content: {
           "application/json": {
-            output: string
+            results: {
+              input: string
+              output: string
+            }[]
           }
         }
       }
