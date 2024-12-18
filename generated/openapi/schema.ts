@@ -126,6 +126,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/run-code": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** コードを実行し、出力を返す */
+    post: operations["runCode"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -470,6 +487,39 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  runCode: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        "application/json": {
+          code: string
+          input: string
+          language: {
+            name: string
+            version: string
+          }
+        }
+      }
+    }
+    responses: {
+      /** @description 実行結果 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            output: string
+          }
+        }
       }
     }
   }

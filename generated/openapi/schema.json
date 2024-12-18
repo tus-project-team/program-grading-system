@@ -576,6 +576,72 @@
           }
         }
       }
+    },
+    "/api/run-code": {
+      "post": {
+        "operationId": "runCode",
+        "summary": "コードを実行し、出力を返す",
+        "tags": [
+          "code"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "input": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "version"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "input",
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "実行結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "output": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}
