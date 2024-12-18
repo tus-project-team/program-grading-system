@@ -1,14 +1,12 @@
-// src/services/dsl/parseDSL.ts
-
-import type { DSLArg } from './types';
-import type { CallNode } from './types';
+import type { CallNode, DSLArg } from './types';
 
 /**
  * DSL文字列をパースし、CallNode[] に変換する
  * 例: "int(1..100).array(3..5, unique=true)"
  */
 export function parseDSL(dsl: string): CallNode[] {
-  const parts = dsl.split('.').map((p) => p.trim());
+  // 既存は split('.') を使っていたが、トップレベルでの分割を行う splitDSL を使用
+  const parts = splitDSL(dsl);
   const result: CallNode[] = [];
 
   for (const part of parts) {
@@ -76,4 +74,38 @@ function parseArgs(argString: string): DSLArg[] {
   }
 
   return args;
+}
+
+/**
+ * DSL文字列をトップレベルの '.' で分割する関数
+ * 例えば "int(1..100).array(3..5)" なら ["int(1..100)", "array(3..5)"]
+ * "int(1..100)" のように '.' が引数中にあってもトップレベルでなければ分割しない。
+ */
+function splitDSL(dsl: string): string[] {
+  const parts: string[] = [];
+  let start = 0;
+  let depth = 0;
+
+  for (let i = 0; i < dsl.length; i++) {
+    const char = dsl[i];
+    if (char === '(') {
+      depth++;
+    } else if (char === ')') {
+      depth--;
+    }
+
+    // トップレベル（depth===0）のときだけ '.' を分割対象とする
+    if (char === '.' && depth === 0) {
+      parts.push(dsl.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+
+  // 最後のパートを追加
+  const lastPart = dsl.slice(start).trim();
+  if (lastPart) {
+    parts.push(lastPart);
+  }
+
+  return parts;
 }
