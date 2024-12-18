@@ -3,10 +3,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl=8.5.0-2ubuntu10.4 \
-    unzip=6.0-28ubuntu4.1 \
-    openssl=3.0.13-0ubuntu3.4 \
-    ca-certificates=20240203 \
+    curl \
+    unzip \
+    openssl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 USER appuser
 WORKDIR /home/appuser
@@ -52,14 +52,28 @@ RUN mkdir -p /tmp/prod/app/node_modules/.prisma/client \
     chmod 777 /tmp/prod/app/prisma/data && \
     chmod 666 /tmp/prod/app/prisma/data/deploy.db
 
-FROM gcr.io/distroless/cc-debian12:nonroot@sha256:ce79e1448516ef8909ccdc7f09b7e9186c53e5c964394580f92d9726a349286c AS production
+FROM base AS dependencies
+USER root
+ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz litestream.tar.gz
+RUN tar -xzf litestream.tar.gz && \
+    mv litestream /usr/bin/litestream && \
+    chmod +x /usr/bin/litestream && \
+    rm -rf litestream.tar.gz
+COPY backend/litestream.yml /litestream.yml
+COPY backend/run.sh /run.sh
+RUN chmod +x /run.sh
+
+FROM gcr.io/distroless/cc-debian12:debug@sha256:c1aad82df2b344ef00c9d01608f6ef13b833e50be2affb63fb4e87fe03df46e4 AS production
 WORKDIR /
 COPY --from=build /tmp/prod/node_modules /node_modules
 COPY --from=build /tmp/prod/app /app
+COPY --from=dependencies /usr/bin/litestream /app/litestream
+COPY --from=dependencies /litestream.yml /app/litestream.yml
+COPY --from=dependencies /run.sh /app/run.sh
 ENV NODE_ENV=production \
     DATABASE_URL=file:/app/prisma/data/deploy.db \
     PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
 WORKDIR /app
 USER nonroot
 EXPOSE 3000
-CMD ["./app"]
+CMD ["run.sh"]

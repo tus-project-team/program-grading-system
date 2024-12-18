@@ -25,4 +25,7 @@ export const Route = createFileRoute("/_student/problems/$problemId")({
       throw error
     }
   },
+  notFoundComponent: () => {
+    return "Problem not found"
+  },
 })

@@ -1,0 +1,85 @@
+[config]
+default_to_workspace = false
+
+
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+
+[tasks.format-write]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all"]
+
+
+[tasks.lint]
+install_crate = "clippy"
+command = "cargo"
+args = [
+  "clippy",
+  "--workspace",
+  "--all-targets",
+  "--all-features",
+  "--",
+  "-D",
+  "warnings",
+]
+
+
+[tasks.lint-write]
+install_crate = "clippy"
+command = "cargo"
+args = [
+  "clippy",
+  "--workspace",
+  "--all-targets",
+  "--all-features",
+  "--fix",
+  "--allow-dirty",
+  "--allow-staged",
+  "--",
+  "-D",
+  "warnings",
+]
+
+
+[tasks.build]
+command = "cargo"
+args = ["build", "--all-features"]
+workspace = true
+
+
+[tasks.test]
+command = "cargo"
+args = ["test", "--all-features", "--all-targets", "--workspace", "${@}"]
+
+
+[tasks.test-coverage]
+command = "cargo"
+args = ["llvm-cov", "--all-features", "--all-targets", "--workspace", "${@}"]
+
+
+[tasks.machete]
+dependencies = ["setup-machete"]
+command = "cargo"
+args = ["machete"]
+
+
+[tasks.setup-machete.install_crate]
+crate_name = "cargo-machete"
+binary = "machete"
+test_arg = ["--help"]
+install_command = "binstall"
+
+
+[tasks.setup-llvm-cov.install_crate]
+crate_name = "cargo-llvm-cov"
+binary = "llvm-cov"
+test_arg = ["--version"]
+install_command = "binstall"
