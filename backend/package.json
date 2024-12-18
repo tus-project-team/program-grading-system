@@ -43,7 +43,7 @@
     "prisma": "6.1.0",
     "tsx": "4.19.2",
     "typescript": "5.7.2",
-    "typescript-eslint": "8.18.0",
+    "typescript-eslint": "8.18.1",
     "vitest": "3.0.0-beta.2"
   },
   "trustedDependencies": [
