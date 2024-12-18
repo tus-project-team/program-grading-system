@@ -25,7 +25,7 @@ jobs:
               - 'language/**'
               - .tool-versions
             workflows:
-              - '.github/workflows/language-website-ci.yml'
+              - '.github/workflows/deploy-language-website.yml'
 
   format:
     name: Format
