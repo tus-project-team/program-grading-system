@@ -33,7 +33,7 @@ jobs:
               - 'language/**'
               - .tool-versions
             workflows:
-              - '.github/workflows/language-website-ci.yml'
+              - '.github/workflows/deploy-language-website.yml'
 
   deploy:
     environment:
@@ -65,7 +65,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./language/website/dist/**"
+          path: "./language/website/dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
