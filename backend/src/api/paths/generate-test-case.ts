@@ -6,16 +6,16 @@ import { run } from "../../services/program/run"
 function formatGeneratedInput(input: unknown): string {
   if (Array.isArray(input)) {
     // 配列の場合は、各要素を再帰的に文字列化してスペース区切りでjoin
-    return input.map(el => formatGeneratedInput(el)).join(' ');
-  } else if (typeof input === 'string') {
+    return input.map((el) => formatGeneratedInput(el)).join(" ")
+  } else if (typeof input === "string") {
     // 文字列ならそのまま
-    return input;
-  } else if (typeof input === 'number') {
+    return input
+  } else if (typeof input === "number") {
     // 数値なら文字列化
-    return String(input);
+    return String(input)
   } else {
     // その他(オブジェクトなど)は、とりあえずString()で文字列化
-    return String(input);
+    return String(input)
   }
 }
 
@@ -45,10 +45,12 @@ const generateTestCase = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            results: z.array(z.object({
-              input: z.string(),
-              output: z.string(),
-            })),
+            results: z.array(
+              z.object({
+                input: z.string(),
+                output: z.string(),
+              }),
+            ),
           }),
         },
       },
@@ -59,25 +61,24 @@ const generateTestCase = createRoute({
   tags: ["code"],
 })
 
-const app = new OpenAPIHono()
-  .openapi(generateTestCase, async (c) => {
-    const { code, count, inputStatus, language } = c.req.valid("json")
+const app = new OpenAPIHono().openapi(generateTestCase, async (c) => {
+  const { code, count, inputStatus, language } = c.req.valid("json")
 
-    const inputGenerator = evaluateDSL(inputStatus)
+  const inputGenerator = evaluateDSL(inputStatus)
 
-    const results = []
-    for (let i = 0; i < count; i++) {
-      const generatedInput = inputGenerator()
-      const finalInput = formatGeneratedInput(generatedInput)
+  const results = []
+  for (let i = 0; i < count; i++) {
+    const generatedInput = inputGenerator()
+    const finalInput = formatGeneratedInput(generatedInput)
 
-      const result = await run({ code, input: finalInput, language })
-      results.push({
-        input: finalInput,
-        output: result.stdout,
-      })
-    }
+    const result = await run({ code, input: finalInput, language })
+    results.push({
+      input: finalInput,
+      output: result.stdout,
+    })
+  }
 
-    return c.json({ results }, 200)
-  })
+  return c.json({ results }, 200)
+})
 
 export default app
