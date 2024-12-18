@@ -2,8 +2,8 @@ import { OpenAPIHono } from "@hono/zod-openapi"
 import { apiReference } from "@scalar/hono-api-reference"
 import { cors } from "hono/cors"
 
+import generateTestCaseApp from "./api/paths/generate-test-case"
 import problemsApp from "./api/paths/problems"
-import runCodeApp from "./api/paths/run-code"
 import submissionsApp from "./api/paths/submissions"
 
 const app = new OpenAPIHono()
@@ -29,7 +29,7 @@ export const routes = app
   .doc("/api/openapi.json", openApiDocument)
   .route("/api", problemsApp)
   .route("/api", submissionsApp)
-  .route("/api", runCodeApp)
+  .route("/api", generateTestCaseApp)
   .get("/api/docs", apiReference({ spec: { url: "/api/openapi.json" } }))
 
 export type AppType = typeof routes

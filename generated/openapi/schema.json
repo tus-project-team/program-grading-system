@@ -577,9 +577,9 @@
         }
       }
     },
-    "/api/run-code": {
+    "/api/generate-test-case": {
       "post": {
-        "operationId": "runCode",
+        "operationId": "generateTestCase",
         "summary": "コードを実行し、出力を返す",
         "tags": [
           "code"
@@ -593,7 +593,7 @@
                   "code": {
                     "type": "string"
                   },
-                  "input": {
+                  "inputStatus": {
                     "type": "string"
                   },
                   "language": {
@@ -614,7 +614,7 @@
                 },
                 "required": [
                   "code",
-                  "input",
+                  "inputStatus",
                   "language"
                 ]
               }

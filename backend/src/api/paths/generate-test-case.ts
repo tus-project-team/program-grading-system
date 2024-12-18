@@ -1,18 +1,19 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
 
+import { evaluateDSL } from "../../services/dsl"
 import { run } from "../../services/program/run"
 
-const runCodeRoute = createRoute({
+const generateTestCase = createRoute({
   method: "post",
-  operationId: "runCode",
-  path: "/run-code",
+  operationId: "generateTestCase",
+  path: "/generate-test-case",
   request: {
     body: {
       content: {
         "application/json": {
           schema: z.object({
             code: z.string(),
-            input: z.string(),
+            inputStatus: z.string(),
             language: z.object({
               name: z.string(),
               version: z.string(),
@@ -39,10 +40,16 @@ const runCodeRoute = createRoute({
 })
 
 const app = new OpenAPIHono()
-  .openapi(runCodeRoute, async (c) => {
-  const { code, input, language } = c.req.valid("json")
-  const result = await run({ code, input, language })
-  return c.json({ output: result.stdout }, 200)
+  .openapi(generateTestCase, async (c) => {
+    const { code, inputStatus, language } = c.req.valid("json")
+    
+    const inputGenerator = evaluateDSL(inputStatus)
+    const generatedInput = inputGenerator()
+
+    const finalInput = typeof generatedInput === 'string' ? generatedInput : JSON.stringify(generatedInput)
+
+    const result = await run({ code, input: finalInput, language })
+    return c.json({ output: result.stdout }, 200)
   })
 
 export default app

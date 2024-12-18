@@ -126,7 +126,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/run-code": {
+  "/api/generate-test-case": {
     parameters: {
       query?: never
       header?: never
@@ -136,7 +136,7 @@ export interface paths {
     get?: never
     put?: never
     /** コードを実行し、出力を返す */
-    post: operations["runCode"]
+    post: operations["generateTestCase"]
     delete?: never
     options?: never
     head?: never
@@ -490,7 +490,7 @@ export interface operations {
       }
     }
   }
-  runCode: {
+  generateTestCase: {
     parameters: {
       query?: never
       header?: never
@@ -501,7 +501,7 @@ export interface operations {
       content: {
         "application/json": {
           code: string
-          input: string
+          inputStatus: string
           language: {
             name: string
             version: string
