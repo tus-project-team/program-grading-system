@@ -3,6 +3,22 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi"
 import { evaluateDSL } from "../../services/dsl"
 import { run } from "../../services/program/run"
 
+function formatGeneratedInput(input: unknown): string {
+  if (Array.isArray(input)) {
+    // 配列の場合は、各要素を再帰的に文字列化してスペース区切りでjoin
+    return input.map(el => formatGeneratedInput(el)).join(' ');
+  } else if (typeof input === 'string') {
+    // 文字列ならそのまま
+    return input;
+  } else if (typeof input === 'number') {
+    // 数値なら文字列化
+    return String(input);
+  } else {
+    // その他(オブジェクトなど)は、とりあえずString()で文字列化
+    return String(input);
+  }
+}
+
 const generateTestCase = createRoute({
   method: "post",
   operationId: "generateTestCase",
@@ -52,7 +68,7 @@ const app = new OpenAPIHono()
     const results = []
     for (let i = 0; i < count; i++) {
       const generatedInput = inputGenerator()
-      const finalInput = typeof generatedInput === 'string' ? generatedInput : JSON.stringify(generatedInput)
+      const finalInput = formatGeneratedInput(generatedInput)
 
       const result = await run({ code, input: finalInput, language })
       results.push({
