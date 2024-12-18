@@ -44,6 +44,7 @@ pub struct Statements {
 pub enum Statement {
     ExpressionStatement(ExpressionStatement),
     VariableDefinition(VariableDefinition),
+    IfStatement(IfStatement),
     Expression(Expression),
 }
 
@@ -63,9 +64,19 @@ pub struct VariableDefinition {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IfStatement {
+    pub condition: Expression,
+    pub then_block: Block,
+    pub else_block: Option<Block>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
+    UnaryExpression(UnaryExpression),
     AssignmentExpression(AssignmentExpression),
+    IfElseExpression(IfElseExpression),
     Identifier(Identifier),
     IntegerLiteral(IntegerLiteral),
     FunctionCall(FunctionCall),
@@ -75,9 +86,11 @@ impl Expression {
     pub fn location(&self) -> &Location {
         match self {
             Expression::BinaryExpression(binary_expression) => &binary_expression.location,
+            Expression::UnaryExpression(unary_expression) => &unary_expression.location,
             Expression::AssignmentExpression(assignment_expression) => {
                 &assignment_expression.location
             }
+            Expression::IfElseExpression(if_else_expression) => &if_else_expression.location,
             Expression::Identifier(identifier) => &identifier.location,
             Expression::IntegerLiteral(integer_literal) => &integer_literal.location,
             Expression::FunctionCall(function_call) => &function_call.location,
@@ -91,6 +104,15 @@ pub enum OperatorKind {
     Subtract,
     Multiply,
     Divide,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
 }
 
 impl std::fmt::Display for OperatorKind {
@@ -100,6 +122,15 @@ impl std::fmt::Display for OperatorKind {
             OperatorKind::Subtract => write!(f, "-"),
             OperatorKind::Multiply => write!(f, "*"),
             OperatorKind::Divide => write!(f, "/"),
+            OperatorKind::LessThan => write!(f, "<"),
+            OperatorKind::LessThanOrEqual => write!(f, "<="),
+            OperatorKind::GreaterThan => write!(f, ">"),
+            OperatorKind::GreaterThanOrEqual => write!(f, ">="),
+            OperatorKind::Equal => write!(f, "=="),
+            OperatorKind::NotEqual => write!(f, "!="),
+            OperatorKind::LogicalAnd => write!(f, "&&"),
+            OperatorKind::LogicalOr => write!(f, "||"),
+            OperatorKind::LogicalNot => write!(f, "!"),
         }
     }
 }
@@ -113,6 +144,15 @@ impl std::str::FromStr for OperatorKind {
             "-" => Ok(OperatorKind::Subtract),
             "*" => Ok(OperatorKind::Multiply),
             "/" => Ok(OperatorKind::Divide),
+            "<" => Ok(OperatorKind::LessThan),
+            "<=" => Ok(OperatorKind::LessThanOrEqual),
+            ">" => Ok(OperatorKind::GreaterThan),
+            ">=" => Ok(OperatorKind::GreaterThanOrEqual),
+            "==" => Ok(OperatorKind::Equal),
+            "!=" => Ok(OperatorKind::NotEqual),
+            "&&" => Ok(OperatorKind::LogicalAnd),
+            "||" => Ok(OperatorKind::LogicalOr),
+            "!" => Ok(OperatorKind::LogicalNot),
             _ => Err(format!("Invalid operator: {}", s)),
         }
     }
@@ -133,9 +173,25 @@ pub struct BinaryExpression {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UnaryExpression {
+    pub operator: Operator,
+    pub operand: Box<Expression>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AssignmentExpression {
     pub name: Identifier,
     pub value: Box<Expression>,
+    pub location: Location,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IfElseExpression {
+    pub condition: Box<Expression>,
+    pub then_block: Block,
+    pub else_block: Block,
+    pub return_type: Type,
     pub location: Location,
 }
 

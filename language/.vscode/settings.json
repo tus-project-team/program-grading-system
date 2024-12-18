@@ -9,5 +9,8 @@
     "--workspace",
     "--all-targets",
     "--message-format=json"
-  ]
+  ],
+  "evenBetterToml.schema.associations": {
+    "Makefile.toml": "https://json.schemastore.org/cargo-make.json"
+  }
 }
