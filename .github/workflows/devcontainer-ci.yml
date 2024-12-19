@@ -47,7 +47,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and run dev container task
-        uses: devcontainers/ci@a56d055efecd725e8cfe370543b6071b79989cc8
+        uses: devcontainers/ci@3998f9ee7179e91ad72065e0b68fe2ebed581346
         with:
           imageName: ghcr.io/${{ github.repository }}-devcontainer
           imageTag: ${{ github.ref_name }}
